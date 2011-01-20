@@ -35,10 +35,12 @@ void BaseMobility::initialize(int stage)
 
         coreEV << "initializing BaseMobility stage " << stage << endl;
 
-        // get utility pointers (world and host)
+        // get utility pointers (world and connection)
 		world = FindModule<BaseWorldUtility*>::findGlobalModule();
-        if (world == NULL)
-            error("Could not find BaseWorldUtility module");
+        if (world == NULL) error("Could not find BaseWorldUtility module");
+        // Modified by Jorge Perez to be able to read the Nics from NicEntry
+        cc = FindModule<BaseConnectionManager *>::findGlobalModule();
+        if( cc == 0 ) error("Could not find connectionmanager module");
 
         coreEV << "initializing BaseUtility stage " << stage << endl; // for node position
 
@@ -98,6 +100,44 @@ void BaseMobility::initialize(int stage)
         	//host moves the first time after some random delay to avoid synchronized movements
             scheduleAt(simTime() + uniform(0, updateInterval), moveMsg);
         }
+
+    }
+    //Modified by Jorge Perez to check for minimum distance among anchors and mobile nodes in map distribution
+    else if (stage == 2)
+    {
+        //Minimum distance between any anchor and any mobile node
+        double minimumDistanceAnchor = par("minimumDistanceAnchor");
+        double minimumDistanceNode = par("minimumDistanceNode");
+        //check whether anchors and nodes have a minimum distance among them separately or not
+        BaseConnectionManager::NicEntries& nicList = cc->getNicList();
+        double distance;
+        bool itsok = false; //It will be false if there is an anchor or mobile node closer as par("minimumdistance")
+        int i = 0; //Shows the number of tries until the anchor or mobile node finds a valid position
+        do
+		{
+        	itsok = true;
+        	// You have to add 3 because BaseMobility ID is 3 less as nicId from the same anchor
+        	coreEV << "Try number " << ++i << endl;
+			for(BaseConnectionManager::NicEntries::iterator i = nicList.begin(); i != nicList.end(); ++i)
+			{
+				NicEntry* nic_i = i->second;
+				if ((cc->findNic(getId()+3))->moduleType != nic_i->moduleType)
+				{
+					continue;
+				} //If the nics to compare are from different type we skip this comparison loop
+				distance = sqrt(pow(move.getStartPos().getX() - nic_i->pos.getX(),2) + pow(move.getStartPos().getY() - nic_i->pos.getY(),2));
+				coreEV << "Distance with node " << nic_i->nicId << ": " << distance << endl;
+				if ((((cc->findNic(getId()+3))->moduleType == 2) && (distance <= minimumDistanceNode) && (distance >0)) ||
+						(((cc->findNic(getId()+3))->moduleType == 1) && (distance <= minimumDistanceAnchor) && (distance >0)))
+				{
+					itsok = false;
+					move.setStart(world->getRandomPosition());
+					updatePosition();
+					break;
+				}
+			}
+		}
+        while (!itsok);
     }
 }
 

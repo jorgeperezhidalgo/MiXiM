@@ -202,11 +202,11 @@ private:
 		 */
 		unsigned getmaxSize() { return maxSize; }
 	};
-
-protected:
+public:
 	/** @brief Type for map from nic-module id to nic-module pointer.*/
 	typedef std::map<int, NicEntry*> NicEntries;
 
+protected:
 	/** @brief Map from nic-module ids to nic-module pointers.*/
 	NicEntries nics;
 
@@ -374,6 +374,12 @@ public:
 
 	/** @brief Returns the ingates of all nics in range*/
 	const NicEntry::GateList& getGateList( int nicID);
+
+	/** @brief Returns all nics in range*/
+	NicEntries& getNicList();
+
+	// Finds a Nic with a NicID
+	NicEntry* findNic( int nicID);
 
 	/** @brief Returns the ingate of the with id==targetID, or 0 if not in range*/
 	const cGate* getOutGateTo(const NicEntry* nic, const NicEntry* targetNic);

@@ -703,9 +703,11 @@ $O/mobility/ANSimMobility.o: mobility/ANSimMobility.cc \
 	../base/utils/Coord.h \
 	../base/modules/BaseWorldUtility.h \
 	../base/modules/BatteryAccess.h \
+	../base/connectionManager/BaseConnectionManager.h \
 	../base/modules/BaseMobility.h \
 	../base/utils/Move.h \
 	mobility/LineSegmentsMobilityBase.h \
+	../base/connectionManager/NicEntry.h \
 	../base/utils/HostState.h \
 	../base/modules/BaseBattery.h \
 	../base/modules/BaseModule.h \
@@ -718,8 +720,10 @@ $O/mobility/RectangleMobility.o: mobility/RectangleMobility.cc \
 	../base/utils/Coord.h \
 	../base/modules/BaseWorldUtility.h \
 	../base/modules/BatteryAccess.h \
+	../base/connectionManager/BaseConnectionManager.h \
 	../base/modules/BaseMobility.h \
 	../base/utils/Move.h \
+	../base/connectionManager/NicEntry.h \
 	../base/utils/HostState.h \
 	mobility/RectangleMobility.h \
 	../base/modules/BaseBattery.h \
@@ -734,8 +738,10 @@ $O/mobility/TractorMobility.o: mobility/TractorMobility.cc \
 	../base/utils/Coord.h \
 	../base/modules/BaseWorldUtility.h \
 	../base/modules/BatteryAccess.h \
+	../base/connectionManager/BaseConnectionManager.h \
 	../base/modules/BaseMobility.h \
 	../base/utils/Move.h \
+	../base/connectionManager/NicEntry.h \
 	../base/utils/HostState.h \
 	../base/modules/BaseBattery.h \
 	../base/modules/BaseModule.h \
@@ -749,9 +755,11 @@ $O/mobility/TurtleMobility.o: mobility/TurtleMobility.cc \
 	../base/utils/Coord.h \
 	../base/modules/BaseWorldUtility.h \
 	../base/modules/BatteryAccess.h \
+	../base/connectionManager/BaseConnectionManager.h \
 	../base/modules/BaseMobility.h \
 	../base/utils/Move.h \
 	mobility/LineSegmentsMobilityBase.h \
+	../base/connectionManager/NicEntry.h \
 	../base/utils/HostState.h \
 	../base/modules/BaseBattery.h \
 	../base/modules/BaseModule.h \
@@ -764,10 +772,12 @@ $O/mobility/MassMobility.o: mobility/MassMobility.cc \
 	../base/utils/Coord.h \
 	../base/modules/BaseWorldUtility.h \
 	../base/modules/BatteryAccess.h \
+	../base/connectionManager/BaseConnectionManager.h \
 	../base/modules/BaseMobility.h \
 	../base/utils/Move.h \
-	mobility/MassMobility.h \
+	../base/connectionManager/NicEntry.h \
 	../base/utils/HostState.h \
+	mobility/MassMobility.h \
 	../base/modules/BaseBattery.h \
 	../base/modules/BaseModule.h \
 	../base/utils/FWMath.h
@@ -780,8 +790,10 @@ $O/mobility/BonnMotionFileCache.o: mobility/BonnMotionFileCache.cc \
 	../base/utils/Coord.h \
 	../base/modules/BaseWorldUtility.h \
 	../base/modules/BatteryAccess.h \
+	../base/connectionManager/BaseConnectionManager.h \
 	../base/modules/BaseMobility.h \
 	../base/utils/Move.h \
+	../base/connectionManager/NicEntry.h \
 	../base/utils/HostState.h \
 	../base/modules/BaseBattery.h \
 	../base/modules/BaseModule.h \
@@ -795,8 +807,10 @@ $O/mobility/ConstSpeedMobility.o: mobility/ConstSpeedMobility.cc \
 	../base/utils/Coord.h \
 	../base/modules/BaseWorldUtility.h \
 	../base/modules/BatteryAccess.h \
+	../base/connectionManager/BaseConnectionManager.h \
 	../base/modules/BaseMobility.h \
 	../base/utils/Move.h \
+	../base/connectionManager/NicEntry.h \
 	../base/utils/HostState.h \
 	../base/modules/BaseBattery.h \
 	../base/modules/BaseModule.h \
@@ -809,9 +823,11 @@ $O/mobility/LineSegmentsMobilityBase.o: mobility/LineSegmentsMobilityBase.cc \
 	../base/utils/Coord.h \
 	../base/modules/BaseWorldUtility.h \
 	../base/modules/BatteryAccess.h \
+	../base/connectionManager/BaseConnectionManager.h \
 	../base/modules/BaseMobility.h \
 	../base/utils/Move.h \
 	mobility/LineSegmentsMobilityBase.h \
+	../base/connectionManager/NicEntry.h \
 	../base/utils/HostState.h \
 	../base/modules/BaseBattery.h \
 	../base/modules/BaseModule.h \
@@ -825,9 +841,11 @@ $O/mobility/BonnMotionMobility.o: mobility/BonnMotionMobility.cc \
 	../base/utils/Coord.h \
 	../base/modules/BaseWorldUtility.h \
 	../base/modules/BatteryAccess.h \
+	../base/connectionManager/BaseConnectionManager.h \
 	../base/modules/BaseMobility.h \
 	mobility/BonnMotionMobility.h \
 	../base/utils/Move.h \
+	../base/connectionManager/NicEntry.h \
 	mobility/LineSegmentsMobilityBase.h \
 	../base/utils/HostState.h \
 	../base/modules/BaseBattery.h \
@@ -841,9 +859,11 @@ $O/mobility/LinearMobility.o: mobility/LinearMobility.cc \
 	../base/utils/Coord.h \
 	../base/modules/BaseWorldUtility.h \
 	../base/modules/BatteryAccess.h \
+	../base/connectionManager/BaseConnectionManager.h \
 	../base/modules/BaseMobility.h \
 	mobility/LinearMobility.h \
 	../base/utils/Move.h \
+	../base/connectionManager/NicEntry.h \
 	../base/utils/HostState.h \
 	../base/modules/BaseBattery.h \
 	../base/modules/BaseModule.h \
@@ -856,9 +876,11 @@ $O/mobility/CircleMobility.o: mobility/CircleMobility.cc \
 	../base/utils/Coord.h \
 	../base/modules/BaseWorldUtility.h \
 	../base/modules/BatteryAccess.h \
+	../base/connectionManager/BaseConnectionManager.h \
 	mobility/CircleMobility.h \
 	../base/modules/BaseMobility.h \
 	../base/utils/Move.h \
+	../base/connectionManager/NicEntry.h \
 	../base/utils/HostState.h \
 	../base/modules/BaseBattery.h \
 	../base/modules/BaseModule.h \

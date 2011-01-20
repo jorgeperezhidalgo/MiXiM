@@ -88,7 +88,9 @@ network ieee802154Narrow
         double playgroundSizeX @unit(m); // x size of the area the nodes are in (in meters)
         double playgroundSizeY @unit(m); // y size of the area the nodes are in (in meters)
         double playgroundSizeZ @unit(m); // z size of the area the nodes are in (in meters)
-        double numHosts; // total number of hosts in the network
+        double numAnchors; //total number of anchors in the network
+        double numNodes; // total number of mobile nodes in the network
+
 
         @display("bgb=$playgroundSizeX,$playgroundSizeY,white,,;bgp=10,50");
     submodules:
@@ -105,10 +107,16 @@ network ieee802154Narrow
                 @display("p=225,40;b=42,42,rect,yellow;i=abstract/multicast");
 
         }
-        node[numHosts]: PhyMacHost {
+        anchor[numAnchors]: PhyMacAnchor {
             parameters:
-                numHosts = numHosts;
-                @display("p=75,130;b=42,42,rect,yellow;i=device/wifilaptop");
+                numAnchors = numAnchors;
+                @display("p=207,130;b=42,42,rect,yellow;i=device/accesspoint");
+
+        }
+        node[numNodes]: PhyMacNode {
+            parameters:
+                numNodes = numNodes;
+                @display("p=75,130;b=0,0,rect,yellow;i=device/pocketpc");
 
         }
     connections allowunconnected:

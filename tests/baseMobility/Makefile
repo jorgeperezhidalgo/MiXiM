@@ -116,9 +116,11 @@ $O/TestBMBaseMobility.o: TestBMBaseMobility.cc \
 	../../base/utils/Coord.h \
 	../../base/modules/BaseWorldUtility.h \
 	../../base/modules/BatteryAccess.h \
+	../../base/connectionManager/BaseConnectionManager.h \
 	../../base/modules/BaseMobility.h \
 	TestBMBaseMobility.h \
 	../../base/utils/Move.h \
+	../../base/connectionManager/NicEntry.h \
 	../../base/utils/HostState.h \
 	../../base/modules/BaseBattery.h \
 	../../base/modules/BaseModule.h \
@@ -131,8 +133,10 @@ $O/BaseMobilityTest.o: BaseMobilityTest.cc \
 	../../base/utils/Coord.h \
 	../../base/modules/BaseWorldUtility.h \
 	../../base/modules/BatteryAccess.h \
+	../../base/connectionManager/BaseConnectionManager.h \
 	../../base/modules/BaseMobility.h \
 	../../base/utils/Move.h \
+	../../base/connectionManager/NicEntry.h \
 	../../base/utils/HostState.h \
 	../../base/modules/BaseBattery.h \
 	../../base/modules/BaseModule.h \

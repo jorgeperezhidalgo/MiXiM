@@ -25,6 +25,7 @@
 
 #include "BatteryAccess.h"
 #include "BaseWorldUtility.h"
+#include "BaseConnectionManager.h"
 #include "Coord.h"
 #include "Move.h"
 
@@ -101,6 +102,9 @@ class BaseMobility : public BatteryAccess
 
   protected:
 
+    /** @brief Pointer to the PropagationModel module*/
+    BaseConnectionManager* cc;
+
     /** @brief Pointer to BaseWorldUtility -- these two must know each other */
     BaseWorldUtility *world;
 
@@ -147,6 +151,9 @@ class BaseMobility : public BatteryAccess
      * message is scheduled in stage 1
      */
     virtual void initialize(int);
+
+    // Modified by Jorge Perez: Method to specify the number of initial stages
+    virtual int numInitStages() const {return 3;}
 
     /** @brief Delete dynamically allocated objects*/
     virtual void finish(){};

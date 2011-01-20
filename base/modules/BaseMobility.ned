@@ -14,6 +14,8 @@ simple BaseMobility like IBaseMobility
         double x; // x coordinate of the nodes' position (-1 = random)
         double y; // y coordinate of the nodes' position (-1 = random)
         double z; // z coordinate of the nodes' position (-1 = random)
+        double minimumDistanceAnchor = default(0); // Modified by Jorge Perez: minimum distance in m between any two anchors in map
+        double minimumDistanceNode = default(0); // Modified by Jorge Perez: minimum distance in m between any two mobile nodes in map
         @display("i=block/cogwheel");
 }
 

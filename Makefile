@@ -2,7 +2,7 @@
 # OMNeT++/OMNEST Makefile for MiXiM
 #
 # This file was generated with the command:
-#  opp_makemake -f --nolink -O out -d tests -d examples -d base -d modules -Xinet -L./out/$(CONFIGNAME)/tests/testUtils -L./out/$(CONFIGNAME)/base -L./out/$(CONFIGNAME)/tests/power/utils -L./out/$(CONFIGNAME)/modules
+#  opp_makemake -f --nolink -O out -d tests -d examples -d base -d modules -Xinet -Xout -L./out/$(CONFIGNAME)/tests/testUtils -L./out/$(CONFIGNAME)/base -L./out/$(CONFIGNAME)/tests/power/utils -L./out/$(CONFIGNAME)/modules
 #
 
 # C++ include paths (with -I)

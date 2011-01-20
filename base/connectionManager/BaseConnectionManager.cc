@@ -126,10 +126,39 @@ void BaseConnectionManager::initialize(int stage)
 	{
 
 	}
+//    // Modified by Jorge Perez
+//	else if (stage == 2)
+//	{
+//        // Create a grid with mobile nodes every par("nodesEvery") meters
+//        double nodesEvery = par("nodesEvery");
+//        double posX = 0.0;
+//        double posY = 0.0;
+//		for(NicEntries::iterator i = nics.begin(); i != nics.end(); ++i)
+//		{
+//			NicEntry* nic_i = i->second;
+//			if (nic_i->moduleType == 2)
+//			{
+//				ccEV << "Node " << nic_i->nicId << " moved to position (" << posX << ", " << posY << ")" << endl;
+//				Coord newPos(posX, posY);
+//				updateNicPos(nic_i->nicId, &newPos);
+//				ccEV << "Posicion (" << nic_i->pos.getX() << ", " << nic_i->pos.getY() << ")" << endl;
+//				posX = posX + nodesEvery;
+//				if (posX > playgroundSize->getX())
+//				{
+//					posX = 0;
+//					posY = posY + nodesEvery;
+//				}
+//				if (posY > playgroundSize->getY())
+//				{
+//					posY = 0;
+//				}
+//				//updatePosition();
+//			}
+//		}
+//    }
 }
 
-BaseConnectionManager::GridCoord BaseConnectionManager
-	::getCellForCoordinate(const Coord& c)
+BaseConnectionManager::GridCoord BaseConnectionManager::getCellForCoordinate(const Coord& c)
 {
     return GridCoord(c, findDistance);
 }
@@ -144,10 +173,26 @@ void BaseConnectionManager::updateConnections(int nicID,
 	checkGrid(oldCell, newCell, nicID );
 }
 
-BaseConnectionManager::NicEntries& BaseConnectionManager
-	::getCellEntries(BaseConnectionManager::GridCoord& cell)
+BaseConnectionManager::NicEntries& BaseConnectionManager::getCellEntries(BaseConnectionManager::GridCoord& cell)
 {
     return nicGrid[cell.x][cell.y][cell.z];
+}
+
+BaseConnectionManager::NicEntries& BaseConnectionManager::getNicList()
+{
+	return nics;
+}
+
+NicEntry* BaseConnectionManager::findNic( int nicID)
+{
+	for(BaseConnectionManager::NicEntries::iterator i = nics.begin(); i != nics.end(); ++i)
+	{
+		NicEntry* nic_i = i->second;
+		if (nic_i->nicId == nicID)
+		{
+			return nic_i;
+		}
+	}
 }
 
 void BaseConnectionManager::registerNicExt(int nicID)

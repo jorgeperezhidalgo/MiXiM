@@ -282,8 +282,10 @@ $O/modules/BaseUtility.o: modules/BaseUtility.cc \
 	utils/Coord.h \
 	modules/BaseWorldUtility.h \
 	modules/BatteryAccess.h \
+	connectionManager/BaseConnectionManager.h \
 	modules/BaseMobility.h \
 	utils/Move.h \
+	connectionManager/NicEntry.h \
 	utils/HostState.h \
 	modules/BaseBattery.h \
 	modules/BaseModule.h \
@@ -395,8 +397,10 @@ $O/modules/BaseMobility.o: modules/BaseMobility.cc \
 	utils/Coord.h \
 	modules/BaseWorldUtility.h \
 	modules/BatteryAccess.h \
+	connectionManager/BaseConnectionManager.h \
 	modules/BaseMobility.h \
 	utils/Move.h \
+	connectionManager/NicEntry.h \
 	utils/HostState.h \
 	modules/BaseBattery.h \
 	modules/BaseModule.h \

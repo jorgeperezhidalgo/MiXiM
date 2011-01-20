@@ -64,7 +64,9 @@ void WorldUtilityStats::finish()
 	recordScalar("GlobalTrafficReceived", bitsReceived, "bit");
 
 	recordScalar("Traffic", bitsSent / bitrate / simTime());
-	double hosts = simulation.getSystemModule()->par("numHosts");
+	double anchors = simulation.getSystemModule()->par("numAnchors");
+	double nodes = simulation.getSystemModule()->par("numNodes");
+	double hosts = anchors + nodes;
 	if(!par("bcTraffic"))
 		hosts = 2;
 	recordScalar("Usage", bitsReceived / bitrate / simTime() / (hosts-1));

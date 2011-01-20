@@ -13,16 +13,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "NetworkStackTrafficGen.h"
+#include "NodeAppLayer.h"
 #include "NetwToMacControlInfo.h"
 #include <cassert>
 #include <Packet.h>
 #include <BaseMacLayer.h>
 
 
-Define_Module(NetworkStackTrafficGen);
+Define_Module(NodeAppLayer);
 
-void NetworkStackTrafficGen::initialize(int stage)
+void NodeAppLayer::initialize(int stage)
 {
 	BaseLayer::initialize(stage);
 
@@ -32,6 +32,9 @@ void NetworkStackTrafficGen::initialize(int stage)
 
 		arp = FindModule<BaseArp*>::findSubModule(findHost());
 		myNetwAddr = arp->myNetwAddr(this);
+
+        cc = FindModule<BaseConnectionManager *>::findGlobalModule();
+        if( cc == 0 ) error("Could not find connectionmanager module");
 
 		packetLength = par("packetLength");
 		packetTime = par("packetTime");
@@ -48,22 +51,23 @@ void NetworkStackTrafficGen::initialize(int stage)
 			remainingBurst = burstSize;
 			scheduleAt(dblrand() * packetTime * burstSize / pppt, delayTimer);
 		}
+        (cc->findNic(getId()+1))->moduleType = 2;
 	} else {
 
 	}
 }
 
-NetworkStackTrafficGen::~NetworkStackTrafficGen() {
+NodeAppLayer::~NodeAppLayer() {
 	cancelAndDelete(delayTimer);
 }
 
 
-void NetworkStackTrafficGen::finish()
+void NodeAppLayer::finish()
 {
 	recordScalar("dropped", nbPacketDropped);
 }
 
-void NetworkStackTrafficGen::handleSelfMsg(cMessage *msg)
+void NodeAppLayer::handleSelfMsg(cMessage *msg)
 {
 	switch( msg->getKind() )
 	{
@@ -91,7 +95,7 @@ void NetworkStackTrafficGen::handleSelfMsg(cMessage *msg)
 }
 
 
-void NetworkStackTrafficGen::handleLowerMsg(cMessage *msg)
+void NodeAppLayer::handleLowerMsg(cMessage *msg)
 {
 	Packet p(packetLength, 1, 0);
 	world->publishBBItem(catPacket, &p, -1);
@@ -101,7 +105,7 @@ void NetworkStackTrafficGen::handleLowerMsg(cMessage *msg)
 }
 
 
-void NetworkStackTrafficGen::handleLowerControl(cMessage *msg)
+void NodeAppLayer::handleLowerControl(cMessage *msg)
 {
 	if(msg->getKind() == BaseMacLayer::PACKET_DROPPED) {
 		nbPacketDropped++;
@@ -110,7 +114,7 @@ void NetworkStackTrafficGen::handleLowerControl(cMessage *msg)
 	msg = 0;
 }
 
-void NetworkStackTrafficGen::sendBroadcast()
+void NodeAppLayer::sendBroadcast()
 {
 	NetwPkt *pkt = new NetwPkt("BROADCAST_MESSAGE", BROADCAST_MESSAGE);
 	pkt->setBitLength(packetLength);

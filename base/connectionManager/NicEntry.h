@@ -55,6 +55,9 @@ class NicEntry : public cObject
     /** @brief Geographic location of the nic*/
     Coord pos;
 
+    // Modified by Jorge Perez: Module type, 1:anchor, 2:node or 3:computer
+    int moduleType;
+
     /** @brief Points to this nics ChannelAccess module */
     ChannelAccess* chAccess;
 
