@@ -110,13 +110,13 @@ network ieee802154Narrow
         anchor[numAnchors]: PhyMacAnchor {
             parameters:
                 numAnchors = numAnchors;
-                @display("p=207,130;b=42,42,rect,yellow;i=device/accesspoint");
+                @display("p=212,120;b=42,42,rect,yellow;i=device/accesspoint");
 
         }
         node[numNodes]: PhyMacNode {
             parameters:
                 numNodes = numNodes;
-                @display("p=75,130;b=0,0,rect,yellow;i=device/pocketpc");
+                @display("p=78,120;b=0,0,rect,yellow;i=device/pocketpc");
 
         }
     connections allowunconnected:

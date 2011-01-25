@@ -111,6 +111,7 @@ void BaseMobility::initialize(int stage)
         //check whether anchors and nodes have a minimum distance among them separately or not
         BaseConnectionManager::NicEntries& nicList = cc->getNicList();
         double distance;
+        Coord newPos;
         bool itsok = false; //It will be false if there is an anchor or mobile node closer as par("minimumdistance")
         int i = 0; //Shows the number of tries until the anchor or mobile node finds a valid position
         do
@@ -131,8 +132,11 @@ void BaseMobility::initialize(int stage)
 						(((cc->findNic(getId()+3))->moduleType == 1) && (distance <= minimumDistanceAnchor) && (distance >0)))
 				{
 					itsok = false;
-					move.setStart(world->getRandomPosition());
+					newPos = world->getRandomPosition();
+					move.setStart(newPos);
 					updatePosition();
+					coreEV << "PosMove (" << move.getStartPos().getX() << ", " << move.getStartPos().getY() << ")"<< endl;
+					coreEV << "PosNic antes (" << (cc->findNic(getId()+3))->pos.getX() << ", " << (cc->findNic(getId()+3))->pos.getY() << ")" << endl;
 					break;
 				}
 			}

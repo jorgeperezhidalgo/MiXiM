@@ -27,6 +27,7 @@ simple AnchorAppLayer
         int burstSize = default(1);
     	int packetLength @unit("bit"); // length of the generated packet (in bits)
     	int destination = default(-1);
+    	int anchorType = default(1); // 1 es un anchor normal, 3 es el anchor computador que calcula todo
     gates:
     	input lowerGateIn; // from NIC
         output lowerGateOut; // to NIC

@@ -375,11 +375,19 @@ public:
 	/** @brief Returns the ingates of all nics in range*/
 	const NicEntry::GateList& getGateList( int nicID);
 
-	/** @brief Returns all nics in range*/
+	/** @brief Returns all nics*/
 	NicEntries& getNicList();
+
+	// Returns all anchors
+	NicEntries& getAnchorsList();
 
 	// Finds a Nic with a NicID
 	NicEntry* findNic( int nicID);
+
+	// Returns maxInterferenceDistance
+	double getMaxInterferenceDistance();
+
+
 
 	/** @brief Returns the ingate of the with id==targetID, or 0 if not in range*/
 	const cGate* getOutGateTo(const NicEntry* nic, const NicEntry* targetNic);

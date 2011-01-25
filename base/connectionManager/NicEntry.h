@@ -57,6 +57,11 @@ class NicEntry : public cObject
 
     // Modified by Jorge Perez: Module type, 1:anchor, 2:node or 3:computer
     int moduleType;
+    double timePhaseSync;
+    double timePhaseTransmision;
+    double timePhaseCommunication;
+    int transmisionSlot[100];
+    int numSlots;
 
     /** @brief Points to this nics ChannelAccess module */
     ChannelAccess* chAccess;

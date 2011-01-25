@@ -49,6 +49,8 @@ protected:
 	int burstSize;
 	int remainingBurst;
 	long destination;
+	int anchorType;
+	int numAnchors;
 
 	int catPacket;
 
@@ -69,6 +71,8 @@ public:
 	virtual ~AnchorAppLayer();
 
 	virtual void initialize(int stage);
+
+	virtual int numInitStages() const {return 4;}
 
 	virtual void finish();
 
@@ -98,6 +102,13 @@ protected:
 
 	/** @brief Send a broadcast message to lower layer. */
 	virtual void sendBroadcast();
+
+	// Returns from the already assigned slots how many time a nicId appears
+	int hasSlot(int *slots, int *slotCounter, int numSlots, int anchor, int numAnchors);
+
+	// Order Queue min to max
+	void orderQueue(int *queue, int *numerTimesQueue, int queueCounter);
+
 };
 
 #endif
