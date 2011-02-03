@@ -23,6 +23,8 @@
  *     long destAddr; 
  *     long srcAddr;  
  *     long sequenceId; 
+ *     bool csmaActive; 
+ * 
  * }
  * </pre>
  */
@@ -32,6 +34,7 @@ class MacPkt : public ::cPacket
     long destAddr_var;
     long srcAddr_var;
     long sequenceId_var;
+    bool csmaActive_var;
 
     // protected and unimplemented operator==(), to prevent accidental usage
     bool operator==(const MacPkt&);
@@ -52,6 +55,8 @@ class MacPkt : public ::cPacket
     virtual void setSrcAddr(long srcAddr_var);
     virtual long getSequenceId() const;
     virtual void setSequenceId(long sequenceId_var);
+    virtual bool getCsmaActive() const;
+    virtual void setCsmaActive(bool csmaActive_var);
 };
 
 inline void doPacking(cCommBuffer *b, MacPkt& obj) {obj.parsimPack(b);}

@@ -63,8 +63,8 @@ module Nic802154_TI_CC2420 like INic
                 headerLength = 48 bit; // ieee 802.15.4                
                 thermalNoise = -110 dBm;
                 // From TI CC1100 datasheet rev. C
-                timeSleepToRX = 0.001792 s;
-                timeSleepToTX = 0.001792 s;
+                timeSleepToRX = 0 s; //0.001792 s;
+                timeSleepToTX = 0 s; //0.001792 s;
                 timeRXToTX = 0.000192 s;
                 timeTXToRX = 0.000192 s;
                 timeRXToSleep = 0 s;
@@ -82,7 +82,7 @@ module Nic802154_TI_CC2420 like INic
         }
         mac: CSMA802154 {
             parameters:
-                rxSetupTime = 0.001792 s;
+                rxSetupTime = 0 s; //0.001792 s;
                 bitrate = 250000 bps;
                 txPower = default(1 mW);
 				

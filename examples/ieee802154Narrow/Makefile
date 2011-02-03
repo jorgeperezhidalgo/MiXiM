@@ -126,6 +126,7 @@ $O/AnchorAppLayer.o: AnchorAppLayer.cc \
 	../../base/modules/BaseLayer.h \
 	../../base/modules/BatteryAccess.h \
 	../../base/connectionManager/BaseConnectionManager.h \
+	../../base/messages/SyncPkt_m.h \
 	../../base/phyLayer/Interpolation.h \
 	../../base/utils/Move.h \
 	../../base/phyLayer/ChannelState.h \
@@ -151,7 +152,6 @@ $O/AnchorAppLayer.o: AnchorAppLayer.cc \
 	../../base/phyLayer/Signal_.h \
 	../../base/utils/PassedMessage.h \
 	../../base/utils/NetwToMacControlInfo.h \
-	../../base/messages/NetwPkt_m.h \
 	../../base/messages/MacPkt_m.h
 $O/NetworkStackTrafficGen.o: NetworkStackTrafficGen.cc \
 	../../base/modules/AddressingInterface.h \

@@ -37,17 +37,14 @@ public:
 
 	enum TrafficGenMessageKinds{
 
-		SEND_BROADCAST_TIMER = 1,
-		BROADCAST_MESSAGE
+		SEND_SYNC_TIMER = 1,
+		SYNC_MESSAGE
 	};
 
 protected:
 
 	int packetLength;
 	simtime_t packetTime;
-	double pppt;
-	int burstSize;
-	int remainingBurst;
 	long destination;
 
 	int catPacket;

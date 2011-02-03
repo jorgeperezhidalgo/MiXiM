@@ -90,6 +90,8 @@ network ieee802154Narrow
         double playgroundSizeZ @unit(m); // z size of the area the nodes are in (in meters)
         double numAnchors; //total number of anchors in the network
         double numNodes; // total number of mobile nodes in the network
+        double fullPhaseTime @unit(s) = default(1.5s); // Time of every full phase
+        double timeComSinkPhase @unit(s) = default(0.5s); // Time of each of the 2 COM_SYNC phases
 
 
         @display("bgb=$playgroundSizeX,$playgroundSizeY,white,,;bgp=10,50");

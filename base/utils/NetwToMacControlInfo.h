@@ -41,11 +41,20 @@ class NetwToMacControlInfo : public cObject
   protected:
     /** @brief MAC address of the sending or receiving node*/
     int nextHopMac;
+    // CSMA Active
+    bool csmaActive;
 
 
   public:
     /** @brief Default constructor*/
     NetwToMacControlInfo(const int addr) : nextHopMac(addr) {};
+
+    //Constructor with BE
+    NetwToMacControlInfo(const int addr, const bool csma)
+    {
+       	nextHopMac = addr;
+       	csmaActive = csma;
+    };
 
     /** @brief Destructor*/
     virtual ~NetwToMacControlInfo() {};
@@ -55,10 +64,20 @@ class NetwToMacControlInfo : public cObject
     	return nextHopMac;
     };
 
+    // Getter method
+    virtual const int getCsmaActive() {
+    	return csmaActive;
+    };
+
     /** @brief Setter method */
     virtual void setNextHopMac(const int addr){
     	nextHopMac = addr;
     };
+    // Setter method
+    virtual void setCsmaActive(const int csma) {
+    	csmaActive = csma;
+    };
+
 };
 
 

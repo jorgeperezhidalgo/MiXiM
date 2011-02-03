@@ -37,6 +37,7 @@
 #include <DroppedPacket.h>
 #include <MacPkt_m.h>
 
+
 /**
  * @brief Generic CSMA Mac-Layer.
  *
@@ -60,6 +61,8 @@ class  csma : public BaseMacLayer
 
     /** @brief Initialization of the module and some variables*/
     virtual void initialize(int);
+
+    virtual int numInitStages() const {return 3;}
 
     /** @brief Delete all dynamically allocated objects of the module*/
     virtual void finish();
@@ -259,6 +262,9 @@ class  csma : public BaseMacLayer
 
     /** @brief This MAC layers MAC address.*/
     //int macaddress;
+
+    // True if its an anchor, false if its a mobile node
+    bool anchor;
 
 
 protected:

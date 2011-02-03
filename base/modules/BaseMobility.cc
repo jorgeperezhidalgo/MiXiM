@@ -117,26 +117,25 @@ void BaseMobility::initialize(int stage)
         do
 		{
         	itsok = true;
-        	// You have to add 3 because BaseMobility ID is 3 less as nicId from the same anchor
         	coreEV << "Try number " << ++i << endl;
 			for(BaseConnectionManager::NicEntries::iterator i = nicList.begin(); i != nicList.end(); ++i)
 			{
 				NicEntry* nic_i = i->second;
-				if ((cc->findNic(getId()+3))->moduleType != nic_i->moduleType)
+				if ((cc->findNic(getParentModule()->findSubmodule("nic")))->moduleType != nic_i->moduleType)
 				{
 					continue;
 				} //If the nics to compare are from different type we skip this comparison loop
 				distance = sqrt(pow(move.getStartPos().getX() - nic_i->pos.getX(),2) + pow(move.getStartPos().getY() - nic_i->pos.getY(),2));
 				coreEV << "Distance with node " << nic_i->nicId << ": " << distance << endl;
-				if ((((cc->findNic(getId()+3))->moduleType == 2) && (distance <= minimumDistanceNode) && (distance >0)) ||
-						(((cc->findNic(getId()+3))->moduleType == 1) && (distance <= minimumDistanceAnchor) && (distance >0)))
+				if ((((cc->findNic(getParentModule()->findSubmodule("nic")))->moduleType == 2) && (distance <= minimumDistanceNode) && (distance >0)) ||
+						(((cc->findNic(getParentModule()->findSubmodule("nic")))->moduleType == 1) && (distance <= minimumDistanceAnchor) && (distance >0)))
 				{
 					itsok = false;
 					newPos = world->getRandomPosition();
 					move.setStart(newPos);
 					updatePosition();
 					coreEV << "PosMove (" << move.getStartPos().getX() << ", " << move.getStartPos().getY() << ")"<< endl;
-					coreEV << "PosNic antes (" << (cc->findNic(getId()+3))->pos.getX() << ", " << (cc->findNic(getId()+3))->pos.getY() << ")" << endl;
+					coreEV << "PosNic antes (" << (cc->findNic(getParentModule()->findSubmodule("nic")))->pos.getX() << ", " << (cc->findNic(getParentModule()->findSubmodule("nic")))->pos.getY() << ")" << endl;
 					break;
 				}
 			}

@@ -28,7 +28,6 @@ void AnchorAppLayer::initialize(int stage)
 
 	if(stage == 0) {
 		world = FindModule<BaseWorldUtility*>::findGlobalModule();
-		delayTimer = new cMessage("delay-timer", SEND_BROADCAST_TIMER);
 
 		arp = FindModule<BaseArp*>::findSubModule(findHost());
 		myNetwAddr = arp->myNetwAddr(this);
@@ -38,155 +37,209 @@ void AnchorAppLayer::initialize(int stage)
 
 		packetLength = par("packetLength");
 		packetTime = par("packetTime");
-		pppt = par("packetsPerPacketTime");
-		burstSize = par("burstSize");
+		phaseRepetitionNumber = par("phaseRepetitionNumber");
+		syncPacketsPerSyncPhase = par("syncPacketsPerSyncPhase");
+		if (syncPacketsPerSyncPhase <= 0) error("You must introduce a positive number of periods.");
+		syncPhaseNumber = 1;
+		syncPacketsPerSyncPhaseCounter = 1;
+
 		destination = par("destination");
 		anchorType = par("anchorType");
+		syncPacketTime = par("syncPacketTime");
+		scheduledSlot = 0;
+		phase2VIPPercentage = par("phase2VIPPercentage");
 
+		fullPhaseTime = getParentModule()->getParentModule()->par("fullPhaseTime");
+		timeComSinkPhase = getParentModule()->getParentModule()->par("timeComSinkPhase");
 
 		nbPacketDropped = 0;
 
-		Packet p(1);
-		catPacket = world->getCategory(&p);
+//		Packet p(1);
+//		catPacket = world->getCategory(&p);
 	} else if (stage == 1) {
-		if(burstSize > 0) {
-			remainingBurst = burstSize;
-			scheduleAt(dblrand() * packetTime * burstSize / pppt, delayTimer);
-		}
-        (cc->findNic(getId()+1))->moduleType = anchorType; // +1 because this id from Nic is one bigger as from app layer
-	} else if ((stage == 3) && (anchorType == 3)){ //Only if the anchor is the computer
-        BaseConnectionManager::NicEntries& anchorList = cc->getAnchorsList();
-        numAnchors = anchorList.size();
-        int j = 0;
-        double distance;
-        NicEntry* anchors[numAnchors];
-        int matrix[numAnchors][numAnchors]; memset(matrix, 0, sizeof(int)*numAnchors*numAnchors);
-        int slotCounter[numAnchors];  memset(slotCounter, 0, sizeof(int)*numAnchors);
-        int slots[numAnchors][numAnchors]; memset(slots, 0, sizeof(int)*numAnchors*numAnchors);
-        int numSlots = 0;
-        int queue[numAnchors]; memset(queue, 0, sizeof(int)*numAnchors);
-        int numerTimesQueue[numAnchors]; memset(numerTimesQueue, 0, sizeof(int)*numAnchors);
-        int queueCounter = 0;
-        int hasSlots;
-        bool lookRow;
-        bool compatible;
-//        EV << "   0  1  2  3  4  5  6  7  8  9  10 11 " << endl;
-        EV << "Coverage " << cc->getMaxInterferenceDistance() << endl;
-        for(BaseConnectionManager::NicEntries::iterator i = anchorList.begin(); i != anchorList.end(); ++i)
-		{
-			anchors[j] = i->second;
-			anchors[j]->numSlots = 0;
-			j++;
-		}
-        for (j = 0; j <= numAnchors-1; j++)
-        {
-
-        	//EV << j << " Anchor " << anchors[j]->nicId << " type " << anchors[j]->moduleType;
-			//EV << "PosNic despues (" << anchors[j]->pos.getX() << ", " << anchors[j]->pos.getY() << ")" << endl;
-//			if (j<10)
-//				EV << j << "  ";
-//			else
-//				EV << j << " ";
-
-			lookRow = false;
-			queueCounter = 0;
-			if (hasSlot(*slots, slotCounter, numSlots, j, numAnchors) == 0)
+		anchor = cc->findNic(getParentModule()->findSubmodule("nic"));
+        anchor->moduleType = anchorType;
+	} else if (stage == 3) {
+		if (anchorType == 3) { //Only if the anchor is the computer
+			BaseConnectionManager::NicEntries& anchorList = cc->getAnchorsList();
+			numAnchors = anchorList.size();
+			int j = 0;
+			double distance;
+			NicEntry* anchors[numAnchors];
+			int matrix[numAnchors][numAnchors]; memset(matrix, 0, sizeof(int)*numAnchors*numAnchors);
+			int slotCounter[numAnchors];  memset(slotCounter, 0, sizeof(int)*numAnchors);
+			int slots[numAnchors][numAnchors]; memset(slots, 0, sizeof(int)*numAnchors*numAnchors);
+			int queue[numAnchors]; memset(queue, 0, sizeof(int)*numAnchors);
+			int numerTimesQueue[numAnchors]; memset(numerTimesQueue, 0, sizeof(int)*numAnchors);
+			int queueCounter = 0;
+			int hasSlots;
+			int numSlots = 0;
+			bool lookRow;
+			bool compatible;
+	//        EV << "   0  1  2  3  4  5  6  7  8  9  10 11 " << endl;
+			EV << "Coverage " << cc->getMaxInterferenceDistance() << endl;
+			for(BaseConnectionManager::NicEntries::iterator i = anchorList.begin(); i != anchorList.end(); ++i)
 			{
-//				EV << "Añadiendo nuevo Slot " << numSlots << " con el anchor " << j << endl;
-				numSlots++;
-				slotCounter[numSlots-1]++;
-				slots[numSlots-1][slotCounter[numSlots-1]-1] = j;
-				lookRow = true;
+				anchors[j] = i->second;
+				anchors[j]->numSlots = 0;
+				j++;
 			}
-        	for (int k = 0; k <= numAnchors-1; k++)
-        	{
-        		if (matrix[j][k] == 0)
-        		{
-            		distance = sqrt(pow(anchors[k]->pos.getX() - anchors[j]->pos.getX(),2) + pow(anchors[k]->pos.getY() - anchors[j]->pos.getY(),2));
-            		matrix[j][k] = int((distance / cc->getMaxInterferenceDistance()) + 1);
-            		matrix[k][j] = matrix[j][k];
-        		}
-//        		EV << matrix[j][k] << "  ";
-        		if ((matrix[j][k] >= 3) && lookRow)
-        		{
-        			compatible = true;
-        			for (int l = 0; l < slotCounter[numSlots-1]; l++)
-        			{
-                		if (matrix[slots[numSlots-1][l]][k] == 0)
-                		{
-                    		distance = sqrt(pow(anchors[k]->pos.getX() - anchors[slots[numSlots-1][l]]->pos.getX(),2) + pow(anchors[k]->pos.getY() - anchors[slots[numSlots-1][l]]->pos.getY(),2));
-                    		matrix[slots[numSlots-1][l]][k] = int((distance / cc->getMaxInterferenceDistance()) + 1);
-                    		matrix[k][slots[numSlots-1][l]] = matrix[slots[numSlots-1][l]][k];
-                		}
-                		if (matrix[slots[numSlots-1][l]][k] <= 2)
-                			compatible = false;
-        			}
-    				if (compatible)
-    				{
-            			hasSlots = hasSlot(*slots, slotCounter, numSlots, k, numAnchors);
-    					if (hasSlots == 0)
-    					{
-//        					EV << "Añadiendo nuevo anchor " << k << " al slot " << numSlots-1 << endl;
-            				slotCounter[numSlots-1]++;
-            				slots[numSlots-1][slotCounter[numSlots-1]-1] = k;
-        				}
-    					else
-    					{
-    						queue[queueCounter] = k;
-    						numerTimesQueue[queueCounter] = hasSlots;
-    						queueCounter++;
-    					}
-    				}
-        		}
-        	}
-       		orderQueue(queue, numerTimesQueue, queueCounter);
-       		for (int k = 0; k < queueCounter; k++)
-            {
-           		compatible = true;
-       			for (int l = 0; l < slotCounter[numSlots-1]; l++)
-       			{
-               		if (matrix[slots[numSlots-1][l]][queue[k]] == 0)
-               		{
-                   		distance = sqrt(pow(anchors[queue[k]]->pos.getX() - anchors[slots[numSlots-1][l]]->pos.getX(),2) + pow(anchors[queue[k]]->pos.getY() - anchors[slots[numSlots-1][l]]->pos.getY(),2));
-                   		matrix[slots[numSlots-1][l]][queue[k]] = int((distance / cc->getMaxInterferenceDistance()) + 1);
-                   		matrix[queue[k]][slots[numSlots-1][l]] = matrix[slots[numSlots-1][l]][queue[k]];
-               		}
-               		if (matrix[slots[numSlots-1][l]][queue[k]] <= 2)
-               			compatible = false;
-       			}
-       			if (compatible)
-       			{
-//       				EV << "Reutilizando anchor " << queue[k] << " en el slot " << numSlots-1 << endl;
-       				slotCounter[numSlots-1]++;
-       				slots[numSlots-1][slotCounter[numSlots-1]-1] = queue[k];
-       			}
-           	}
-//        	EV << endl;
-		}
-
-        for (j = 0; j < numSlots; j++)
-        {
-        	EV << "Slot " << j << ": ";
-        	for (int k = 0; k < slotCounter[j]; k++)
-        	{
-        		anchors[slots[j][k]]->transmisionSlot[anchors[slots[j][k]]->numSlots] = j;
-        		anchors[slots[j][k]]->numSlots = anchors[slots[j][k]]->numSlots +1;
-        		EV << "(" << anchors[slots[j][k]]->numSlots << ")";
-        		EV << slots[j][k] << ",";
-        	}
-        	EV << endl;
-        }
-        j= 0;
-        for(BaseConnectionManager::NicEntries::iterator i = anchorList.begin(); i != anchorList.end(); ++i)
-		{
-			EV << "Nic (" << j << ")" << i->second->nicId << " transmits in Slot: ";
-			for (int k = 0; k < i->second->numSlots; k++)
+			for (j = 0; j <= numAnchors-1; j++)
 			{
-				EV << i->second->transmisionSlot[k] << ", ";
+
+				//EV << j << " Anchor " << anchors[j]->nicId << " type " << anchors[j]->moduleType;
+				//EV << "PosNic despues (" << anchors[j]->pos.getX() << ", " << anchors[j]->pos.getY() << ")" << endl;
+	//			if (j<10)
+	//				EV << j << "  ";
+	//			else
+	//				EV << j << " ";
+
+				lookRow = false;
+				queueCounter = 0;
+				if (hasSlot(*slots, slotCounter, numSlots, j, numAnchors) == 0)
+				{
+	//				EV << "Añadiendo nuevo Slot " << numSlots << " con el anchor " << j << endl;
+					numSlots++;
+					slotCounter[numSlots-1]++;
+					slots[numSlots-1][slotCounter[numSlots-1]-1] = j;
+					lookRow = true;
+				}
+				for (int k = 0; k <= numAnchors-1; k++)
+				{
+					if (matrix[j][k] == 0)
+					{
+						distance = sqrt(pow(anchors[k]->pos.getX() - anchors[j]->pos.getX(),2) + pow(anchors[k]->pos.getY() - anchors[j]->pos.getY(),2));
+						matrix[j][k] = int((distance / cc->getMaxInterferenceDistance()) + 1);
+						matrix[k][j] = matrix[j][k];
+					}
+	//        		EV << matrix[j][k] << "  ";
+					if ((matrix[j][k] >= 3) && lookRow)
+					{
+						compatible = true;
+						for (int l = 0; l < slotCounter[numSlots-1]; l++)
+						{
+							if (matrix[slots[numSlots-1][l]][k] == 0)
+							{
+								distance = sqrt(pow(anchors[k]->pos.getX() - anchors[slots[numSlots-1][l]]->pos.getX(),2) + pow(anchors[k]->pos.getY() - anchors[slots[numSlots-1][l]]->pos.getY(),2));
+								matrix[slots[numSlots-1][l]][k] = int((distance / cc->getMaxInterferenceDistance()) + 1);
+								matrix[k][slots[numSlots-1][l]] = matrix[slots[numSlots-1][l]][k];
+							}
+							if (matrix[slots[numSlots-1][l]][k] <= 2)
+								compatible = false;
+						}
+						if (compatible)
+						{
+							hasSlots = hasSlot(*slots, slotCounter, numSlots, k, numAnchors);
+							if (hasSlots == 0)
+							{
+	//        					EV << "Añadiendo nuevo anchor " << k << " al slot " << numSlots-1 << endl;
+								slotCounter[numSlots-1]++;
+								slots[numSlots-1][slotCounter[numSlots-1]-1] = k;
+							}
+							else
+							{
+								queue[queueCounter] = k;
+								numerTimesQueue[queueCounter] = hasSlots;
+								queueCounter++;
+							}
+						}
+					}
+				}
+				orderQueue(queue, numerTimesQueue, queueCounter);
+				for (int k = 0; k < queueCounter; k++)
+				{
+					compatible = true;
+					for (int l = 0; l < slotCounter[numSlots-1]; l++)
+					{
+						if (matrix[slots[numSlots-1][l]][queue[k]] == 0)
+						{
+							distance = sqrt(pow(anchors[queue[k]]->pos.getX() - anchors[slots[numSlots-1][l]]->pos.getX(),2) + pow(anchors[queue[k]]->pos.getY() - anchors[slots[numSlots-1][l]]->pos.getY(),2));
+							matrix[slots[numSlots-1][l]][queue[k]] = int((distance / cc->getMaxInterferenceDistance()) + 1);
+							matrix[queue[k]][slots[numSlots-1][l]] = matrix[slots[numSlots-1][l]][queue[k]];
+						}
+						if (matrix[slots[numSlots-1][l]][queue[k]] <= 2)
+							compatible = false;
+					}
+					if (compatible)
+					{
+	//       				EV << "Reutilizando anchor " << queue[k] << " en el slot " << numSlots-1 << endl;
+						slotCounter[numSlots-1]++;
+						slots[numSlots-1][slotCounter[numSlots-1]-1] = queue[k];
+					}
+				}
+	//        	EV << endl;
 			}
-			EV << endl;
-			j++;
+
+			for (j = 0; j < numSlots; j++)
+			{
+				EV << "Slot " << j << ": ";
+				for (int k = 0; k < slotCounter[j]; k++)
+				{
+					anchors[slots[j][k]]->transmisionSlot[anchors[slots[j][k]]->numSlots] = j;
+					anchors[slots[j][k]]->numSlots = anchors[slots[j][k]]->numSlots +1;
+					anchors[slots[j][k]]->numTotalSlots = numSlots;
+					EV << "(" << anchors[slots[j][k]]->numSlots << ")";
+					EV << slots[j][k] << ",";
+				}
+				EV << endl;
+			}
+			j= 0;
+			for(BaseConnectionManager::NicEntries::iterator i = anchorList.begin(); i != anchorList.end(); ++i)
+			{
+				EV << "Nic (" << j << ")" << i->second->nicId << " transmits in Slot: ";
+				for (int k = 0; k < i->second->numSlots; k++)
+				{
+					EV << i->second->transmisionSlot[k] << ", ";
+				}
+				EV << endl;
+				j++;
+			}
 		}
+		timeSyncPhase = anchor->numTotalSlots * syncPacketTime ;
+        timeVIPPhase = (fullPhaseTime - (2 * timeComSinkPhase) - (3 * syncPacketsPerSyncPhase * timeSyncPhase)) * phase2VIPPercentage;
+        timeReportPhase = (fullPhaseTime - (2 * timeComSinkPhase) - (3 * syncPacketsPerSyncPhase * timeSyncPhase)) * (1 - phase2VIPPercentage);
+        EV << "T Report: " << timeReportPhase << endl;
+        EV << "T VIP: " << timeVIPPhase << endl;
+	}
+	else if (stage == 4)
+	{
+		delayTimer = new cMessage("delay-timer", SEND_SYNC_TIMER);
+		if (phaseRepetitionNumber != 0)
+		{
+			lastPhaseStart = simTime();
+			scheduleAt(lastPhaseStart + (anchor->transmisionSlot[scheduledSlot] * syncPacketTime), delayTimer);
+
+			scheduledSlot++;
+			if (scheduledSlot >= anchor->numSlots)
+			{
+				scheduledSlot = 0;
+				syncPacketsPerSyncPhaseCounter++;
+				lastPhaseStart = lastPhaseStart + timeSyncPhase;
+				if (syncPacketsPerSyncPhaseCounter > syncPacketsPerSyncPhase)
+				{
+					syncPacketsPerSyncPhaseCounter = 1;
+					switch (syncPhaseNumber)
+					{
+					case 1:
+						syncPhaseNumber++;
+						lastPhaseStart = lastPhaseStart + timeReportPhase + timeVIPPhase;
+						break;
+					case 2:
+						syncPhaseNumber++;
+						lastPhaseStart = lastPhaseStart + timeComSinkPhase;
+						break;
+					case 3:
+						syncPhaseNumber = 1;
+						lastPhaseStart = lastPhaseStart + timeComSinkPhase;
+						phaseRepetitionNumber--;
+						break;
+					default:
+						syncPhaseNumber = 1;
+					}
+				}
+			}
+		}
+		EV <<"Time for next Sync Packet "<< lastPhaseStart<<endl;
 	}
 }
 
@@ -249,22 +302,46 @@ void AnchorAppLayer::handleSelfMsg(cMessage *msg)
 {
 	switch( msg->getKind() )
 	{
-	case SEND_BROADCAST_TIMER:
+	case SEND_SYNC_TIMER:
 		assert(msg == delayTimer);
-
 
 		sendBroadcast();
 
-		remainingBurst--;
+		if (phaseRepetitionNumber != 0)
+		{
+			scheduleAt(lastPhaseStart + (anchor->transmisionSlot[scheduledSlot] * syncPacketTime), delayTimer);
 
-		if(remainingBurst == 0) {
-			//remainingBurst = burstSize;
-			EV << "Se acabo" <<endl;
-			scheduleAt(simTime() + (dblrand()*1.4+0.3)*packetTime * burstSize / pppt, msg);
-		} else {
-			scheduleAt(simTime() + packetTime * 2, msg);
+			scheduledSlot++;
+			if (scheduledSlot >= anchor->numSlots)
+			{
+				scheduledSlot = 0;
+				syncPacketsPerSyncPhaseCounter++;
+				lastPhaseStart = lastPhaseStart + timeSyncPhase;
+				if (syncPacketsPerSyncPhaseCounter > syncPacketsPerSyncPhase)
+				{
+					syncPacketsPerSyncPhaseCounter = 1;
+					switch (syncPhaseNumber)
+					{
+					case 1:
+						syncPhaseNumber++;
+						lastPhaseStart = lastPhaseStart + timeReportPhase + timeVIPPhase;
+						break;
+					case 2:
+						syncPhaseNumber++;
+						lastPhaseStart = lastPhaseStart + timeComSinkPhase;
+						break;
+					case 3:
+						syncPhaseNumber = 1;
+						lastPhaseStart = lastPhaseStart + timeComSinkPhase;
+						phaseRepetitionNumber--;
+						break;
+					default:
+						syncPhaseNumber = 1;
+					}
+				}
+			}
 		}
-
+		EV <<"Time for next Sync Packet "<< lastPhaseStart<<endl;
 		break;
 	default:
 		EV << "Unkown selfmessage! -> delete, kind: "<<msg->getKind() <<endl;
@@ -275,8 +352,8 @@ void AnchorAppLayer::handleSelfMsg(cMessage *msg)
 
 void AnchorAppLayer::handleLowerMsg(cMessage *msg)
 {
-	Packet p(packetLength, 1, 0);
-	world->publishBBItem(catPacket, &p, -1);
+//	Packet p(packetLength, 1, 0);
+//	world->publishBBItem(catPacket, &p, -1);
 
 	delete msg;
 	msg = 0;
@@ -287,6 +364,8 @@ void AnchorAppLayer::handleLowerControl(cMessage *msg)
 {
 	if(msg->getKind() == BaseMacLayer::PACKET_DROPPED) {
 		nbPacketDropped++;
+	} else if (msg->getKind() == BaseMacLayer::SYNC_SENT) {
+		EV << "El mensaje de sync se ha enviado correctamente." << endl;
 	}
 	delete msg;
 	msg = 0;
@@ -294,16 +373,17 @@ void AnchorAppLayer::handleLowerControl(cMessage *msg)
 
 void AnchorAppLayer::sendBroadcast()
 {
-	NetwPkt *pkt = new NetwPkt("BROADCAST_MESSAGE", BROADCAST_MESSAGE);
+	SyncPkt *pkt = new SyncPkt("SYNC_MESSAGE", SYNC_MESSAGE);
 	pkt->setBitLength(packetLength);
 
-	pkt->setSrcAddr(myNetwAddr);
-	pkt->setDestAddr(destination);
+//	pkt->setSrcAddr(myNetwAddr);
+//	pkt->setDestAddr(destination);
 
-	pkt->setControlInfo(new NetwToMacControlInfo(destination));
+	pkt->setControlInfo(new NetwToMacControlInfo(destination,false));
 
-	Packet p(packetLength, 0, 1);
-	world->publishBBItem(catPacket, &p, -1);
+
+//	Packet p(packetLength, 0, 1);
+//	world->publishBBItem(catPacket, &p, -1);
 
 	sendDown(pkt);
 }

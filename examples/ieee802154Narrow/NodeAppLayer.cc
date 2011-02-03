@@ -28,7 +28,7 @@ void NodeAppLayer::initialize(int stage)
 
 	if(stage == 0) {
 		world = FindModule<BaseWorldUtility*>::findGlobalModule();
-		delayTimer = new cMessage("delay-timer", SEND_BROADCAST_TIMER);
+//		delayTimer = new cMessage("delay-timer", SEND_SYNC_TIMER);
 
 		arp = FindModule<BaseArp*>::findSubModule(findHost());
 		myNetwAddr = arp->myNetwAddr(this);
@@ -38,27 +38,19 @@ void NodeAppLayer::initialize(int stage)
 
 		packetLength = par("packetLength");
 		packetTime = par("packetTime");
-		pppt = par("packetsPerPacketTime");
-		burstSize = par("burstSize");
 		destination = par("destination");
 
 		nbPacketDropped = 0;
 
-		Packet p(1);
-		catPacket = world->getCategory(&p);
 	} else if (stage == 1) {
-		if(burstSize > 0) {
-			remainingBurst = burstSize;
-			scheduleAt(dblrand() * packetTime * burstSize / pppt, delayTimer);
-		}
-        (cc->findNic(getId()+1))->moduleType = 2;
+		(cc->findNic(getParentModule()->findSubmodule("nic")))->moduleType = 2;
 	} else {
 
 	}
 }
 
 NodeAppLayer::~NodeAppLayer() {
-	cancelAndDelete(delayTimer);
+//	cancelAndDelete(delayTimer);
 }
 
 
@@ -69,36 +61,45 @@ void NodeAppLayer::finish()
 
 void NodeAppLayer::handleSelfMsg(cMessage *msg)
 {
-	switch( msg->getKind() )
-	{
-	case SEND_BROADCAST_TIMER:
-		assert(msg == delayTimer);
-
-
-		sendBroadcast();
-
-		remainingBurst--;
-
-		if(remainingBurst == 0) {
-			//remainingBurst = burstSize;
-			EV << "Se acabo" <<endl;
-			scheduleAt(simTime() + (dblrand()*1.4+0.3)*packetTime * burstSize / pppt, msg);
-		} else {
-			scheduleAt(simTime() + packetTime * 2, msg);
-		}
-
-		break;
-	default:
-		EV << "Unkown selfmessage! -> delete, kind: "<<msg->getKind() <<endl;
-		delete msg;
-	}
+//	switch( msg->getKind() )
+//	{
+//	case SEND_SYNC_TIMER:
+//		assert(msg == delayTimer);
+//
+//
+//		sendBroadcast();
+//
+//		remainingBurst--;
+//
+//		if(remainingBurst == 0) {
+//			//remainingBurst = burstSize;
+//			EV << "Se acabo" <<endl;
+//			scheduleAt(simTime() + (dblrand()*1.4+0.3)*packetTime * burstSize / pppt, msg);
+//		} else {
+//			scheduleAt(simTime() + packetTime * 2, msg);
+//		}
+//
+//		break;
+//	default:
+//		EV << "Unkown selfmessage! -> delete, kind: "<<msg->getKind() <<endl;
+//		delete msg;
+//	}
 }
 
 
 void NodeAppLayer::handleLowerMsg(cMessage *msg)
 {
-	Packet p(packetLength, 1, 0);
-	world->publishBBItem(catPacket, &p, -1);
+//	Packet p(packetLength, 1, 0);
+//	world->publishBBItem(catPacket, &p, -1);
+
+	switch( msg->getKind() )
+	{
+	case SYNC_MESSAGE:
+		EV << "Lowermessage " << msg->getName() << " received in Appl Layer in Node " << this->getId() << endl;
+		break;
+	default:
+		EV << "Unkown lowermessage! -> delete, kind: "<< msg->getKind() << endl;
+	}
 
 	delete msg;
 	msg = 0;
@@ -116,17 +117,17 @@ void NodeAppLayer::handleLowerControl(cMessage *msg)
 
 void NodeAppLayer::sendBroadcast()
 {
-	NetwPkt *pkt = new NetwPkt("BROADCAST_MESSAGE", BROADCAST_MESSAGE);
-	pkt->setBitLength(packetLength);
-
-	pkt->setSrcAddr(myNetwAddr);
-	pkt->setDestAddr(destination);
-
-	pkt->setControlInfo(new NetwToMacControlInfo(destination));
-
-	Packet p(packetLength, 0, 1);
-	world->publishBBItem(catPacket, &p, -1);
-
-	sendDown(pkt);
+//	NetwPkt *pkt = new NetwPkt("BROADCAST_MESSAGE", BROADCAST_MESSAGE);
+//	pkt->setBitLength(packetLength);
+//
+//	pkt->setSrcAddr(myNetwAddr);
+//	pkt->setDestAddr(destination);
+//
+//	pkt->setControlInfo(new NetwToMacControlInfo(destination));
+//
+//	Packet p(packetLength, 0, 1);
+//	world->publishBBItem(catPacket, &p, -1);
+//
+//	sendDown(pkt);
 }
 

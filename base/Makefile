@@ -73,7 +73,8 @@ OBJS = \
     $O/messages/BorderMsg_m.o \
     $O/messages/MacPkt_m.o \
     $O/messages/ChannelSenseRequest_m.o \
-    $O/messages/NetwPkt_m.o
+    $O/messages/NetwPkt_m.o \
+    $O/messages/SyncPkt_m.o
 
 # Message files
 MSGFILES = \
@@ -82,7 +83,8 @@ MSGFILES = \
     messages/BorderMsg.msg \
     messages/MacPkt.msg \
     messages/ChannelSenseRequest.msg \
-    messages/NetwPkt.msg
+    messages/NetwPkt.msg \
+    messages/SyncPkt.msg
 
 #------------------------------------------------------------------------------
 
@@ -261,19 +263,21 @@ $O/messages/AirFrame_m.o: messages/AirFrame_m.cc \
 	phyLayer/MappingUtils.h \
 	messages/AirFrame_m.h \
 	utils/FWMath.h
+$O/messages/ChannelSenseRequest_m.o: messages/ChannelSenseRequest_m.cc \
+	phyLayer/ChannelState.h \
+	messages/ChannelSenseRequest_m.h
+$O/messages/SyncPkt_m.o: messages/SyncPkt_m.cc \
+	messages/SyncPkt_m.h
+$O/messages/ApplPkt_m.o: messages/ApplPkt_m.cc \
+	messages/ApplPkt_m.h
 $O/messages/MacPkt_m.o: messages/MacPkt_m.cc \
 	messages/MacPkt_m.h
 $O/messages/NetwPkt_m.o: messages/NetwPkt_m.cc \
 	messages/NetwPkt_m.h
-$O/messages/ChannelSenseRequest_m.o: messages/ChannelSenseRequest_m.cc \
-	phyLayer/ChannelState.h \
-	messages/ChannelSenseRequest_m.h
 $O/messages/BorderMsg_m.o: messages/BorderMsg_m.cc \
 	utils/Coord.h \
 	messages/BorderMsg_m.h \
 	utils/FWMath.h
-$O/messages/ApplPkt_m.o: messages/ApplPkt_m.cc \
-	messages/ApplPkt_m.h
 $O/modules/BaseUtility.o: modules/BaseUtility.cc \
 	utils/ImNotifiable.h \
 	modules/Blackboard.h \

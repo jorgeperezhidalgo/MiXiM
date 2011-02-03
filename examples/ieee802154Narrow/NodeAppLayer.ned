@@ -22,9 +22,8 @@ simple NodeAppLayer
 {
     parameters:
         double packetTime @unit(s);
-        double packetsPerPacketTime;
         bool debug; // debug switch
-        int burstSize = default(1);
+        int phaseRepetitionNumber = default(-1); // How many full phases should we do
     	int packetLength @unit("bit"); // length of the generated packet (in bits)
     	int destination = default(-1);
     gates:

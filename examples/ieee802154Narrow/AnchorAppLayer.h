@@ -16,7 +16,7 @@
 #ifndef ANCHORAPPLAYER_H_
 #define ANCHORAPPLAYER_H_
 
-#include "NetwPkt_m.h"
+#include "SyncPkt_m.h"
 #include "SimpleAddress.h"
 #include "BaseLayer.h"
 #include "BaseArp.h"
@@ -37,20 +37,33 @@ public:
 
 	enum TrafficGenMessageKinds{
 
-		SEND_BROADCAST_TIMER = 1,
-		BROADCAST_MESSAGE
+		SEND_SYNC_TIMER = 1,
+		SYNC_MESSAGE
 	};
 
 protected:
 
 	int packetLength;
 	simtime_t packetTime;
-	double pppt;
-	int burstSize;
-	int remainingBurst;
+	int phaseRepetitionNumber;
+	int syncPacketsPerSyncPhase; // Determines how many times do we repeat all the slots per sync phase
+	int syncPacketsPerSyncPhaseCounter; // In which of the repetitions are we already
+	int syncPhaseNumber; //To identify in which of the 3 sync phases are we inside the fullphase
+	int numSlots;
 	long destination;
 	int anchorType;
 	int numAnchors;
+	simtime_t syncPacketTime;
+	simtime_t fullPhaseTime;
+	simtime_t timeComSinkPhase;
+	simtime_t timeSyncPhase;
+	simtime_t timeReportPhase;
+	simtime_t timeVIPPhase;
+	double phase2VIPPercentage;
+	int scheduledSlot; //When a node has assigned more than 1 slot, we have to create a new entry in the same sync phase
+	simtime_t lastPhaseStart;
+	NicEntry* anchor;
+
 
 	int catPacket;
 
@@ -72,7 +85,7 @@ public:
 
 	virtual void initialize(int stage);
 
-	virtual int numInitStages() const {return 4;}
+	virtual int numInitStages() const {return 5;}
 
 	virtual void finish();
 

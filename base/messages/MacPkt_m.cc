@@ -37,6 +37,7 @@ MacPkt::MacPkt(const char *name, int kind) : cPacket(name,kind)
     this->destAddr_var = 0;
     this->srcAddr_var = 0;
     this->sequenceId_var = 0;
+    this->csmaActive_var = 0;
 }
 
 MacPkt::MacPkt(const MacPkt& other) : cPacket()
@@ -56,6 +57,7 @@ MacPkt& MacPkt::operator=(const MacPkt& other)
     this->destAddr_var = other.destAddr_var;
     this->srcAddr_var = other.srcAddr_var;
     this->sequenceId_var = other.sequenceId_var;
+    this->csmaActive_var = other.csmaActive_var;
     return *this;
 }
 
@@ -65,6 +67,7 @@ void MacPkt::parsimPack(cCommBuffer *b)
     doPacking(b,this->destAddr_var);
     doPacking(b,this->srcAddr_var);
     doPacking(b,this->sequenceId_var);
+    doPacking(b,this->csmaActive_var);
 }
 
 void MacPkt::parsimUnpack(cCommBuffer *b)
@@ -73,6 +76,7 @@ void MacPkt::parsimUnpack(cCommBuffer *b)
     doUnpacking(b,this->destAddr_var);
     doUnpacking(b,this->srcAddr_var);
     doUnpacking(b,this->sequenceId_var);
+    doUnpacking(b,this->csmaActive_var);
 }
 
 long MacPkt::getDestAddr() const
@@ -103,6 +107,16 @@ long MacPkt::getSequenceId() const
 void MacPkt::setSequenceId(long sequenceId_var)
 {
     this->sequenceId_var = sequenceId_var;
+}
+
+bool MacPkt::getCsmaActive() const
+{
+    return csmaActive_var;
+}
+
+void MacPkt::setCsmaActive(bool csmaActive_var)
+{
+    this->csmaActive_var = csmaActive_var;
 }
 
 class MacPktDescriptor : public cClassDescriptor
@@ -152,7 +166,7 @@ const char *MacPktDescriptor::getProperty(const char *propertyname) const
 int MacPktDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 3+basedesc->getFieldCount(object) : 3;
+    return basedesc ? 4+basedesc->getFieldCount(object) : 4;
 }
 
 unsigned int MacPktDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -167,8 +181,9 @@ unsigned int MacPktDescriptor::getFieldTypeFlags(void *object, int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
 }
 
 const char *MacPktDescriptor::getFieldName(void *object, int field) const
@@ -183,8 +198,9 @@ const char *MacPktDescriptor::getFieldName(void *object, int field) const
         "destAddr",
         "srcAddr",
         "sequenceId",
+        "csmaActive",
     };
-    return (field>=0 && field<3) ? fieldNames[field] : NULL;
+    return (field>=0 && field<4) ? fieldNames[field] : NULL;
 }
 
 int MacPktDescriptor::findField(void *object, const char *fieldName) const
@@ -194,6 +210,7 @@ int MacPktDescriptor::findField(void *object, const char *fieldName) const
     if (fieldName[0]=='d' && strcmp(fieldName, "destAddr")==0) return base+0;
     if (fieldName[0]=='s' && strcmp(fieldName, "srcAddr")==0) return base+1;
     if (fieldName[0]=='s' && strcmp(fieldName, "sequenceId")==0) return base+2;
+    if (fieldName[0]=='c' && strcmp(fieldName, "csmaActive")==0) return base+3;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -209,8 +226,9 @@ const char *MacPktDescriptor::getFieldTypeString(void *object, int field) const
         "long",
         "long",
         "long",
+        "bool",
     };
-    return (field>=0 && field<3) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<4) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *MacPktDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -253,6 +271,7 @@ std::string MacPktDescriptor::getFieldAsString(void *object, int field, int i) c
         case 0: return long2string(pp->getDestAddr());
         case 1: return long2string(pp->getSrcAddr());
         case 2: return long2string(pp->getSequenceId());
+        case 3: return bool2string(pp->getCsmaActive());
         default: return "";
     }
 }
@@ -270,6 +289,7 @@ bool MacPktDescriptor::setFieldAsString(void *object, int field, int i, const ch
         case 0: pp->setDestAddr(string2long(value)); return true;
         case 1: pp->setSrcAddr(string2long(value)); return true;
         case 2: pp->setSequenceId(string2long(value)); return true;
+        case 3: pp->setCsmaActive(string2bool(value)); return true;
         default: return false;
     }
 }
@@ -286,8 +306,9 @@ const char *MacPktDescriptor::getFieldStructName(void *object, int field) const
         NULL,
         NULL,
         NULL,
+        NULL,
     };
-    return (field>=0 && field<3) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<4) ? fieldStructNames[field] : NULL;
 }
 
 void *MacPktDescriptor::getFieldStructPointer(void *object, int field, int i) const

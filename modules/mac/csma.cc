@@ -116,7 +116,7 @@ void csma::initialize(int stage) {
 		macState = IDLE_1;
 		txAttempts = 0;
 
-	} else if(stage == 1) {
+	} else if(stage == 2) {
 		BaseConnectionManager* cc = getConnectionManager();
 
     	if(cc->hasPar("pMax") && txPower > cc->par("pMax").doubleValue())
@@ -128,6 +128,10 @@ void csma::initialize(int stage) {
 		<< " backoff method = " << par("backoffMethod").stringValue() << endl;
 
 		EV << "finished csma init stage 1." << endl;
+
+		anchor = true;
+		if (((cc->findNic(getParentModule()->getId()))->moduleType) == 2)
+			anchor = false;
 	}
 }
 
@@ -171,10 +175,10 @@ void csma::handleUpperMsg(cMessage *msg) {
 	//MacPkt *macPkt = encapsMsg(msg);
 	MacPkt *macPkt = new MacPkt(msg->getName());
 	macPkt->setBitLength(headerLength);
-	NetwToMacControlInfo* cInfo =
-			static_cast<NetwToMacControlInfo*> (msg->removeControlInfo());
+	NetwToMacControlInfo* cInfo = static_cast<NetwToMacControlInfo*> (msg->removeControlInfo());
 	EV<<"CSMA received a message from upper layer, name is " << msg->getName() <<", CInfo removed, mac addr="<< cInfo->getNextHopMac()<<endl;
 	int dest = cInfo->getNextHopMac();
+	macPkt->setCsmaActive(cInfo->getCsmaActive());
 	macPkt->setDestAddr(dest);
 	delete cInfo;
 	macPkt->setSrcAddr(myMacAddr);
@@ -196,6 +200,7 @@ void csma::handleUpperMsg(cMessage *msg) {
 	//RadioAccNoise3PhyControlInfo *pco = new RadioAccNoise3PhyControlInfo(bitrate);
 	//macPkt->setControlInfo(pco);
 	assert(static_cast<cPacket*>(msg));
+	EV <<"pkt preencapsulated, length: " << macPkt->getBitLength() << "\n";
 	macPkt->encapsulate(static_cast<cPacket*>(msg));
 	EV <<"pkt encapsulated, length: " << macPkt->getBitLength() << "\n";
 	executeMac(EV_SEND_REQUEST, macPkt);
@@ -206,11 +211,19 @@ void csma::updateStatusIdle(t_mac_event event, cMessage *msg) {
 	case EV_SEND_REQUEST:
 		if (macQueue.size() <= queueLength) {
 			macQueue.push_back(static_cast<MacPkt *> (msg));
-			EV<<"(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> BACKOFF." << endl;
 			updateMacState(BACKOFF_2);
-			NB = 0;
 			//BE = macMinBE;
-			startTimer(TIMER_BACKOFF);
+			if (anchor && !((static_cast<MacPkt *> (msg))->getCsmaActive()))
+			{
+				EV<<"(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> No BACKOFF." << endl;
+				scheduleAt(simTime(), backoffTimer);
+			}
+			else
+			{
+				EV<<"(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> BACKOFF." << endl;
+				startTimer(TIMER_BACKOFF);
+				NB = 0;
+			}
 		} else {
 			// queue is full, message has to be deleted
 			EV << "(12) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff not avail]: dropping packet -> IDLE." << endl;
@@ -263,6 +276,7 @@ void csma::updateStatusBackoff(t_mac_event event, cMessage *msg) {
 		<< " starting CCA timer." << endl;
 		startTimer(TIMER_CCA);
 		updateMacState(CCA_3);
+		EV<< "Estado de la Radio: " << phy->getRadioState()<<endl;
 		phy->setRadioState(Radio::RX);
 		break;
 	case EV_DUPLICATE_RECEIVED:
@@ -316,6 +330,7 @@ void csma::updateStatusBackoff(t_mac_event event, cMessage *msg) {
 
 void csma::attachSignal(MacPkt* mac, simtime_t startTime) {
 	simtime_t duration = (mac->getBitLength() + phyHeaderLength)/bitrate;
+	EV << "Tamaño: " << mac->getBitLength() + phyHeaderLength <<", Duracion: " << duration<<endl;
 	Signal* s = createSignal(startTime, duration, txPower, bitrate);
 	MacToPhyControlInfo* cinfo = new MacToPhyControlInfo(s);
 
@@ -345,8 +360,20 @@ void csma::updateStatusCCA(t_mac_event event, cMessage *msg) {
 			NB = NB+1;
 			//BE = std::min(BE+1, macMaxBE);
 
-			// decide if we go for another backoff or if we drop the frame.
-			if(NB> macMaxCSMABackoffs) {
+			// decide if we go for another backoff or if we drop the frame
+			// if csma deactivated we drop the packet directly
+			if (anchor && !((static_cast<MacPkt *> (msg))->getCsmaActive())) {
+				// drop the frame
+				EV << "Channel busy and CSMA disabled. Dropping the packet." << endl;
+				cMessage * mac = macQueue.front();
+				macQueue.pop_front();
+				txAttempts = 0;
+				nbDroppedFrames++;
+				mac->setName("MAC ERROR");
+				mac->setKind(PACKET_DROPPED);
+				sendControlUp(mac);
+				manageQueue();
+			} else if(NB> macMaxCSMABackoffs) {
 				// drop the frame
 				EV << "Tried " << NB << " backoffs, all reported a busy "
 				<< "channel. Dropping the packet." << endl;
@@ -440,7 +467,9 @@ void csma::updateStatusTransmitFrame(t_mac_event event, cMessage *msg) {
 		} else {
 			EV << ": RadioSetupRx, manageQueue..." << endl;
 			macQueue.pop_front();
-			delete packet;
+			packet->setName("SYNC SENT");
+			packet->setKind(SYNC_SENT);
+			sendControlUp(packet);
 			manageQueue();
 		}
 	} else {
@@ -457,7 +486,7 @@ void csma::updateStatusWaitAck(t_mac_event event, cMessage *msg) {
 		EV<< "(5) FSM State WAITACK_5, EV_ACK_RECEIVED: "
 		<< " ProcessAck, manageQueue..." << endl;
 		if(rxAckTimer->isScheduled())
-		cancelEvent(rxAckTimer);
+			cancelEvent(rxAckTimer);
 		mac = static_cast<cMessage *>(macQueue.front());
 		macQueue.pop_front();
 		txAttempts = 0;
@@ -672,7 +701,12 @@ double csma::scheduleBackoff() {
 		int BE = std::min(macMinBE + NB, macMaxBE);
 		double d = std::pow((double) 2, (int) BE);
 		int v = (int) d - 1;
-		int r = intuniform(1, v, 0);
+		int r;
+		if (v != 0)
+			r = intuniform(1, v, 0);
+		else
+			r = 0;
+
 		backoffTime = r * aUnitBackoffPeriod.dbl();
 
 		EV<< "(startTimer) backoffTimer value=" << backoffTime

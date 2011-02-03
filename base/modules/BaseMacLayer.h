@@ -55,6 +55,8 @@ public:
 		TX_OVER = 23500,
 		/** Tells the netw layer that a packet to be sent has been dropped.*/
 		PACKET_DROPPED,
+		/** Indicates that the Sync Broadcast was sent*/
+		SYNC_SENT,
 		/** Stores the id on which classes extending BaseMac should
 		 * continue their own control kinds.*/
 		LAST_BASE_MAC_CONTROL_KIND,

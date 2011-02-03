@@ -22,12 +22,14 @@ simple AnchorAppLayer
 {
     parameters:
         double packetTime @unit(s);
-        double packetsPerPacketTime;
         bool debug; // debug switch
-        int burstSize = default(1);
+        int phaseRepetitionNumber = default(-1); // How many full phases should we do
+        int syncPacketsPerSyncPhase = default(4); // How many sync packets to send every sync phase
     	int packetLength @unit("bit"); // length of the generated packet (in bits)
     	int destination = default(-1);
     	int anchorType = default(1); // 1 es un anchor normal, 3 es el anchor computador que calcula todo
+    	double syncPacketTime @unit(s) = default(1.5ms); 
+    	double phase2VIPPercentage = default(0.4);
     gates:
     	input lowerGateIn; // from NIC
         output lowerGateOut; // to NIC
