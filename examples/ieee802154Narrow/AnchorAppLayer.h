@@ -62,8 +62,12 @@ protected:
 	double phase2VIPPercentage;
 	int scheduledSlot; //When a node has assigned more than 1 slot, we have to create a new entry in the same sync phase
 	simtime_t lastPhaseStart;
+	simtime_t nextSyncSend;
 	NicEntry* anchor;
 
+	bool syncInSlot; // Indicates if the sync packets have to be slotted or not
+   	simtime_t syncFirstMaxRandomTime; // First maximum time an anchor must wait to transmit the first sync packet in no slotted mode
+   	simtime_t syncRestMaxRandomTimes; // Rest of maximum times an anchor must wait to transmit the rest of the sync packets in no slotted mode
 
 	int catPacket;
 

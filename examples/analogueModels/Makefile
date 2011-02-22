@@ -40,7 +40,7 @@ PROJECTRELATIVE_PATH = examples/analogueModels
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
-OBJS = $O/SamplePhyLayer.o $O/SimpleMacLayer.o $O/RandomFreqTimeModel.o $O/RandomFrequencyOnlyModel.o
+OBJS = $O/RandomFrequencyOnlyModel.o $O/SamplePhyLayer.o $O/RandomFreqTimeModel.o $O/SimpleMacLayer.o
 
 # Message files
 MSGFILES =

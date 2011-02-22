@@ -49,6 +49,12 @@ void AnchorAppLayer::initialize(int stage)
 		scheduledSlot = 0;
 		phase2VIPPercentage = par("phase2VIPPercentage");
 
+		syncInSlot = par("syncInSlot");
+	   	//syncFirstMaxRandomTime = par("syncFirstMaxRandomTime");
+		// Cambio temporal
+		syncFirstMaxRandomTime = par("syncRestMaxRandomTimes");
+	   	syncRestMaxRandomTimes = par("syncRestMaxRandomTimes");
+
 		fullPhaseTime = getParentModule()->getParentModule()->par("fullPhaseTime");
 		timeComSinkPhase = getParentModule()->getParentModule()->par("timeComSinkPhase");
 
@@ -59,7 +65,7 @@ void AnchorAppLayer::initialize(int stage)
 	} else if (stage == 1) {
 		anchor = cc->findNic(getParentModule()->findSubmodule("nic"));
         anchor->moduleType = anchorType;
-	} else if (stage == 3) {
+	} else if (stage == 3 && syncInSlot) {
 		if (anchorType == 3) { //Only if the anchor is the computer
 			BaseConnectionManager::NicEntries& anchorList = cc->getAnchorsList();
 			numAnchors = anchorList.size();
@@ -196,15 +202,15 @@ void AnchorAppLayer::initialize(int stage)
 			}
 		}
 		timeSyncPhase = anchor->numTotalSlots * syncPacketTime ;
-        timeVIPPhase = (fullPhaseTime - (2 * timeComSinkPhase) - (3 * syncPacketsPerSyncPhase * timeSyncPhase)) * phase2VIPPercentage;
-        timeReportPhase = (fullPhaseTime - (2 * timeComSinkPhase) - (3 * syncPacketsPerSyncPhase * timeSyncPhase)) * (1 - phase2VIPPercentage);
-        EV << "T Report: " << timeReportPhase << endl;
-        EV << "T VIP: " << timeVIPPhase << endl;
+		timeVIPPhase = (fullPhaseTime - (2 * timeComSinkPhase) - (3 * syncPacketsPerSyncPhase * timeSyncPhase)) * phase2VIPPercentage;
+		timeReportPhase = (fullPhaseTime - (2 * timeComSinkPhase) - (3 * syncPacketsPerSyncPhase * timeSyncPhase)) * (1 - phase2VIPPercentage);
+		EV << "T Report: " << timeReportPhase << endl;
+		EV << "T VIP: " << timeVIPPhase << endl;
 	}
 	else if (stage == 4)
 	{
 		delayTimer = new cMessage("delay-timer", SEND_SYNC_TIMER);
-		if (phaseRepetitionNumber != 0)
+		if (phaseRepetitionNumber != 0 && syncInSlot)
 		{
 			lastPhaseStart = simTime();
 			scheduleAt(lastPhaseStart + (anchor->transmisionSlot[scheduledSlot] * syncPacketTime), delayTimer);
@@ -238,8 +244,12 @@ void AnchorAppLayer::initialize(int stage)
 					}
 				}
 			}
+			EV <<"Time for next Sync Packet "<< lastPhaseStart<<endl;
 		}
-		EV <<"Time for next Sync Packet "<< lastPhaseStart<<endl;
+		else
+		{
+			scheduleAt(simTime() + uniform(0, syncFirstMaxRandomTime, 0), delayTimer);
+		}
 	}
 }
 
@@ -296,6 +306,7 @@ AnchorAppLayer::~AnchorAppLayer() {
 void AnchorAppLayer::finish()
 {
 	recordScalar("dropped", nbPacketDropped);
+
 }
 
 void AnchorAppLayer::handleSelfMsg(cMessage *msg)
@@ -307,7 +318,7 @@ void AnchorAppLayer::handleSelfMsg(cMessage *msg)
 
 		sendBroadcast();
 
-		if (phaseRepetitionNumber != 0)
+		if (phaseRepetitionNumber != 0 && syncInSlot)
 		{
 			scheduleAt(lastPhaseStart + (anchor->transmisionSlot[scheduledSlot] * syncPacketTime), delayTimer);
 
@@ -340,8 +351,12 @@ void AnchorAppLayer::handleSelfMsg(cMessage *msg)
 					}
 				}
 			}
+			EV <<"Time for next Sync Packet "<< lastPhaseStart<<endl;
 		}
-		EV <<"Time for next Sync Packet "<< lastPhaseStart<<endl;
+		else
+		{
+
+		}
 		break;
 	default:
 		EV << "Unkown selfmessage! -> delete, kind: "<<msg->getKind() <<endl;
@@ -364,8 +379,18 @@ void AnchorAppLayer::handleLowerControl(cMessage *msg)
 {
 	if(msg->getKind() == BaseMacLayer::PACKET_DROPPED) {
 		nbPacketDropped++;
+		nextSyncSend = uniform(0, syncRestMaxRandomTimes, 0);
+		EV << "El envio del mensaje de sync ha fallado. Enviando otra vez mensaje " << syncPacketsPerSyncPhaseCounter << " de " << syncPacketsPerSyncPhase << " en " << nextSyncSend <<"s." << endl;
+		scheduleAt(simTime() + nextSyncSend, delayTimer);
 	} else if (msg->getKind() == BaseMacLayer::SYNC_SENT) {
-		EV << "El mensaje de sync se ha enviado correctamente." << endl;
+		syncPacketsPerSyncPhaseCounter++;
+		EV << "El mensaje de sync se ha enviado correctamente.";
+		if (syncPacketsPerSyncPhaseCounter <= syncPacketsPerSyncPhase) {
+			nextSyncSend = uniform(0, syncRestMaxRandomTimes, 0);
+			EV << "Enviando " << syncPacketsPerSyncPhaseCounter << " de " << syncPacketsPerSyncPhase << " en " << nextSyncSend <<"s.";
+			scheduleAt(simTime() + nextSyncSend, delayTimer);
+		}
+		EV << endl;
 	}
 	delete msg;
 	msg = 0;
@@ -379,7 +404,12 @@ void AnchorAppLayer::sendBroadcast()
 //	pkt->setSrcAddr(myNetwAddr);
 //	pkt->setDestAddr(destination);
 
+	//It doesn't matter if we have slotted version or not, CSMA must be disabled, we control random time and retransmision in app layer
+
 	pkt->setControlInfo(new NetwToMacControlInfo(destination,false));
+
+	pkt->setSequenceId(syncPacketsPerSyncPhaseCounter);
+
 
 
 //	Packet p(packetLength, 0, 1);

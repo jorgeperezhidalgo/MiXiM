@@ -32,58 +32,58 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
 OBJS = \
-    $O/connectionManager/NicEntryDirect.o \
     $O/connectionManager/ChannelAccess.o \
+    $O/connectionManager/BaseConnectionManager.o \
+    $O/connectionManager/NicEntryDirect.o \
     $O/connectionManager/ConnectionManager.o \
     $O/connectionManager/NicEntryDebug.o \
-    $O/connectionManager/BaseConnectionManager.o \
-    $O/modules/BaseModule.o \
-    $O/modules/BaseApplLayer.o \
-    $O/modules/BatteryAccess.o \
-    $O/modules/BaseWorldUtility.o \
     $O/modules/Blackboard.o \
     $O/modules/BaseBattery.o \
-    $O/modules/TestApplLayer.o \
-    $O/modules/BaseUtility.o \
-    $O/modules/BaseMobility.o \
-    $O/modules/BaseArp.o \
     $O/modules/BaseNetwLayer.o \
-    $O/modules/BaseLayer.o \
     $O/modules/BaseMacLayer.o \
-    $O/phyLayer/BaseDecider.o \
-    $O/phyLayer/PhyUtils.o \
-    $O/phyLayer/ChannelState.o \
-    $O/phyLayer/Signal.o \
-    $O/phyLayer/BasePhyLayer.o \
+    $O/modules/BaseModule.o \
+    $O/modules/BaseUtility.o \
+    $O/modules/TestApplLayer.o \
+    $O/modules/BaseWorldUtility.o \
+    $O/modules/BaseArp.o \
+    $O/modules/BatteryAccess.o \
+    $O/modules/BaseLayer.o \
+    $O/modules/BaseMobility.o \
+    $O/modules/BaseApplLayer.o \
     $O/phyLayer/Decider.o \
-    $O/phyLayer/ChannelInfo.o \
     $O/phyLayer/MappingBase.o \
+    $O/phyLayer/BasePhyLayer.o \
     $O/phyLayer/MappingUtils.o \
-    $O/timers/RepeatTimerCore.o \
-    $O/timers/Timer.o \
-    $O/timers/TimerCore.o \
+    $O/phyLayer/BaseDecider.o \
+    $O/phyLayer/ChannelInfo.o \
+    $O/phyLayer/ChannelState.o \
+    $O/phyLayer/PhyUtils.o \
+    $O/phyLayer/Signal.o \
     $O/timers/RepeatTimer.o \
+    $O/timers/Timer.o \
     $O/timers/GlobalTime.o \
-    $O/timers/FrameTimer.o \
+    $O/timers/RepeatTimerCore.o \
+    $O/timers/TimerCore.o \
     $O/timers/FrameTimerGenerator.o \
-    $O/utils/winsupport.o \
+    $O/timers/FrameTimer.o \
     $O/utils/Coord.o \
+    $O/utils/winsupport.o \
     $O/messages/AirFrame_m.o \
+    $O/messages/ChannelSenseRequest_m.o \
+    $O/messages/NetwPkt_m.o \
     $O/messages/ApplPkt_m.o \
     $O/messages/BorderMsg_m.o \
     $O/messages/MacPkt_m.o \
-    $O/messages/ChannelSenseRequest_m.o \
-    $O/messages/NetwPkt_m.o \
     $O/messages/SyncPkt_m.o
 
 # Message files
 MSGFILES = \
     messages/AirFrame.msg \
+    messages/ChannelSenseRequest.msg \
+    messages/NetwPkt.msg \
     messages/ApplPkt.msg \
     messages/BorderMsg.msg \
     messages/MacPkt.msg \
-    messages/ChannelSenseRequest.msg \
-    messages/NetwPkt.msg \
     messages/SyncPkt.msg
 
 #------------------------------------------------------------------------------

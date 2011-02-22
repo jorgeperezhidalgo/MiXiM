@@ -36,6 +36,8 @@
 #include "BaseMacLayer.h"
 #include <DroppedPacket.h>
 #include <MacPkt_m.h>
+#include "SyncPkt_m.h"
+
 
 
 /**
@@ -199,6 +201,8 @@ class  csma : public BaseMacLayer
     simtime_t rxSetupTime;
     /** @brief Time to switch radio from Rx to Tx state */
     simtime_t aTurnaroundTime;
+    // Time to leave between end of packet and start of the next one according to standard
+    simtime_t LIFS;
     /** @brief maximum number of backoffs before frame drop */
     int macMaxCSMABackoffs;
     /** @brief maximum number of frame retransmissions without ack */

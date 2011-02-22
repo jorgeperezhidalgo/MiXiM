@@ -20,6 +20,8 @@
  * <pre>
  * packet SyncPkt
  * {
+ * 	int sequenceId = 0;
+ * 	int srcAddr = 0;
  *     	int8 status = 0;
  * 	int16 posX = 0;
  * 	int16 posY = 0;
@@ -31,6 +33,8 @@
 class SyncPkt : public ::cPacket
 {
   protected:
+    int sequenceId_var;
+    int srcAddr_var;
     int8 status_var;
     int16 posX_var;
     int16 posY_var;
@@ -50,6 +54,10 @@ class SyncPkt : public ::cPacket
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
+    virtual int getSequenceId() const;
+    virtual void setSequenceId(int sequenceId_var);
+    virtual int getSrcAddr() const;
+    virtual void setSrcAddr(int srcAddr_var);
     virtual int8 getStatus() const;
     virtual void setStatus(int8 status_var);
     virtual int16 getPosX() const;

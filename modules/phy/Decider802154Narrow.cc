@@ -33,8 +33,9 @@ double Decider802154Narrow::evalBER(AirFrame* frame) {
 
 	delete noise;
 
-	return std::max(0.5 * exp(-rcvPower / (2 * noiseLevel)),
-			DEFAULT_BER_LOWER_BOUND);
+//	return std::max(0.5 * exp(-rcvPower / (2 * noiseLevel)),
+//			DEFAULT_BER_LOWER_BOUND);
+	return 0; //Apaño de Jorge
 }
 
 simtime_t Decider802154Narrow::processNewSignal(AirFrame* frame) {
@@ -121,6 +122,8 @@ simtime_t Decider802154Narrow::processSignalEnd(AirFrame* frame)
 
 
 			ber = std::max(getBERFromSNR(snr), BER_LOWER_BOUND);
+			if (channel.size() == 1) //Apaño de Jorge
+				ber = 0;			 //Apaño de Jorge
 			avgBER = ber*nbBits;
 			snirAvg = snirAvg + snr*snrDuration.dbl();
 

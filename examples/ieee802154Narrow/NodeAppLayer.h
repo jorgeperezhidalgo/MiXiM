@@ -16,7 +16,8 @@
 #ifndef NODEAPPLAYER_H_
 #define NODEAPPLAYER_H_
 
-#include "NetwPkt_m.h"
+#include "SyncPkt_m.h"
+//#include "NetwPkt_m.h"
 #include "SimpleAddress.h"
 #include "BaseLayer.h"
 #include "BaseArp.h"
@@ -50,6 +51,7 @@ protected:
 	int catPacket;
 
 	long nbPacketDropped;
+	cOutVector vReceivedPacketsSource;
 
 
 	BaseArp* arp;

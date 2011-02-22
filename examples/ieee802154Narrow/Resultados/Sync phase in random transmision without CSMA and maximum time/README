@@ -1,0 +1,42 @@
+In this cases we simulated 6 anchor with 1 mobile node. The Anchors are located one time altogether to avoid hidden terminal problem, and the other time separated to generate hidden terminal problem.
+
+The errors caused by noise or simply random error due to the channel transmision are disabled to have only cca simultanieus problems and hidden terminal problems, like this we can be sure all the packets we transmit are caused by this problems. Para volver a poner esto normal, buscar el comentario //Apaño Jorge y quitar lo añadido 
+
+We disabled CSMA and enabled a random time to wait in app layer, this random time goes from 1 to 30, here we get the 30 simulations. Each of this simulations is done 1000 times to avoid the random.
+
+As we disabled the CSMA, we have to add a LIFS time to respect the standard time between the end of transmision of a packet to the beggining of the next packet. This time was previously not necesary as the first backoff time was bigger.
+
+---------------------------
+COMENTARIOS DE LAS GRAFICAS
+---------------------------
+
+Gráfica Received packets and last packet arrival
+------------------------------------------------
+
+El rojo se compara con el naranja, en ambos la trayectoria es ascendente tendiendo a 24 (número total de paquetes mandados) en el infinito. Se puede observar que cuando no hay problema de Hidden Terminal Problem (en rojo), el número de paquetes que recibe el nodo móvil es muy superior a cuando sí que hay este problema (en naranja), esto es debido a las colisiones creadas por este problema.
+
+A la vez se representa en la gráfica el tiempo medio de llegada (de las 1000 simulaciones) del último paquete, no es el 24º paquete, pues mucho se pierden por las colisiones o bien del hidden terminal problem o bien cuando los anchor realizan CCA a la vez. Se puede ver que los tiempos en el azul oscuro (sin hidden terminal problem) son superiores a los tiempos en el azul claro (con hidden terminal problem), esto se debe a que al no haber hidden terminal problem, como se dijo antes, llegan más paquetes al nodo móvil y por tanto el último tarda más.
+
+Gráfica Average time between arrivals
+-------------------------------------
+
+Esta gráfica representa el tiempo medio entre las llegadas de paquetes consecutivos (de cualquier AN) en el nodo móvil, tanto para el caso con problema de terminal oculto (azul) como para el caso en el que se evita este problema (rojo). La lógica dice que segun subimos el tiempo medio entre envios de paquetes por parte de un AN (eje x), el tiempo medio entre llegadas en el nodo móvil debería subir, pero porque al principio hay esta variació? Es debida a las colisiones provocadas por el CCA o el CCA y el hidden terminal problem según corresponda, esto hace que si bien el paquete se mandó rápido comparado con la parte derecha de la gráfica, este paquete nunca llegó debido a las colisiones, llegando por tanto alguno enviado más tarde, es por ello que al principio cuesta mucho tiempo que un paquete llegue, cada vez menos hasta que llega a un mínimo donde el tiempo de espera entre envios por parte de los AN empieza a jugar un papel importante y vuelve a crecer la gráfico como la lógica indicaba. La gráfica con hidden terminal problem registra tiempos superiores ya que a parte del problema del CCA, tenemos el hidden terminal que hace que se pierdan más paquetes y por tanto los que llegan, lleguen más tarde.
+
+Gráfica Average different times
+-------------------------------
+
+Esta gráfica está compuesta por dos gráficas, a la izquierda evitando el problema del hidden terminal problem y a la derecha sin evitarlo.
+
+Ambas gráficas representan el tiempo medio en el que llegó el primer paquete al nodo móvil (de las 1000 simulaciones), el tiempo medio en el que llegó el último primero (da igual de que AN proceda), el tiempo medio en el que llegó el último 2º, el último 3º y el tiempo medio en el que llegó el último paquete (como en la gráfica 1)
+
+Tanto en la gráfica de la izquierda como de la derecha y tal y como nos diría la lógica, a tiempos medios de espera entre envío de paquetes, el tiempo que tarda en llegar el primer paquete, es menor que el tiempo medio que tarda en llegar el último primero, este es a su vez menor que el tiempo que tarda en llegar el 2º último, este menor que el 3er último y este menor que el último. El caso interesante está cuando los tiempos medios de espera entre envío de paquetes son pequeños. En este caso, se puede observar que para el caso en el que hemos evitado el problema del terminal oculto, el tiempo medio en el que llega el último paquete es ligeramente mayor, que el tiempo medio en el que llega el último 2º y 3er paquetes, estos son prácticamente igual e incluso el tiempo en el que llega el 2º es mayor que en el que llega el 3er dado al gran número de colisiones que hará que en muchas de las 1000 ocasiones, no llegue ningún 2º y/o 3er paquete y por tanto ningún último 2º o 3er paquete. Se observa también la gran diferencia en tiempo entre el primer paquete (que será un 1er paquete de un AN) con el último 1er paquete de un AN recibido, al contrario de la gráfica de la derecha, esto es debido a que al no tener problema de terminal oculto, el número de colisiones no es tan elevado y por tanto y tal como se vio en la gráfica 1, el número de paquetes recibidos por el NM es mayor, recibiendo por tanto varios número 1.
+Tanto en la gráfica de la derecha como en la de la izquierda, se puede observar como al principio hay una pequeña bajada (mayor en la de la derecha debido a la presencia de hidden terminal problem) y luego ya es una curva ascendente con el tiempo medio de envio de paquetes (lógicamente). Esta bajada inicial se explica de la misma forma que en la gráfica 2.
+En la gráfica de la derecha cabe destacar que cuando el tiempo de espera entre envio de paquetes es bajo, el tiempo medio de llegada del último paquete es menor que el tiempo medio de llegada del último 2º y último 3er paquete, esto se debe a que en muchas de las ocasiones ningún 2º y/o 3er paquete fue entregado y por tanto el último paquete fue un 1er paquete. Siendo por ello en media, el tiempo de llegada del 2º último y 3er último paquetes mayor que el tiempo del último.
+Como comparación entre las dos gráficas, cabe destacar que, los tiempo sin hidden terminal problem, son superiores, esto es debido nuevamente (gráfica 1) a que el número de paquetes que llega es mayor y por tanto necesita más tiempo. Esto es así salvo para el primer paquete recibido, donde ocurre justo lo contrario, cuantas más colisiones haya más tarde llegará, esto se refleja también en la gráfica.
+
+Percentil 98 different times
+----------------------------
+
+Esta gráfica corresponde no a la media sino al percentil 98%, lo que significa que si tomamos estos tiempos como referencia, el 98% de las ocasiones estaremos por debajo y se pueden tomar por tanto como un límite bastante aceptable.
+El análisis de esta gráfica es muy similar al de la gráfica anterior, con la salvedad de que los tiempos son superiores (mirar escala eje Y), debido a que no nos interesa la media, tal y como se comentó anteriormente, sino los peores casos.
+En la gráfica de la derecha, la curva roja (tiempo medio de llegada del primer paquete), se observa que al contrario que en la gráfica anterior y que en la gráfica de la izquiera, antes de descender la curva, asciende un poco en los primeros tiempos del eje X y luego ya desciende y vuelve a ascender como es normal. Esto es debido a que al ser el percentil, no nos interesa la media de las llegadas de los primero paquetes, sino los que más tarde llegan

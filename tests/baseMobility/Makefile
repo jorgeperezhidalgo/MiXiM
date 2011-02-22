@@ -35,7 +35,7 @@ PROJECTRELATIVE_PATH = tests/baseMobility
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
-OBJS = $O/TestBMBaseMobility.o $O/BaseMobilityTest.o
+OBJS = $O/BaseMobilityTest.o $O/TestBMBaseMobility.o
 
 # Message files
 MSGFILES =

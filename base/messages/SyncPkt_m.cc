@@ -34,6 +34,8 @@ Register_Class(SyncPkt);
 
 SyncPkt::SyncPkt(const char *name, int kind) : cPacket(name,kind)
 {
+    this->sequenceId_var = 0;
+    this->srcAddr_var = 0;
     this->status_var = 0;
     this->posX_var = 0;
     this->posY_var = 0;
@@ -55,6 +57,8 @@ SyncPkt& SyncPkt::operator=(const SyncPkt& other)
 {
     if (this==&other) return *this;
     cPacket::operator=(other);
+    this->sequenceId_var = other.sequenceId_var;
+    this->srcAddr_var = other.srcAddr_var;
     this->status_var = other.status_var;
     this->posX_var = other.posX_var;
     this->posY_var = other.posY_var;
@@ -66,6 +70,8 @@ SyncPkt& SyncPkt::operator=(const SyncPkt& other)
 void SyncPkt::parsimPack(cCommBuffer *b)
 {
     cPacket::parsimPack(b);
+    doPacking(b,this->sequenceId_var);
+    doPacking(b,this->srcAddr_var);
     doPacking(b,this->status_var);
     doPacking(b,this->posX_var);
     doPacking(b,this->posY_var);
@@ -76,11 +82,33 @@ void SyncPkt::parsimPack(cCommBuffer *b)
 void SyncPkt::parsimUnpack(cCommBuffer *b)
 {
     cPacket::parsimUnpack(b);
+    doUnpacking(b,this->sequenceId_var);
+    doUnpacking(b,this->srcAddr_var);
     doUnpacking(b,this->status_var);
     doUnpacking(b,this->posX_var);
     doUnpacking(b,this->posY_var);
     doUnpacking(b,this->posZ_var);
     doUnpacking(b,this->timestamp_var);
+}
+
+int SyncPkt::getSequenceId() const
+{
+    return sequenceId_var;
+}
+
+void SyncPkt::setSequenceId(int sequenceId_var)
+{
+    this->sequenceId_var = sequenceId_var;
+}
+
+int SyncPkt::getSrcAddr() const
+{
+    return srcAddr_var;
+}
+
+void SyncPkt::setSrcAddr(int srcAddr_var)
+{
+    this->srcAddr_var = srcAddr_var;
 }
 
 int8 SyncPkt::getStatus() const
@@ -180,7 +208,7 @@ const char *SyncPktDescriptor::getProperty(const char *propertyname) const
 int SyncPktDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 5+basedesc->getFieldCount(object) : 5;
+    return basedesc ? 7+basedesc->getFieldCount(object) : 7;
 }
 
 unsigned int SyncPktDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -197,8 +225,10 @@ unsigned int SyncPktDescriptor::getFieldTypeFlags(void *object, int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<5) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<7) ? fieldTypeFlags[field] : 0;
 }
 
 const char *SyncPktDescriptor::getFieldName(void *object, int field) const
@@ -210,24 +240,28 @@ const char *SyncPktDescriptor::getFieldName(void *object, int field) const
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldNames[] = {
+        "sequenceId",
+        "srcAddr",
         "status",
         "posX",
         "posY",
         "posZ",
         "timestamp",
     };
-    return (field>=0 && field<5) ? fieldNames[field] : NULL;
+    return (field>=0 && field<7) ? fieldNames[field] : NULL;
 }
 
 int SyncPktDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
-    if (fieldName[0]=='s' && strcmp(fieldName, "status")==0) return base+0;
-    if (fieldName[0]=='p' && strcmp(fieldName, "posX")==0) return base+1;
-    if (fieldName[0]=='p' && strcmp(fieldName, "posY")==0) return base+2;
-    if (fieldName[0]=='p' && strcmp(fieldName, "posZ")==0) return base+3;
-    if (fieldName[0]=='t' && strcmp(fieldName, "timestamp")==0) return base+4;
+    if (fieldName[0]=='s' && strcmp(fieldName, "sequenceId")==0) return base+0;
+    if (fieldName[0]=='s' && strcmp(fieldName, "srcAddr")==0) return base+1;
+    if (fieldName[0]=='s' && strcmp(fieldName, "status")==0) return base+2;
+    if (fieldName[0]=='p' && strcmp(fieldName, "posX")==0) return base+3;
+    if (fieldName[0]=='p' && strcmp(fieldName, "posY")==0) return base+4;
+    if (fieldName[0]=='p' && strcmp(fieldName, "posZ")==0) return base+5;
+    if (fieldName[0]=='t' && strcmp(fieldName, "timestamp")==0) return base+6;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -240,13 +274,15 @@ const char *SyncPktDescriptor::getFieldTypeString(void *object, int field) const
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldTypeStrings[] = {
+        "int",
+        "int",
         "int8",
         "int16",
         "int16",
         "int16",
         "int32",
     };
-    return (field>=0 && field<5) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<7) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *SyncPktDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -286,11 +322,13 @@ std::string SyncPktDescriptor::getFieldAsString(void *object, int field, int i) 
     }
     SyncPkt *pp = (SyncPkt *)object; (void)pp;
     switch (field) {
-        case 0: return long2string(pp->getStatus());
-        case 1: return long2string(pp->getPosX());
-        case 2: return long2string(pp->getPosY());
-        case 3: return long2string(pp->getPosZ());
-        case 4: return long2string(pp->getTimestamp());
+        case 0: return long2string(pp->getSequenceId());
+        case 1: return long2string(pp->getSrcAddr());
+        case 2: return long2string(pp->getStatus());
+        case 3: return long2string(pp->getPosX());
+        case 4: return long2string(pp->getPosY());
+        case 5: return long2string(pp->getPosZ());
+        case 6: return long2string(pp->getTimestamp());
         default: return "";
     }
 }
@@ -305,11 +343,13 @@ bool SyncPktDescriptor::setFieldAsString(void *object, int field, int i, const c
     }
     SyncPkt *pp = (SyncPkt *)object; (void)pp;
     switch (field) {
-        case 0: pp->setStatus(string2long(value)); return true;
-        case 1: pp->setPosX(string2long(value)); return true;
-        case 2: pp->setPosY(string2long(value)); return true;
-        case 3: pp->setPosZ(string2long(value)); return true;
-        case 4: pp->setTimestamp(string2long(value)); return true;
+        case 0: pp->setSequenceId(string2long(value)); return true;
+        case 1: pp->setSrcAddr(string2long(value)); return true;
+        case 2: pp->setStatus(string2long(value)); return true;
+        case 3: pp->setPosX(string2long(value)); return true;
+        case 4: pp->setPosY(string2long(value)); return true;
+        case 5: pp->setPosZ(string2long(value)); return true;
+        case 6: pp->setTimestamp(string2long(value)); return true;
         default: return false;
     }
 }
@@ -328,8 +368,10 @@ const char *SyncPktDescriptor::getFieldStructName(void *object, int field) const
         NULL,
         NULL,
         NULL,
+        NULL,
+        NULL,
     };
-    return (field>=0 && field<5) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<7) ? fieldStructNames[field] : NULL;
 }
 
 void *SyncPktDescriptor::getFieldStructPointer(void *object, int field, int i) const

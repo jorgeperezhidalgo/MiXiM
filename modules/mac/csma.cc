@@ -72,6 +72,7 @@ void csma::initialize(int stage) {
 		macAckWaitDuration = par("macAckWaitDuration").doubleValue();
 		aUnitBackoffPeriod = par("aUnitBackoffPeriod");
 		ccaDetectionTime = par("ccaDetectionTime").doubleValue();
+	   	LIFS = par("LIFS").doubleValue();
 		rxSetupTime = par("rxSetupTime").doubleValue();
 		aTurnaroundTime = par("aTurnaroundTime").doubleValue();
 		bitrate = par("bitrate");
@@ -179,9 +180,11 @@ void csma::handleUpperMsg(cMessage *msg) {
 	EV<<"CSMA received a message from upper layer, name is " << msg->getName() <<", CInfo removed, mac addr="<< cInfo->getNextHopMac()<<endl;
 	int dest = cInfo->getNextHopMac();
 	macPkt->setCsmaActive(cInfo->getCsmaActive());
+	macPkt->setSequenceId((static_cast<SyncPkt*>(msg))->getSequenceId());
 	macPkt->setDestAddr(dest);
 	delete cInfo;
 	macPkt->setSrcAddr(myMacAddr);
+	(static_cast<SyncPkt*>(msg))->setSrcAddr(myMacAddr);
 
 	if(useMACAcks) {
 		if(SeqNrParent.find(dest) == SeqNrParent.end()) {
@@ -216,7 +219,8 @@ void csma::updateStatusIdle(t_mac_event event, cMessage *msg) {
 			if (anchor && !((static_cast<MacPkt *> (msg))->getCsmaActive()))
 			{
 				EV<<"(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> No BACKOFF." << endl;
-				scheduleAt(simTime(), backoffTimer);
+				scheduleAt(simTime() + sifs, backoffTimer);
+				NB = macMaxCSMABackoffs; // if csma deactivated we drop the packet directly
 			}
 			else
 			{
@@ -361,19 +365,7 @@ void csma::updateStatusCCA(t_mac_event event, cMessage *msg) {
 			//BE = std::min(BE+1, macMaxBE);
 
 			// decide if we go for another backoff or if we drop the frame
-			// if csma deactivated we drop the packet directly
-			if (anchor && !((static_cast<MacPkt *> (msg))->getCsmaActive())) {
-				// drop the frame
-				EV << "Channel busy and CSMA disabled. Dropping the packet." << endl;
-				cMessage * mac = macQueue.front();
-				macQueue.pop_front();
-				txAttempts = 0;
-				nbDroppedFrames++;
-				mac->setName("MAC ERROR");
-				mac->setKind(PACKET_DROPPED);
-				sendControlUp(mac);
-				manageQueue();
-			} else if(NB> macMaxCSMABackoffs) {
+			if(NB> macMaxCSMABackoffs) {
 				// drop the frame
 				EV << "Tried " << NB << " backoffs, all reported a busy "
 				<< "channel. Dropping the packet." << endl;

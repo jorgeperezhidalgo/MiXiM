@@ -36,7 +36,7 @@ PROJECTRELATIVE_PATH = examples/ieee802154Narrow
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
-OBJS = $O/NetworkStackTrafficGen.o $O/WorldUtilityStats.o $O/AnchorAppLayer.o $O/NodeAppLayer.o
+OBJS = $O/AnchorAppLayer.o $O/NodeAppLayer.o $O/NetworkStackTrafficGen.o $O/WorldUtilityStats.o
 
 # Message files
 MSGFILES =
@@ -198,6 +198,7 @@ $O/NodeAppLayer.o: NodeAppLayer.cc \
 	../../base/modules/BaseLayer.h \
 	../../base/modules/BatteryAccess.h \
 	../../base/connectionManager/BaseConnectionManager.h \
+	../../base/messages/SyncPkt_m.h \
 	NodeAppLayer.h \
 	../../base/phyLayer/Interpolation.h \
 	../../base/utils/Move.h \
@@ -221,7 +222,6 @@ $O/NodeAppLayer.o: NodeAppLayer.cc \
 	../../base/modules/BaseModule.h \
 	../../base/phyLayer/MappingUtils.h \
 	../../base/phyLayer/Signal_.h \
-	../../base/messages/NetwPkt_m.h \
 	../../base/utils/PassedMessage.h \
 	../../base/utils/NetwToMacControlInfo.h \
 	../../base/messages/MacPkt_m.h

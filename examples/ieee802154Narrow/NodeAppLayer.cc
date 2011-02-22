@@ -41,6 +41,7 @@ void NodeAppLayer::initialize(int stage)
 		destination = par("destination");
 
 		nbPacketDropped = 0;
+		vReceivedPacketsSource.setName("vReceivedPacketsSource");
 
 	} else if (stage == 1) {
 		(cc->findNic(getParentModule()->findSubmodule("nic")))->moduleType = 2;
@@ -91,11 +92,15 @@ void NodeAppLayer::handleLowerMsg(cMessage *msg)
 {
 //	Packet p(packetLength, 1, 0);
 //	world->publishBBItem(catPacket, &p, -1);
+	SyncPkt *pkt = static_cast<SyncPkt*>(msg);
 
+
+	//sequenceId
 	switch( msg->getKind() )
 	{
 	case SYNC_MESSAGE:
-		EV << "Lowermessage " << msg->getName() << " received in Appl Layer in Node " << this->getId() << endl;
+		EV << "Lowermessage " << msg->getName() << " number " << pkt->getSequenceId() << " from anchor " << pkt->getSrcAddr() << " received in Appl Layer in Node " << this->getId() << endl;
+		vReceivedPacketsSource.recordWithTimestamp(simTime(), pkt->getSrcAddr());
 		break;
 	default:
 		EV << "Unkown lowermessage! -> delete, kind: "<< msg->getKind() << endl;

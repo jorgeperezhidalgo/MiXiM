@@ -1,0 +1,22 @@
+
+rm -f results/RandomNodes*
+rm -f csv/scalar*
+rm -f csv/vector*
+#rm -f matlab/scalar*
+#rm -f matlab/vector*
+./ieee802154Narrow -f omnetpp.ini -c RandomNodes -u Cmdenv
+
+N='$N'
+T='$T'
+
+for (( i = 6; i <= 6; i++ ))      ### Outer for loop ###
+do
+    for (( j = 1; j <= 30; j++ )) ### Inner for loop ###
+    do
+        scavetool scalar -p "module(**node**) AND (nbFramesWith*)" -O ./csv/scalar-N=$i-T=$j.csv -F csv ./results/RandomNodes-$N=$i,\ $T=$j,*.sca
+	scavetool vector -p "module(**node**) AND (vReceived*)" -O ./csv/vector-N=$i-T=$j.csv -F csv ./results/RandomNodes-$N=$i,\ $T=$j,*.vec
+        #scavetool scalar -p "module(**node**) AND (nbFramesWith*)" -O ./matlab/scalar-N$i-T$j.m -F matlab ./results/RandomNodes-$N=$i,\ $T=$j,*.sca
+	#scavetool vector -p "module(**node**) AND (vReceived*)" -O ./matlab/vector-N$i-T$j.m -F matlab ./results/RandomNodes-$N=$i,\ $T=$j,*.vec
+    done
+done
+

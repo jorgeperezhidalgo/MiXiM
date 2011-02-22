@@ -41,6 +41,7 @@ simple CSMA802154 extends csma
         macAckWaitDuration @unit(s) = default(0.00056 s);  // 1+12+10+12 symbols
         ccaDetectionTime @unit(s) = default(0.000128 s); // 8 symbols
         aTurnaroundTime @unit(s) = default(0.000192 s);    // 12 symbols
+        double LIFS @unit(s) = default(0.000640 s); // 40 symbol time to leave between end of packet and start of the next one according to standard
         //txPower @unit(mW);
         useMACAcks = default(true);
         
