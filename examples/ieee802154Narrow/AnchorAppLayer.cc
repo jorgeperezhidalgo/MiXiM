@@ -44,7 +44,6 @@ void AnchorAppLayer::initialize(int stage)
 		syncPacketsPerSyncPhaseCounter = 1;
 
 		destination = par("destination");
-		anchorType = par("anchorType");
 		syncPacketTime = par("syncPacketTime");
 		scheduledSlot = 0;
 		phase2VIPPercentage = par("phase2VIPPercentage");
@@ -64,151 +63,15 @@ void AnchorAppLayer::initialize(int stage)
 //		catPacket = world->getCategory(&p);
 	} else if (stage == 1) {
 		anchor = cc->findNic(getParentModule()->findSubmodule("nic"));
-        anchor->moduleType = anchorType;
-	} else if (stage == 3 && syncInSlot) {
-		if (anchorType == 3) { //Only if the anchor is the computer
-			BaseConnectionManager::NicEntries& anchorList = cc->getAnchorsList();
-			numAnchors = anchorList.size();
-			int j = 0;
-			double distance;
-			NicEntry* anchors[numAnchors];
-			int matrix[numAnchors][numAnchors]; memset(matrix, 0, sizeof(int)*numAnchors*numAnchors);
-			int slotCounter[numAnchors];  memset(slotCounter, 0, sizeof(int)*numAnchors);
-			int slots[numAnchors][numAnchors]; memset(slots, 0, sizeof(int)*numAnchors*numAnchors);
-			int queue[numAnchors]; memset(queue, 0, sizeof(int)*numAnchors);
-			int numerTimesQueue[numAnchors]; memset(numerTimesQueue, 0, sizeof(int)*numAnchors);
-			int queueCounter = 0;
-			int hasSlots;
-			int numSlots = 0;
-			bool lookRow;
-			bool compatible;
-	//        EV << "   0  1  2  3  4  5  6  7  8  9  10 11 " << endl;
-			EV << "Coverage " << cc->getMaxInterferenceDistance() << endl;
-			for(BaseConnectionManager::NicEntries::iterator i = anchorList.begin(); i != anchorList.end(); ++i)
-			{
-				anchors[j] = i->second;
-				anchors[j]->numSlots = 0;
-				j++;
-			}
-			for (j = 0; j <= numAnchors-1; j++)
-			{
-
-				//EV << j << " Anchor " << anchors[j]->nicId << " type " << anchors[j]->moduleType;
-				//EV << "PosNic despues (" << anchors[j]->pos.getX() << ", " << anchors[j]->pos.getY() << ")" << endl;
-	//			if (j<10)
-	//				EV << j << "  ";
-	//			else
-	//				EV << j << " ";
-
-				lookRow = false;
-				queueCounter = 0;
-				if (hasSlot(*slots, slotCounter, numSlots, j, numAnchors) == 0)
-				{
-	//				EV << "Añadiendo nuevo Slot " << numSlots << " con el anchor " << j << endl;
-					numSlots++;
-					slotCounter[numSlots-1]++;
-					slots[numSlots-1][slotCounter[numSlots-1]-1] = j;
-					lookRow = true;
-				}
-				for (int k = 0; k <= numAnchors-1; k++)
-				{
-					if (matrix[j][k] == 0)
-					{
-						distance = sqrt(pow(anchors[k]->pos.getX() - anchors[j]->pos.getX(),2) + pow(anchors[k]->pos.getY() - anchors[j]->pos.getY(),2));
-						matrix[j][k] = int((distance / cc->getMaxInterferenceDistance()) + 1);
-						matrix[k][j] = matrix[j][k];
-					}
-	//        		EV << matrix[j][k] << "  ";
-					if ((matrix[j][k] >= 3) && lookRow)
-					{
-						compatible = true;
-						for (int l = 0; l < slotCounter[numSlots-1]; l++)
-						{
-							if (matrix[slots[numSlots-1][l]][k] == 0)
-							{
-								distance = sqrt(pow(anchors[k]->pos.getX() - anchors[slots[numSlots-1][l]]->pos.getX(),2) + pow(anchors[k]->pos.getY() - anchors[slots[numSlots-1][l]]->pos.getY(),2));
-								matrix[slots[numSlots-1][l]][k] = int((distance / cc->getMaxInterferenceDistance()) + 1);
-								matrix[k][slots[numSlots-1][l]] = matrix[slots[numSlots-1][l]][k];
-							}
-							if (matrix[slots[numSlots-1][l]][k] <= 2)
-								compatible = false;
-						}
-						if (compatible)
-						{
-							hasSlots = hasSlot(*slots, slotCounter, numSlots, k, numAnchors);
-							if (hasSlots == 0)
-							{
-	//        					EV << "Añadiendo nuevo anchor " << k << " al slot " << numSlots-1 << endl;
-								slotCounter[numSlots-1]++;
-								slots[numSlots-1][slotCounter[numSlots-1]-1] = k;
-							}
-							else
-							{
-								queue[queueCounter] = k;
-								numerTimesQueue[queueCounter] = hasSlots;
-								queueCounter++;
-							}
-						}
-					}
-				}
-				orderQueue(queue, numerTimesQueue, queueCounter);
-				for (int k = 0; k < queueCounter; k++)
-				{
-					compatible = true;
-					for (int l = 0; l < slotCounter[numSlots-1]; l++)
-					{
-						if (matrix[slots[numSlots-1][l]][queue[k]] == 0)
-						{
-							distance = sqrt(pow(anchors[queue[k]]->pos.getX() - anchors[slots[numSlots-1][l]]->pos.getX(),2) + pow(anchors[queue[k]]->pos.getY() - anchors[slots[numSlots-1][l]]->pos.getY(),2));
-							matrix[slots[numSlots-1][l]][queue[k]] = int((distance / cc->getMaxInterferenceDistance()) + 1);
-							matrix[queue[k]][slots[numSlots-1][l]] = matrix[slots[numSlots-1][l]][queue[k]];
-						}
-						if (matrix[slots[numSlots-1][l]][queue[k]] <= 2)
-							compatible = false;
-					}
-					if (compatible)
-					{
-	//       				EV << "Reutilizando anchor " << queue[k] << " en el slot " << numSlots-1 << endl;
-						slotCounter[numSlots-1]++;
-						slots[numSlots-1][slotCounter[numSlots-1]-1] = queue[k];
-					}
-				}
-	//        	EV << endl;
-			}
-
-			for (j = 0; j < numSlots; j++)
-			{
-				EV << "Slot " << j << ": ";
-				for (int k = 0; k < slotCounter[j]; k++)
-				{
-					anchors[slots[j][k]]->transmisionSlot[anchors[slots[j][k]]->numSlots] = j;
-					anchors[slots[j][k]]->numSlots = anchors[slots[j][k]]->numSlots +1;
-					anchors[slots[j][k]]->numTotalSlots = numSlots;
-					EV << "(" << anchors[slots[j][k]]->numSlots << ")";
-					EV << slots[j][k] << ",";
-				}
-				EV << endl;
-			}
-			j= 0;
-			for(BaseConnectionManager::NicEntries::iterator i = anchorList.begin(); i != anchorList.end(); ++i)
-			{
-				EV << "Nic (" << j << ")" << i->second->nicId << " transmits in Slot: ";
-				for (int k = 0; k < i->second->numSlots; k++)
-				{
-					EV << i->second->transmisionSlot[k] << ", ";
-				}
-				EV << endl;
-				j++;
-			}
-		}
+		anchor->moduleType = 1;
+	} else if (stage == 4) {
+		anchor = cc->findNic(getParentModule()->findSubmodule("nic"));
 		timeSyncPhase = anchor->numTotalSlots * syncPacketTime ;
 		timeVIPPhase = (fullPhaseTime - (2 * timeComSinkPhase) - (3 * syncPacketsPerSyncPhase * timeSyncPhase)) * phase2VIPPercentage;
 		timeReportPhase = (fullPhaseTime - (2 * timeComSinkPhase) - (3 * syncPacketsPerSyncPhase * timeSyncPhase)) * (1 - phase2VIPPercentage);
 		EV << "T Report: " << timeReportPhase << endl;
 		EV << "T VIP: " << timeVIPPhase << endl;
-	}
-	else if (stage == 4)
-	{
+
 		delayTimer = new cMessage("delay-timer", SEND_SYNC_TIMER);
 		if (phaseRepetitionNumber != 0 && syncInSlot)
 		{
@@ -377,20 +240,22 @@ void AnchorAppLayer::handleLowerMsg(cMessage *msg)
 
 void AnchorAppLayer::handleLowerControl(cMessage *msg)
 {
-	if(msg->getKind() == BaseMacLayer::PACKET_DROPPED) {
-		nbPacketDropped++;
-		nextSyncSend = uniform(0, syncRestMaxRandomTimes, 0);
-		EV << "El envio del mensaje de sync ha fallado. Enviando otra vez mensaje " << syncPacketsPerSyncPhaseCounter << " de " << syncPacketsPerSyncPhase << " en " << nextSyncSend <<"s." << endl;
-		scheduleAt(simTime() + nextSyncSend, delayTimer);
-	} else if (msg->getKind() == BaseMacLayer::SYNC_SENT) {
-		syncPacketsPerSyncPhaseCounter++;
-		EV << "El mensaje de sync se ha enviado correctamente.";
-		if (syncPacketsPerSyncPhaseCounter <= syncPacketsPerSyncPhase) {
+	if (!syncInSlot) {
+		if(msg->getKind() == BaseMacLayer::PACKET_DROPPED) {
+			nbPacketDropped++;
 			nextSyncSend = uniform(0, syncRestMaxRandomTimes, 0);
-			EV << "Enviando " << syncPacketsPerSyncPhaseCounter << " de " << syncPacketsPerSyncPhase << " en " << nextSyncSend <<"s.";
+			EV << "El envio del mensaje de sync ha fallado. Enviando otra vez mensaje " << syncPacketsPerSyncPhaseCounter << " de " << syncPacketsPerSyncPhase << " en " << nextSyncSend <<"s." << endl;
 			scheduleAt(simTime() + nextSyncSend, delayTimer);
+		} else if (msg->getKind() == BaseMacLayer::SYNC_SENT) {
+			syncPacketsPerSyncPhaseCounter++;
+			EV << "El mensaje de sync se ha enviado correctamente.";
+			if (syncPacketsPerSyncPhaseCounter <= syncPacketsPerSyncPhase) {
+				nextSyncSend = uniform(0, syncRestMaxRandomTimes, 0);
+				EV << "Enviando " << syncPacketsPerSyncPhaseCounter << " de " << syncPacketsPerSyncPhase << " en " << nextSyncSend <<"s.";
+				scheduleAt(simTime() + nextSyncSend, delayTimer);
+			}
+			EV << endl;
 		}
-		EV << endl;
 	}
 	delete msg;
 	msg = 0;

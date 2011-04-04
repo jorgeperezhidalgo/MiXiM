@@ -107,6 +107,7 @@ void BaseMobility::initialize(int stage)
     {
         //Minimum distance between any anchor and any mobile node
         double minimumDistanceAnchor = par("minimumDistanceAnchor");
+        EV << "Minimum Distance Anchor = " << minimumDistanceAnchor << endl;
         double minimumDistanceNode = par("minimumDistanceNode");
         //check whether anchors and nodes have a minimum distance among them separately or not
         BaseConnectionManager::NicEntries& nicList = cc->getNicList();

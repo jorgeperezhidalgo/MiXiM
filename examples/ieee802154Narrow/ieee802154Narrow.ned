@@ -112,13 +112,18 @@ network ieee802154Narrow
         anchor[numAnchors]: PhyMacAnchor {
             parameters:
                 numAnchors = numAnchors;
-                @display("p=212,120;b=42,42,rect,yellow;i=device/accesspoint");
+                @display("p=231,147;b=42,42,rect,yellow;i=device/accesspoint");
 
         }
         node[numNodes]: PhyMacNode {
             parameters:
                 numNodes = numNodes;
-                @display("p=78,120;b=0,0,rect,yellow;i=device/pocketpc");
+                @display("p=60,147;b=0,0,rect,yellow;i=device/pocketpc");
+
+        }
+        computer: PhyMacComputer {
+            parameters:
+                @display("p=141,118;b=50,50,rect,red;i=device/laptop");
 
         }
     connections allowunconnected:

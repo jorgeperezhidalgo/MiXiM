@@ -36,7 +36,7 @@ PROJECTRELATIVE_PATH = examples/ieee802154Narrow
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
-OBJS = $O/AnchorAppLayer.o $O/NodeAppLayer.o $O/NetworkStackTrafficGen.o $O/WorldUtilityStats.o
+OBJS = $O/AnchorAppLayer.o $O/NodeAppLayer.o $O/NetworkStackTrafficGen.o $O/ComputerAppLayer.o $O/WorldUtilityStats.o
 
 # Message files
 MSGFILES =
@@ -201,6 +201,42 @@ $O/NodeAppLayer.o: NodeAppLayer.cc \
 	../../base/messages/SyncPkt_m.h \
 	NodeAppLayer.h \
 	../../base/phyLayer/Interpolation.h \
+	../../base/utils/Move.h \
+	../../base/phyLayer/ChannelState.h \
+	../../base/modules/BaseBattery.h \
+	../../base/phyLayer/PhyUtils.h \
+	../../base/utils/SimpleAddress.h \
+	../../base/utils/FWMath.h \
+	../../base/modules/ArpInterface.h \
+	../../base/utils/ImNotifiable.h \
+	../../base/modules/BaseArp.h \
+	../../base/phyLayer/MappingBase.h \
+	../../base/utils/FindModule.h \
+	../../base/phyLayer/MacToPhyInterface.h \
+	../../base/phyLayer/Mapping.h \
+	../../base/utils/Coord.h \
+	../../base/modules/BaseWorldUtility.h \
+	../../modules/utility/Packet.h \
+	../../base/connectionManager/NicEntry.h \
+	../../base/utils/HostState.h \
+	../../base/modules/BaseModule.h \
+	../../base/phyLayer/MappingUtils.h \
+	../../base/phyLayer/Signal_.h \
+	../../base/utils/PassedMessage.h \
+	../../base/utils/NetwToMacControlInfo.h \
+	../../base/messages/MacPkt_m.h
+$O/ComputerAppLayer.o: ComputerAppLayer.cc \
+	../../base/modules/AddressingInterface.h \
+	../../base/phyLayer/AnalogueModel.h \
+	../../base/modules/Blackboard.h \
+	../../base/modules/BaseUtility.h \
+	../../base/modules/BaseMacLayer.h \
+	../../base/modules/BaseLayer.h \
+	../../base/modules/BatteryAccess.h \
+	../../base/connectionManager/BaseConnectionManager.h \
+	../../base/messages/SyncPkt_m.h \
+	../../base/phyLayer/Interpolation.h \
+	ComputerAppLayer.h \
 	../../base/utils/Move.h \
 	../../base/phyLayer/ChannelState.h \
 	../../base/modules/BaseBattery.h \

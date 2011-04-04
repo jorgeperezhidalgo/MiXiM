@@ -31,14 +31,14 @@
  *
  * @ingroup exampleIEEE802154Narrow
  */
-class AnchorAppLayer : public BaseLayer
+class ComputerAppLayer : public BaseLayer
 {
 public:
 
 	enum TrafficGenMessageKinds{
 
-		SEND_SYNC_TIMER = 1,
-		SYNC_MESSAGE
+		SEND_MESSAGE_TIMER = 1,
+		MESSAGE
 	};
 
 protected:
@@ -65,8 +65,6 @@ protected:
 	NicEntry* anchor;
 
 	bool syncInSlot; // Indicates if the sync packets have to be slotted or not
-   	simtime_t syncFirstMaxRandomTime; // First maximum time an anchor must wait to transmit the first sync packet in no slotted mode
-   	simtime_t syncRestMaxRandomTimes; // Rest of maximum times an anchor must wait to transmit the rest of the sync packets in no slotted mode
 
 	int catPacket;
 
@@ -84,7 +82,7 @@ protected:
 	BaseConnectionManager* cc;
 
 public:
-	virtual ~AnchorAppLayer();
+	virtual ~ComputerAppLayer();
 
 	virtual void initialize(int stage);
 
@@ -105,14 +103,14 @@ protected:
 	/** @brief Handle messages from upper layer */
 	virtual void handleUpperMsg(cMessage *msg)
 	{
-		opp_error("AnchorAppLayer has no upper layers!");
+		opp_error("ComputerAppLayer has no upper layers!");
 		delete msg;
 	}
 
 	/** @brief Handle control messages from upper layer */
 	virtual void handleUpperControl(cMessage *msg)
 	{
-		opp_error("AnchorAppLayer has no upper layers!");
+		opp_error("ComputerAppLayer has no upper layers!");
 		delete msg;
 	}
 
