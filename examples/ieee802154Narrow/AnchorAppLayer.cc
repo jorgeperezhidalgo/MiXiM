@@ -14,7 +14,7 @@
 //
 
 #include "AnchorAppLayer.h"
-#include "NetwToMacControlInfo.h"
+#include "AppToNetControlInfo.h"
 #include <cassert>
 #include <Packet.h>
 #include <BaseMacLayer.h>
@@ -271,7 +271,7 @@ void AnchorAppLayer::sendBroadcast()
 
 	//It doesn't matter if we have slotted version or not, CSMA must be disabled, we control random time and retransmision in app layer
 
-	pkt->setControlInfo(new NetwToMacControlInfo(destination,false));
+	pkt->setControlInfo(new AppToNetControlInfo(destination,false));
 
 	pkt->setSequenceId(syncPacketsPerSyncPhaseCounter);
 

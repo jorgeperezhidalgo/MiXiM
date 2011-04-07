@@ -676,9 +676,9 @@ $O/timers/FrameTimerGenerator.o: timers/FrameTimerGenerator.cc \
 	utils/Coord.h \
 	timers/FrameTimerGenerator.h \
 	utils/FWMath.h
-$O/utils/winsupport.o: utils/winsupport.cc \
-	utils/winsupport.h
 $O/utils/Coord.o: utils/Coord.cc \
 	utils/Coord.h \
 	utils/FWMath.h
+$O/utils/winsupport.o: utils/winsupport.cc \
+	utils/winsupport.h
 

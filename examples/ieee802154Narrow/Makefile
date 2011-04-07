@@ -2,7 +2,7 @@
 # OMNeT++/OMNEST Makefile for ieee802154Narrow
 #
 # This file was generated with the command:
-#  opp_makemake -f -o ieee802154Narrow -O out -I../../base/phyLayer -I../../base/modules -I../../base/messages -I../../base/connectionManager -I../../base/utils -I../../modules/utility -L../../out/$(CONFIGNAME)/tests/testUtils -L../../out/$(CONFIGNAME)/base -L../../out/$(CONFIGNAME)/tests/power/utils -L../../out/$(CONFIGNAME)/modules -lmiximbase -lmiximmodules
+#  opp_makemake -f -o ieee802154Narrow -O out -I../../base/phyLayer -I../../base/messages -I../../base/modules -I../../base/connectionManager -I../../base/utils -I../../modules/utility -L../../out/$(CONFIGNAME)/tests/testUtils -L../../out/$(CONFIGNAME)/base -L../../out/$(CONFIGNAME)/tests/power/utils -L../../out/$(CONFIGNAME)/modules -lmiximbase -lmiximmodules
 #
 
 # Name of target to be created (-o option)
@@ -16,8 +16,8 @@ USERIF_LIBS = $(ALL_ENV_LIBS) # that is, $(TKENV_LIBS) $(CMDENV_LIBS)
 # C++ include paths (with -I)
 INCLUDE_PATH = \
     -I../../base/phyLayer \
-    -I../../base/modules \
     -I../../base/messages \
+    -I../../base/modules \
     -I../../base/connectionManager \
     -I../../base/utils \
     -I../../modules/utility \
@@ -36,7 +36,13 @@ PROJECTRELATIVE_PATH = examples/ieee802154Narrow
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
-OBJS = $O/AnchorAppLayer.o $O/NodeAppLayer.o $O/NetworkStackTrafficGen.o $O/ComputerAppLayer.o $O/WorldUtilityStats.o
+OBJS = \
+    $O/AnchorAppLayer.o \
+    $O/NodeAppLayer.o \
+    $O/ComputerAppLayer.o \
+    $O/AnchorNetLayer.o \
+    $O/AnchorTransLayer.o \
+    $O/WorldUtilityStats.o
 
 # Message files
 MSGFILES =
@@ -130,6 +136,7 @@ $O/AnchorAppLayer.o: AnchorAppLayer.cc \
 	../../base/phyLayer/Interpolation.h \
 	../../base/utils/Move.h \
 	../../base/phyLayer/ChannelState.h \
+	../../base/utils/AppToNetControlInfo.h \
 	../../base/modules/BaseBattery.h \
 	../../base/phyLayer/PhyUtils.h \
 	../../base/utils/SimpleAddress.h \
@@ -151,44 +158,21 @@ $O/AnchorAppLayer.o: AnchorAppLayer.cc \
 	../../base/phyLayer/MappingUtils.h \
 	../../base/phyLayer/Signal_.h \
 	../../base/utils/PassedMessage.h \
-	../../base/utils/NetwToMacControlInfo.h \
 	../../base/messages/MacPkt_m.h
-$O/NetworkStackTrafficGen.o: NetworkStackTrafficGen.cc \
-	../../base/modules/AddressingInterface.h \
-	../../base/phyLayer/AnalogueModel.h \
+$O/AnchorTransLayer.o: AnchorTransLayer.cc \
+	../../base/utils/ImNotifiable.h \
 	../../base/modules/Blackboard.h \
 	../../base/modules/BaseUtility.h \
-	../../base/modules/BaseMacLayer.h \
+	../../base/utils/FindModule.h \
+	../../base/utils/Coord.h \
 	../../base/modules/BatteryAccess.h \
 	../../base/modules/BaseLayer.h \
-	../../base/connectionManager/BaseConnectionManager.h \
-	../../base/phyLayer/Interpolation.h \
-	../../base/utils/Move.h \
-	../../base/phyLayer/ChannelState.h \
-	../../base/modules/BaseBattery.h \
-	../../base/phyLayer/PhyUtils.h \
-	../../base/utils/SimpleAddress.h \
-	../../base/utils/FWMath.h \
-	../../base/modules/ArpInterface.h \
-	../../base/utils/ImNotifiable.h \
-	../../base/modules/BaseArp.h \
-	../../base/phyLayer/MappingBase.h \
-	../../base/utils/FindModule.h \
-	../../base/phyLayer/MacToPhyInterface.h \
-	../../base/phyLayer/Mapping.h \
-	../../base/utils/Coord.h \
-	../../base/modules/BaseWorldUtility.h \
-	../../modules/utility/Packet.h \
-	NetworkStackTrafficGen.h \
-	../../base/connectionManager/NicEntry.h \
 	../../base/utils/HostState.h \
+	AnchorTransLayer.h \
+	../../base/modules/BaseBattery.h \
 	../../base/modules/BaseModule.h \
-	../../base/phyLayer/MappingUtils.h \
-	../../base/phyLayer/Signal_.h \
-	../../base/utils/NetwToMacControlInfo.h \
-	../../base/messages/NetwPkt_m.h \
 	../../base/utils/PassedMessage.h \
-	../../base/messages/MacPkt_m.h
+	../../base/utils/FWMath.h
 $O/NodeAppLayer.o: NodeAppLayer.cc \
 	../../base/modules/AddressingInterface.h \
 	../../base/phyLayer/AnalogueModel.h \
@@ -261,4 +245,26 @@ $O/ComputerAppLayer.o: ComputerAppLayer.cc \
 	../../base/utils/PassedMessage.h \
 	../../base/utils/NetwToMacControlInfo.h \
 	../../base/messages/MacPkt_m.h
+$O/AnchorNetLayer.o: AnchorNetLayer.cc \
+	../../base/modules/AddressingInterface.h \
+	../../base/utils/ImNotifiable.h \
+	../../base/modules/Blackboard.h \
+	../../base/modules/BaseUtility.h \
+	../../base/utils/FindModule.h \
+	AnchorNetLayer.h \
+	../../base/modules/BaseNetwLayer.h \
+	../../base/utils/Coord.h \
+	../../base/modules/BatteryAccess.h \
+	../../base/modules/BaseLayer.h \
+	../../base/utils/HostState.h \
+	../../base/utils/AppToNetControlInfo.h \
+	../../base/modules/BaseBattery.h \
+	../../base/modules/BaseModule.h \
+	../../base/utils/PassedMessage.h \
+	../../base/messages/NetwPkt_m.h \
+	../../base/utils/NetwToMacControlInfo.h \
+	../../base/utils/SimpleAddress.h \
+	../../base/utils/FWMath.h \
+	../../base/utils/NetwControlInfo.h \
+	../../base/modules/ArpInterface.h
 

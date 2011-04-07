@@ -218,7 +218,7 @@ void csma::updateStatusIdle(t_mac_event event, cMessage *msg) {
 			//BE = macMinBE;
 			if (anchor && !((static_cast<MacPkt *> (msg))->getCsmaActive()))
 			{
-				EV<<"(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> No BACKOFF." << endl;
+				EV<<"(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> No BACKOFF. Wait for SIFS " << sifs << "s" << endl;
 				scheduleAt(simTime() + sifs, backoffTimer);
 				NB = macMaxCSMABackoffs; // if csma deactivated we drop the packet directly
 			}

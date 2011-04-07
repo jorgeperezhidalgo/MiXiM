@@ -30,7 +30,7 @@ packet SyncPkt
 {
 	int sequenceId = 0;
 	int srcAddr = 0;
-    	int8 status = 0;
+    int8 status = 0;
 	int16 posX = 0;
 	int16 posY = 0;
 	int16 posZ = 0;
