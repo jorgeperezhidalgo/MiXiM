@@ -38,10 +38,14 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 # Object files for local .cc and .msg files
 OBJS = \
     $O/AnchorAppLayer.o \
+    $O/ComputerNetLayer.o \
     $O/NodeAppLayer.o \
+    $O/NodeTransLayer.o \
+    $O/ComputerTransLayer.o \
     $O/ComputerAppLayer.o \
     $O/AnchorNetLayer.o \
     $O/AnchorTransLayer.o \
+    $O/NodeNetLayer.o \
     $O/WorldUtilityStats.o
 
 # Message files
@@ -123,42 +127,6 @@ $O/WorldUtilityStats.o: WorldUtilityStats.cc \
 	WorldUtilityStats.h \
 	../../base/utils/FWMath.h \
 	../../modules/utility/Packet.h
-$O/AnchorAppLayer.o: AnchorAppLayer.cc \
-	../../base/modules/AddressingInterface.h \
-	../../base/phyLayer/AnalogueModel.h \
-	../../base/modules/Blackboard.h \
-	../../base/modules/BaseUtility.h \
-	../../base/modules/BaseMacLayer.h \
-	../../base/modules/BaseLayer.h \
-	../../base/modules/BatteryAccess.h \
-	../../base/connectionManager/BaseConnectionManager.h \
-	../../base/messages/SyncPkt_m.h \
-	../../base/phyLayer/Interpolation.h \
-	../../base/utils/Move.h \
-	../../base/phyLayer/ChannelState.h \
-	../../base/utils/AppToNetControlInfo.h \
-	../../base/modules/BaseBattery.h \
-	../../base/phyLayer/PhyUtils.h \
-	../../base/utils/SimpleAddress.h \
-	../../base/utils/FWMath.h \
-	../../base/modules/ArpInterface.h \
-	../../base/utils/ImNotifiable.h \
-	../../base/modules/BaseArp.h \
-	../../base/phyLayer/MappingBase.h \
-	../../base/utils/FindModule.h \
-	../../base/phyLayer/MacToPhyInterface.h \
-	../../base/phyLayer/Mapping.h \
-	../../base/utils/Coord.h \
-	../../base/modules/BaseWorldUtility.h \
-	AnchorAppLayer.h \
-	../../modules/utility/Packet.h \
-	../../base/connectionManager/NicEntry.h \
-	../../base/utils/HostState.h \
-	../../base/modules/BaseModule.h \
-	../../base/phyLayer/MappingUtils.h \
-	../../base/phyLayer/Signal_.h \
-	../../base/utils/PassedMessage.h \
-	../../base/messages/MacPkt_m.h
 $O/AnchorTransLayer.o: AnchorTransLayer.cc \
 	../../base/utils/ImNotifiable.h \
 	../../base/modules/Blackboard.h \
@@ -245,6 +213,100 @@ $O/ComputerAppLayer.o: ComputerAppLayer.cc \
 	../../base/utils/PassedMessage.h \
 	../../base/utils/NetwToMacControlInfo.h \
 	../../base/messages/MacPkt_m.h
+$O/ComputerNetLayer.o: ComputerNetLayer.cc \
+	../../base/modules/AddressingInterface.h \
+	../../base/utils/ImNotifiable.h \
+	../../base/modules/Blackboard.h \
+	../../base/modules/BaseUtility.h \
+	../../base/utils/FindModule.h \
+	../../base/modules/BaseNetwLayer.h \
+	../../base/utils/Coord.h \
+	ComputerNetLayer.h \
+	../../base/modules/BatteryAccess.h \
+	../../base/modules/BaseLayer.h \
+	../../base/utils/HostState.h \
+	../../base/utils/AppToNetControlInfo.h \
+	../../base/modules/BaseBattery.h \
+	../../base/modules/BaseModule.h \
+	../../base/utils/PassedMessage.h \
+	../../base/messages/NetwPkt_m.h \
+	../../base/utils/NetwToMacControlInfo.h \
+	../../base/utils/SimpleAddress.h \
+	../../base/utils/FWMath.h \
+	../../base/utils/NetwControlInfo.h \
+	../../base/modules/ArpInterface.h
+$O/ComputerTransLayer.o: ComputerTransLayer.cc \
+	../../base/utils/ImNotifiable.h \
+	../../base/modules/Blackboard.h \
+	../../base/modules/BaseUtility.h \
+	../../base/utils/FindModule.h \
+	../../base/utils/Coord.h \
+	../../base/modules/BaseLayer.h \
+	../../base/modules/BatteryAccess.h \
+	../../base/utils/HostState.h \
+	../../base/modules/BaseBattery.h \
+	../../base/modules/BaseModule.h \
+	ComputerTransLayer.h \
+	../../base/utils/PassedMessage.h \
+	../../base/utils/FWMath.h
+$O/AnchorAppLayer.o: AnchorAppLayer.cc \
+	../../base/modules/AddressingInterface.h \
+	../../base/phyLayer/AnalogueModel.h \
+	../../base/modules/Blackboard.h \
+	../../base/modules/BaseUtility.h \
+	../../base/modules/BaseMacLayer.h \
+	../../base/modules/BaseLayer.h \
+	../../base/modules/BatteryAccess.h \
+	../../base/connectionManager/BaseConnectionManager.h \
+	../../base/messages/SyncPkt_m.h \
+	../../base/phyLayer/Interpolation.h \
+	../../base/utils/Move.h \
+	../../base/phyLayer/ChannelState.h \
+	../../base/utils/AppToNetControlInfo.h \
+	../../base/modules/BaseBattery.h \
+	../../base/phyLayer/PhyUtils.h \
+	../../base/utils/SimpleAddress.h \
+	../../base/utils/FWMath.h \
+	../../base/modules/ArpInterface.h \
+	../../base/utils/ImNotifiable.h \
+	../../base/modules/BaseArp.h \
+	../../base/phyLayer/MappingBase.h \
+	../../base/utils/FindModule.h \
+	../../base/phyLayer/MacToPhyInterface.h \
+	../../base/phyLayer/Mapping.h \
+	../../base/utils/Coord.h \
+	../../base/modules/BaseWorldUtility.h \
+	AnchorAppLayer.h \
+	../../modules/utility/Packet.h \
+	../../base/connectionManager/NicEntry.h \
+	../../base/utils/HostState.h \
+	../../base/modules/BaseModule.h \
+	../../base/phyLayer/MappingUtils.h \
+	../../base/phyLayer/Signal_.h \
+	../../base/utils/PassedMessage.h \
+	../../base/messages/MacPkt_m.h
+$O/NodeNetLayer.o: NodeNetLayer.cc \
+	../../base/modules/AddressingInterface.h \
+	../../base/utils/ImNotifiable.h \
+	../../base/modules/Blackboard.h \
+	../../base/modules/BaseUtility.h \
+	../../base/utils/FindModule.h \
+	../../base/modules/BaseNetwLayer.h \
+	../../base/utils/Coord.h \
+	../../base/modules/BatteryAccess.h \
+	../../base/modules/BaseLayer.h \
+	../../base/utils/HostState.h \
+	../../base/utils/AppToNetControlInfo.h \
+	../../base/modules/BaseBattery.h \
+	../../base/modules/BaseModule.h \
+	../../base/utils/PassedMessage.h \
+	NodeNetLayer.h \
+	../../base/messages/NetwPkt_m.h \
+	../../base/utils/NetwToMacControlInfo.h \
+	../../base/utils/SimpleAddress.h \
+	../../base/utils/FWMath.h \
+	../../base/utils/NetwControlInfo.h \
+	../../base/modules/ArpInterface.h
 $O/AnchorNetLayer.o: AnchorNetLayer.cc \
 	../../base/modules/AddressingInterface.h \
 	../../base/utils/ImNotifiable.h \
@@ -267,4 +329,18 @@ $O/AnchorNetLayer.o: AnchorNetLayer.cc \
 	../../base/utils/FWMath.h \
 	../../base/utils/NetwControlInfo.h \
 	../../base/modules/ArpInterface.h
+$O/NodeTransLayer.o: NodeTransLayer.cc \
+	NodeTransLayer.h \
+	../../base/utils/ImNotifiable.h \
+	../../base/modules/Blackboard.h \
+	../../base/modules/BaseUtility.h \
+	../../base/utils/FindModule.h \
+	../../base/utils/Coord.h \
+	../../base/modules/BaseLayer.h \
+	../../base/modules/BatteryAccess.h \
+	../../base/utils/HostState.h \
+	../../base/modules/BaseBattery.h \
+	../../base/modules/BaseModule.h \
+	../../base/utils/PassedMessage.h \
+	../../base/utils/FWMath.h
 
