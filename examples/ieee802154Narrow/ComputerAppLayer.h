@@ -86,7 +86,7 @@ public:
 
 	virtual void initialize(int stage);
 
-	virtual int numInitStages() const {return 5;}
+	virtual int numInitStages() const {return 4;}
 
 	virtual void finish();
 

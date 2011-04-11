@@ -70,7 +70,7 @@ void ComputerAppLayer::initialize(int stage)
 		int numerTimesQueue[numAnchors]; memset(numerTimesQueue, 0, sizeof(int)*numAnchors);
 		int queueCounter = 0;
 		int hasSlots;
-		int numSlots = 0;
+		numSlots = 0;
 		bool lookRow;
 		bool compatible;
 //        EV << "   0  1  2  3  4  5  6  7  8  9  10 11 " << endl;
@@ -196,6 +196,7 @@ void ComputerAppLayer::initialize(int stage)
 		timeReportPhase = (fullPhaseTime - (2 * timeComSinkPhase) - (3 * syncPacketsPerSyncPhase * timeSyncPhase)) * (1 - phase2VIPPercentage);
 		EV << "T Report: " << timeReportPhase << endl;
 		EV << "T VIP: " << timeVIPPhase << endl;
+		EV << "Number of Slots: " << numSlots << endl;
 	}
 }
 
@@ -245,14 +246,13 @@ void ComputerAppLayer::orderQueue(int *queue, int *numerTimesQueue, int queueCou
 }
 
 ComputerAppLayer::~ComputerAppLayer() {
-	cancelAndDelete(delayTimer);
 }
 
 
 void ComputerAppLayer::finish()
 {
 	recordScalar("dropped", nbPacketDropped);
-
+	recordScalar("numSlots", numSlots);
 }
 
 void ComputerAppLayer::handleSelfMsg(cMessage *msg)

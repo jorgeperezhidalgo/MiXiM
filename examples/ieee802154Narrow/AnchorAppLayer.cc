@@ -69,8 +69,6 @@ void AnchorAppLayer::initialize(int stage)
 		timeSyncPhase = anchor->numTotalSlots * syncPacketTime ;
 		timeVIPPhase = (fullPhaseTime - (2 * timeComSinkPhase) - (3 * syncPacketsPerSyncPhase * timeSyncPhase)) * phase2VIPPercentage;
 		timeReportPhase = (fullPhaseTime - (2 * timeComSinkPhase) - (3 * syncPacketsPerSyncPhase * timeSyncPhase)) * (1 - phase2VIPPercentage);
-		EV << "T Report: " << timeReportPhase << endl;
-		EV << "T VIP: " << timeVIPPhase << endl;
 
 		delayTimer = new cMessage("delay-timer", SEND_SYNC_TIMER);
 		if (phaseRepetitionNumber != 0 && syncInSlot)
@@ -107,7 +105,6 @@ void AnchorAppLayer::initialize(int stage)
 					}
 				}
 			}
-			EV <<"Time for next Sync Packet "<< lastPhaseStart<<endl;
 		}
 		else
 		{
