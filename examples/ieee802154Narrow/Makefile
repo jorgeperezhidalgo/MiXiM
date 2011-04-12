@@ -37,16 +37,16 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
 OBJS = \
-    $O/AnchorAppLayer.o \
-    $O/ComputerNetLayer.o \
-    $O/NodeAppLayer.o \
+    $O/AnchorTransLayer.o \
     $O/NodeTransLayer.o \
-    $O/ComputerTransLayer.o \
     $O/ComputerAppLayer.o \
     $O/AnchorNetLayer.o \
-    $O/AnchorTransLayer.o \
+    $O/WorldUtilityStats.o \
+    $O/AnchorAppLayer.o \
+    $O/NodeAppLayer.o \
     $O/NodeNetLayer.o \
-    $O/WorldUtilityStats.o
+    $O/ComputerTransLayer.o \
+    $O/ComputerNetLayer.o
 
 # Message files
 MSGFILES =

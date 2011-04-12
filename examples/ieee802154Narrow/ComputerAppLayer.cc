@@ -57,9 +57,11 @@ void ComputerAppLayer::initialize(int stage)
 
 //		Packet p(1);
 //		catPacket = world->getCategory(&p);
-	} else if (stage == 3 && syncInSlot) {
+//	} else if (stage == 3 && syncInSlot) {
+	} else if (stage == 3) {
 		BaseConnectionManager::NicEntries& anchorList = cc->getAnchorsList();
 		numAnchors = anchorList.size();
+		EV << "Numero de AN: " << numAnchors << endl;
 		int j = 0;
 		double distance;
 		NicEntry* anchors[numAnchors];

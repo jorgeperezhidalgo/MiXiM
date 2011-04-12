@@ -31,7 +31,7 @@ PROJECTRELATIVE_PATH = tests/power/utils
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
-OBJS = $O/Subscriber.o $O/DeviceDutySimple.o $O/DeviceDuty.o
+OBJS = $O/DeviceDuty.o $O/DeviceDutySimple.o $O/Subscriber.o
 
 # Message files
 MSGFILES =

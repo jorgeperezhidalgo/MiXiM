@@ -196,6 +196,7 @@ void AnchorAppLayer::handleSelfMsg(cMessage *msg)
 					case 1:
 						syncPhaseNumber++;
 						lastPhaseStart = lastPhaseStart + timeReportPhase + timeVIPPhase;
+						phaseRepetitionNumber--; //Modificacion temporal
 						break;
 					case 2:
 						syncPhaseNumber++;
@@ -242,14 +243,20 @@ void AnchorAppLayer::handleLowerControl(cMessage *msg)
 			nbPacketDropped++;
 			nextSyncSend = uniform(0, syncRestMaxRandomTimes, 0);
 			EV << "El envio del mensaje de sync ha fallado. Enviando otra vez mensaje " << syncPacketsPerSyncPhaseCounter << " de " << syncPacketsPerSyncPhase << " en " << nextSyncSend <<"s." << endl;
-			scheduleAt(simTime() + nextSyncSend, delayTimer);
+			// Temporal, this is ok only for first synctime, if want to use regularly we have to change it to it
+			if ((simTime() + nextSyncSend) <= (timeSyncPhase * syncPacketsPerSyncPhase)) {
+				scheduleAt(simTime() + nextSyncSend, delayTimer);
+			}
 		} else if (msg->getKind() == BaseMacLayer::SYNC_SENT) {
-			syncPacketsPerSyncPhaseCounter++;
+			//syncPacketsPerSyncPhaseCounter++;
 			EV << "El mensaje de sync se ha enviado correctamente.";
 			if (syncPacketsPerSyncPhaseCounter <= syncPacketsPerSyncPhase) {
 				nextSyncSend = uniform(0, syncRestMaxRandomTimes, 0);
 				EV << "Enviando " << syncPacketsPerSyncPhaseCounter << " de " << syncPacketsPerSyncPhase << " en " << nextSyncSend <<"s.";
-				scheduleAt(simTime() + nextSyncSend, delayTimer);
+				// Temporal, this is ok only for first synctime, if want to use regularly we have to change it to it
+				if ((simTime() + nextSyncSend) <= (timeSyncPhase * syncPacketsPerSyncPhase)) {
+					scheduleAt(simTime() + nextSyncSend, delayTimer);
+				}
 			}
 			EV << endl;
 		}
