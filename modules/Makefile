@@ -45,67 +45,67 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
 OBJS = \
-    $O/analogueModel/JakesFading.o \
-    $O/analogueModel/LogNormalShadowing.o \
     $O/analogueModel/UWBIRIEEE802154APathlossModel.o \
     $O/analogueModel/SimplePathlossModel.o \
+    $O/analogueModel/JakesFading.o \
+    $O/analogueModel/LogNormalShadowing.o \
     $O/analogueModel/UWBIRStochasticPathlossModel.o \
-    $O/application/SensorApplLayer.o \
-    $O/application/TrafficGen.o \
-    $O/application/BurstApplLayer.o \
-    $O/application/TestApplication.o \
     $O/application/BurstApplLayerBattery.o \
+    $O/application/TestApplication.o \
+    $O/application/BurstApplLayer.o \
+    $O/application/TrafficGen.o \
+    $O/application/SensorApplLayer.o \
     $O/connectionManager/UnitDisk.o \
-    $O/mac/Mac80211.o \
+    $O/mac/AlohaMacLayer.o \
     $O/mac/csma.o \
+    $O/mac/UWBIRMac.o \
     $O/mac/CSMA802154.o \
     $O/mac/CSMAMacLayer.o \
-    $O/mac/UWBIRMac.o \
-    $O/mac/AlohaMacLayer.o \
-    $O/messages/UWBIRMacPkt.o \
+    $O/mac/Mac80211.o \
     $O/messages/AggrPkt.o \
-    $O/mobility/MassMobility.o \
-    $O/mobility/TractorMobility.o \
-    $O/mobility/TurtleMobility.o \
-    $O/mobility/BonnMotionMobility.o \
+    $O/messages/UWBIRMacPkt.o \
     $O/mobility/ANSimMobility.o \
-    $O/mobility/RectangleMobility.o \
-    $O/mobility/BonnMotionFileCache.o \
-    $O/mobility/ConstSpeedMobility.o \
     $O/mobility/LinearMobility.o \
-    $O/mobility/CircleMobility.o \
+    $O/mobility/RectangleMobility.o \
+    $O/mobility/ConstSpeedMobility.o \
+    $O/mobility/MassMobility.o \
     $O/mobility/LineSegmentsMobilityBase.o \
-    $O/netw/DummyRoute.o \
+    $O/mobility/BonnMotionFileCache.o \
+    $O/mobility/CircleMobility.o \
+    $O/mobility/TractorMobility.o \
+    $O/mobility/BonnMotionMobility.o \
+    $O/mobility/TurtleMobility.o \
     $O/netw/ArpHost.o \
-    $O/phy/DeciderUWBIRED.o \
-    $O/phy/PhyLayer.o \
-    $O/phy/PhyLayerBattery.o \
-    $O/phy/Decider802154Narrow.o \
-    $O/phy/PhyLayerUWBIR.o \
-    $O/phy/SNRThresholdDecider.o \
-    $O/phy/Decider80211.o \
-    $O/phy/Decider80211Battery.o \
+    $O/netw/DummyRoute.o \
     $O/phy/DeciderUWBIREDSync.o \
+    $O/phy/PhyLayerBattery.o \
+    $O/phy/DeciderUWBIRED.o \
+    $O/phy/Decider80211Battery.o \
+    $O/phy/PhyLayer.o \
+    $O/phy/Decider802154Narrow.o \
+    $O/phy/SNRThresholdDecider.o \
+    $O/phy/PhyLayerUWBIR.o \
     $O/phy/DeciderUWBIREDSyncOnAddress.o \
-    $O/power/battery/BatteryStats.o \
+    $O/phy/Decider80211.o \
     $O/power/battery/SimpleBattery.o \
+    $O/power/battery/BatteryStats.o \
     $O/transport/Aggregation.o \
-    $O/utility/IEEE802154A.o \
     $O/utility/phyPER.o \
     $O/utility/SimTracer.o \
-    $O/messages/AggrPkt_m.o \
+    $O/utility/IEEE802154A.o \
     $O/messages/DummyRoutePkt_m.o \
     $O/messages/Mac80211Pkt_m.o \
-    $O/messages/AirFrameUWBIR_m.o \
-    $O/messages/UWBIRMacPkt_m.o
+    $O/messages/AggrPkt_m.o \
+    $O/messages/UWBIRMacPkt_m.o \
+    $O/messages/AirFrameUWBIR_m.o
 
 # Message files
 MSGFILES = \
-    messages/AggrPkt.msg \
     messages/DummyRoutePkt.msg \
     messages/Mac80211Pkt.msg \
-    messages/AirFrameUWBIR.msg \
-    messages/UWBIRMacPkt.msg
+    messages/AggrPkt.msg \
+    messages/UWBIRMacPkt.msg \
+    messages/AirFrameUWBIR.msg
 
 #------------------------------------------------------------------------------
 

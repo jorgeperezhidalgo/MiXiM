@@ -127,6 +127,9 @@ class BaseMobility : public BatteryAccess
     /** @brief debug this core module? */
     bool coreDebug;
 
+    /* Modified by Jorge: Number of Anchors */
+    int numAnchors;
+
   public:
 
     /** @brief This modules should only receive self-messages

@@ -35,7 +35,7 @@ PROJECTRELATIVE_PATH = tests/blackboard
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
-OBJS = $O/StateChanger.o $O/StateVisualize.o $O/TestStateSub.o $O/StateView.o
+OBJS = $O/StateChanger.o $O/StateView.o $O/StateVisualize.o $O/TestStateSub.o
 
 # Message files
 MSGFILES =

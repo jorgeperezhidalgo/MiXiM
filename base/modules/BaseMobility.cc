@@ -71,6 +71,20 @@ void BaseMobility::initialize(int stage)
         if(y > -1) pos.setY(y);
         if(!use2D && z > -1) pos.setZ(z);
 
+        //Modified by Jorge, distribution of the anchors in a grid when the position is -2, only valid for 2D
+        if(x == -2 && y == -2) {
+    		numAnchors = getParentModule()->getParentModule()->par("numAnchors"); // Total number of Anchors read from parameters
+    		double sizeX = getParentModule()->getParentModule()->par("playgroundSizeX"); // Playground size X
+    		double sizeY = getParentModule()->getParentModule()->par("playgroundSizeY"); // Playground size Y
+        	int n = getParentModule()->getIndex(); // The id of this Anchor to know where to place it
+        	double jumpX = (sizeX / (ceil(sqrt(numAnchors))-1));
+        	double jumpY = (sizeY / (ceil(sqrt(numAnchors))-1));
+        	pos.setX(static_cast<double>(n % static_cast<int>(ceil(sqrt(numAnchors)))) * jumpX);
+        	pos.setY(static_cast<double>(n / static_cast<int>(ceil(sqrt(numAnchors)))) * jumpY);
+        	EV << "Holita: " << ceil(sqrt(numAnchors)) << endl;
+        	EV << n << endl;
+        }
+
         // set start-position and start-time (i.e. current simulation-time) of the Move
         move.setStart(pos);
 		coreEV << "start pos: " << move.getStartPos().info() << endl;
@@ -105,43 +119,50 @@ void BaseMobility::initialize(int stage)
     //Modified by Jorge Perez to check for minimum distance among anchors and mobile nodes in map distribution
     else if (stage == 2)
     {
-        //Minimum distance between any anchor and any mobile node
-        double minimumDistanceAnchor = par("minimumDistanceAnchor");
-        EV << "Minimum Distance Anchor = " << minimumDistanceAnchor << endl;
-        double minimumDistanceNode = par("minimumDistanceNode");
-        //check whether anchors and nodes have a minimum distance among them separately or not
-        BaseConnectionManager::NicEntries& nicList = cc->getNicList();
-        double distance;
-        Coord newPos;
-        bool itsok = false; //It will be false if there is an anchor or mobile node closer as par("minimumdistance")
-        int i = 0; //Shows the number of tries until the anchor or mobile node finds a valid position
-        do
-		{
-        	itsok = true;
-        	coreEV << "Try number " << ++i << endl;
-			for(BaseConnectionManager::NicEntries::iterator i = nicList.begin(); i != nicList.end(); ++i)
+        //read coordinates from parameters if available
+        double x = hasPar("x") ? par("x").doubleValue() : -1;
+        double y = hasPar("y") ? par("y").doubleValue() : -1;
+        double z = hasPar("z") ? par("z").doubleValue() : -1;
+        if ((x == -1) && (y == -1))
+        {
+			//Minimum distance between any anchor and any mobile node
+			double minimumDistanceAnchor = par("minimumDistanceAnchor");
+			EV << "Minimum Distance Anchor = " << minimumDistanceAnchor << endl;
+			double minimumDistanceNode = par("minimumDistanceNode");
+			//check whether anchors and nodes have a minimum distance among them separately or not
+			BaseConnectionManager::NicEntries& nicList = cc->getNicList();
+			double distance;
+			Coord newPos;
+			bool itsok = false; //It will be false if there is an anchor or mobile node closer as par("minimumdistance")
+			int i = 0; //Shows the number of tries until the anchor or mobile node finds a valid position
+			do
 			{
-				NicEntry* nic_i = i->second;
-				if ((cc->findNic(getParentModule()->findSubmodule("nic")))->moduleType != nic_i->moduleType)
+				itsok = true;
+				coreEV << "Try number " << ++i << endl;
+				for(BaseConnectionManager::NicEntries::iterator i = nicList.begin(); i != nicList.end(); ++i)
 				{
-					continue;
-				} //If the nics to compare are from different type we skip this comparison loop
-				distance = sqrt(pow(move.getStartPos().getX() - nic_i->pos.getX(),2) + pow(move.getStartPos().getY() - nic_i->pos.getY(),2));
-				coreEV << "Distance with node " << nic_i->nicId << ": " << distance << endl;
-				if ((((cc->findNic(getParentModule()->findSubmodule("nic")))->moduleType == 2) && (distance <= minimumDistanceNode) && (distance >0)) ||
-						(((cc->findNic(getParentModule()->findSubmodule("nic")))->moduleType == 1) && (distance <= minimumDistanceAnchor) && (distance >0)))
-				{
-					itsok = false;
-					newPos = world->getRandomPosition();
-					move.setStart(newPos);
-					updatePosition();
-					coreEV << "PosMove (" << move.getStartPos().getX() << ", " << move.getStartPos().getY() << ")"<< endl;
-					coreEV << "PosNic antes (" << (cc->findNic(getParentModule()->findSubmodule("nic")))->pos.getX() << ", " << (cc->findNic(getParentModule()->findSubmodule("nic")))->pos.getY() << ")" << endl;
-					break;
+					NicEntry* nic_i = i->second;
+					if ((cc->findNic(getParentModule()->findSubmodule("nic")))->moduleType != nic_i->moduleType)
+					{
+						continue;
+					} //If the nics to compare are from different type we skip this comparison loop
+					distance = sqrt(pow(move.getStartPos().getX() - nic_i->pos.getX(),2) + pow(move.getStartPos().getY() - nic_i->pos.getY(),2));
+					coreEV << "Distance with node " << nic_i->nicId << ": " << distance << endl;
+					if ((((cc->findNic(getParentModule()->findSubmodule("nic")))->moduleType == 2) && (distance <= minimumDistanceNode) && (distance >0)) ||
+							(((cc->findNic(getParentModule()->findSubmodule("nic")))->moduleType == 1) && (distance <= minimumDistanceAnchor) && (distance >0)))
+					{
+						itsok = false;
+						newPos = world->getRandomPosition();
+						move.setStart(newPos);
+						updatePosition();
+						coreEV << "PosMove (" << move.getStartPos().getX() << ", " << move.getStartPos().getY() << ")"<< endl;
+						coreEV << "PosNic antes (" << (cc->findNic(getParentModule()->findSubmodule("nic")))->pos.getX() << ", " << (cc->findNic(getParentModule()->findSubmodule("nic")))->pos.getY() << ")" << endl;
+						break;
+					}
 				}
 			}
+			while (!itsok);
 		}
-        while (!itsok);
     }
 }
 
