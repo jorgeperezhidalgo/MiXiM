@@ -14,7 +14,7 @@
 //
 
 #include "ComputerAppLayer.h"
-#include "NetwToMacControlInfo.h"
+#include "AppToNetControlInfo.h"
 #include <cassert>
 #include <Packet.h>
 #include <BaseMacLayer.h>
@@ -49,19 +49,23 @@ void ComputerAppLayer::initialize(int stage)
 		phase2VIPPercentage = par("phase2VIPPercentage");
 
 		syncInSlot = par("syncInSlot");
+	   	//syncFirstMaxRandomTime = par("syncFirstMaxRandomTime");
+		// Cambio temporal
+		syncFirstMaxRandomTime = par("syncRestMaxRandomTimes");
+	   	syncRestMaxRandomTimes = par("syncRestMaxRandomTimes");
 
 		fullPhaseTime = getParentModule()->getParentModule()->par("fullPhaseTime");
 		timeComSinkPhase = getParentModule()->getParentModule()->par("timeComSinkPhase");
 
 		nbPacketDropped = 0;
 
-//		Packet p(1);
-//		catPacket = world->getCategory(&p);
-//	} else if (stage == 3 && syncInSlot) {
-	} else if (stage == 3) {
+	} else if (stage == 1) { //Asign the type to 1 to be taken in account in slot distribution
+		computer = cc->findNic(getParentModule()->findSubmodule("nic"));
+		computer->moduleType = 3;
+	} else if (stage == 3) { //Slot calculation
 		BaseConnectionManager::NicEntries& anchorList = cc->getAnchorsList();
 		numAnchors = anchorList.size();
-		EV << "Numero de AN: " << numAnchors << endl;
+		EV << "Number of AN: " << numAnchors << endl;
 		int j = 0;
 		double distance;
 		NicEntry* anchors[numAnchors];
@@ -193,12 +197,67 @@ void ComputerAppLayer::initialize(int stage)
 			EV << endl;
 			j++;
 		}
-		timeSyncPhase = numSlots * syncPacketTime ;
+	} else if (stage == 4) {
+		computer = cc->findNic(getParentModule()->findSubmodule("nic"));
+		timeSyncPhase = computer->numTotalSlots * syncPacketTime ;
 		timeVIPPhase = (fullPhaseTime - (2 * timeComSinkPhase) - (3 * syncPacketsPerSyncPhase * timeSyncPhase)) * phase2VIPPercentage;
 		timeReportPhase = (fullPhaseTime - (2 * timeComSinkPhase) - (3 * syncPacketsPerSyncPhase * timeSyncPhase)) * (1 - phase2VIPPercentage);
 		EV << "T Report: " << timeReportPhase << endl;
 		EV << "T VIP: " << timeVIPPhase << endl;
 		EV << "Number of Slots: " << numSlots << endl;
+
+		delayTimer = new cMessage("sync-delay-timer", SEND_SYNC_TIMER_WITHOUT_CSMA);
+		if (phaseRepetitionNumber != 0 && syncInSlot)
+		{
+			lastPhaseStart = simTime();
+			scheduleAt(lastPhaseStart + (computer->transmisionSlot[scheduledSlot] * syncPacketTime), delayTimer);
+
+			scheduledSlot++;
+			if (scheduledSlot >= computer->numSlots)
+			{
+				scheduledSlot = 0;
+				syncPacketsPerSyncPhaseCounter++;
+				lastPhaseStart = lastPhaseStart + timeSyncPhase;
+				if (syncPacketsPerSyncPhaseCounter > syncPacketsPerSyncPhase)
+				{
+					syncPacketsPerSyncPhaseCounter = 1;
+					switch (syncPhaseNumber)
+					{
+					case 1:
+						syncPhaseNumber++;
+						lastPhaseStart = lastPhaseStart + timeReportPhase + timeVIPPhase;
+						break;
+					case 2:
+						syncPhaseNumber++;
+						lastPhaseStart = lastPhaseStart + timeComSinkPhase;
+						break;
+					case 3:
+						syncPhaseNumber = 1;
+						lastPhaseStart = lastPhaseStart + timeComSinkPhase;
+						phaseRepetitionNumber--;
+						break;
+					default:
+						syncPhaseNumber = 1;
+					}
+				}
+			}
+		}
+		else if (phaseRepetitionNumber != 0)
+		{
+			scheduleAt(simTime() + uniform(0, syncFirstMaxRandomTime, 0), delayTimer);
+		}
+		else
+		{
+//			// Try for the routing
+//			ApplPkt *pkt = new ApplPkt("Report with CSMA", REPORT_WITH_CSMA);
+//			//int netwAddr = getParentModule()->getParentModule()->getSubmodule("computer")->findSubmodule("nic");
+//			int netwAddr = getParentModule()->getParentModule()->getSubmodule("anchor",21)->findSubmodule("nic");
+//			pkt->setBitLength(packetLength);
+////			pkt->setControlInfo(new AppToNetControlInfo(netwAddr, true));
+//			pkt->setDestAddr(netwAddr);
+//			pkt->setSrcAddr(getParentModule()->findSubmodule("nic"));
+//			sendDown(pkt);
+		}
 	}
 }
 
@@ -248,6 +307,7 @@ void ComputerAppLayer::orderQueue(int *queue, int *numerTimesQueue, int queueCou
 }
 
 ComputerAppLayer::~ComputerAppLayer() {
+	cancelAndDelete(delayTimer);
 }
 
 
@@ -261,9 +321,50 @@ void ComputerAppLayer::handleSelfMsg(cMessage *msg)
 {
 	switch( msg->getKind() )
 	{
-	case SEND_MESSAGE_TIMER:
+	case SEND_SYNC_TIMER_WITHOUT_CSMA:
 		assert(msg == delayTimer);
 
+		sendBroadcast();
+
+		if (phaseRepetitionNumber != 0 && syncInSlot)
+		{
+			scheduleAt(lastPhaseStart + (computer->transmisionSlot[scheduledSlot] * syncPacketTime), delayTimer);
+
+			scheduledSlot++;
+			if (scheduledSlot >= computer->numSlots)
+			{
+				scheduledSlot = 0;
+				syncPacketsPerSyncPhaseCounter++;
+				lastPhaseStart = lastPhaseStart + timeSyncPhase;
+				if (syncPacketsPerSyncPhaseCounter > syncPacketsPerSyncPhase)
+				{
+					syncPacketsPerSyncPhaseCounter = 1;
+					switch (syncPhaseNumber)
+					{
+					case 1:
+						syncPhaseNumber++;
+						lastPhaseStart = lastPhaseStart + timeReportPhase + timeVIPPhase;
+						break;
+					case 2:
+						syncPhaseNumber++;
+						lastPhaseStart = lastPhaseStart + timeComSinkPhase;
+						break;
+					case 3:
+						syncPhaseNumber = 1;
+						lastPhaseStart = lastPhaseStart + timeComSinkPhase;
+						phaseRepetitionNumber--;
+						break;
+					default:
+						syncPhaseNumber = 1;
+					}
+				}
+			}
+			EV <<"Time for next Sync Packet "<< lastPhaseStart<<endl;
+		}
+		else
+		{
+
+		}
 		break;
 	default:
 		EV << "Unkown selfmessage! -> delete, kind: "<<msg->getKind() <<endl;
@@ -272,13 +373,31 @@ void ComputerAppLayer::handleSelfMsg(cMessage *msg)
 }
 
 
+
+
+
 void ComputerAppLayer::handleLowerMsg(cMessage *msg)
 {
 //	Packet p(packetLength, 1, 0);
 //	world->publishBBItem(catPacket, &p, -1);
 
-	delete msg;
-	msg = 0;
+	// Temporal aquí habrá que añadir todos los tipos de paquetes que tratar
+	switch( msg->getKind() )
+    {
+    case ComputerAppLayer::REPORT_WITHOUT_CSMA:
+    case ComputerAppLayer::REPORT_WITH_CSMA:
+    	if ((static_cast<ApplPkt*>(msg))->getDestAddr() == getParentModule()->findSubmodule("nic")) {
+    		getParentModule()->bubble("I've received the message");
+    		delete msg;
+    		msg = 0;
+    	} else {
+    		sendDown(msg);
+    	}
+    	break;
+    default:
+    	delete msg;
+    	msg = 0;
+    }
 }
 
 
@@ -287,6 +406,24 @@ void ComputerAppLayer::handleLowerControl(cMessage *msg)
 	if (!syncInSlot) {
 		if(msg->getKind() == BaseMacLayer::PACKET_DROPPED) {
 			nbPacketDropped++;
+			nextSyncSend = uniform(0, syncRestMaxRandomTimes, 0);
+			EV << "El envio del mensaje de sync ha fallado. Enviando otra vez mensaje " << syncPacketsPerSyncPhaseCounter << " de " << syncPacketsPerSyncPhase << " en " << nextSyncSend <<"s." << endl;
+			// Temporal, this is ok only for first synctime, if want to use regularly we have to change it to it
+			if ((simTime() + nextSyncSend) <= (timeSyncPhase * syncPacketsPerSyncPhase)) {
+				scheduleAt(simTime() + nextSyncSend, delayTimer);
+			}
+		} else if (msg->getKind() == BaseMacLayer::SYNC_SENT) {
+			syncPacketsPerSyncPhaseCounter++;
+			EV << "El mensaje de sync se ha enviado correctamente.";
+			if (syncPacketsPerSyncPhaseCounter <= syncPacketsPerSyncPhase) {
+				nextSyncSend = uniform(0, syncRestMaxRandomTimes, 0);
+				EV << "Enviando " << syncPacketsPerSyncPhaseCounter << " de " << syncPacketsPerSyncPhase << " en " << nextSyncSend <<"s.";
+				// Temporal, this is ok only for first synctime, if want to use regularly we have to change it to it
+				if ((simTime() + nextSyncSend) <= (timeSyncPhase * syncPacketsPerSyncPhase)) {
+					scheduleAt(simTime() + nextSyncSend, delayTimer);
+				}
+			}
+			EV << endl;
 		}
 	}
 	delete msg;
@@ -295,18 +432,14 @@ void ComputerAppLayer::handleLowerControl(cMessage *msg)
 
 void ComputerAppLayer::sendBroadcast()
 {
-	SyncPkt *pkt = new SyncPkt("SYNC_MESSAGE", MESSAGE);
+	//It doesn't matter if we have slotted version or not, CSMA must be disabled, we control random time and retransmision in app layer
+	ApplPkt *pkt = new ApplPkt("SYNC_MESSAGE_WITHOUT_CSMA", SYNC_MESSAGE_WITHOUT_CSMA);
 	pkt->setBitLength(packetLength);
 
-//	pkt->setSrcAddr(myNetwAddr);
-//	pkt->setDestAddr(destination);
-
-	//It doesn't matter if we have slotted version or not, CSMA must be disabled, we control random time and retransmision in app layer
-
-	pkt->setControlInfo(new NetwToMacControlInfo(destination,false));
+	pkt->setSrcAddr(myNetwAddr);
+	pkt->setDestAddr(destination);
 
 	pkt->setSequenceId(syncPacketsPerSyncPhaseCounter);
-
 
 
 //	Packet p(packetLength, 0, 1);

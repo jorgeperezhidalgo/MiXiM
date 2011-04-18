@@ -59,9 +59,7 @@ void AnchorAppLayer::initialize(int stage)
 
 		nbPacketDropped = 0;
 
-//		Packet p(1);
-//		catPacket = world->getCategory(&p);
-	} else if (stage == 1) {
+	} else if (stage == 1) { //Asign the type to 1 to be taken in account in slot distribution
 		anchor = cc->findNic(getParentModule()->findSubmodule("nic"));
 		anchor->moduleType = 1;
 	} else if (stage == 4) {
@@ -70,7 +68,7 @@ void AnchorAppLayer::initialize(int stage)
 		timeVIPPhase = (fullPhaseTime - (2 * timeComSinkPhase) - (3 * syncPacketsPerSyncPhase * timeSyncPhase)) * phase2VIPPercentage;
 		timeReportPhase = (fullPhaseTime - (2 * timeComSinkPhase) - (3 * syncPacketsPerSyncPhase * timeSyncPhase)) * (1 - phase2VIPPercentage);
 
-		delayTimer = new cMessage("delay-timer", SEND_SYNC_TIMER);
+		delayTimer = new cMessage("sync-delay-timer", SEND_SYNC_TIMER_WITHOUT_CSMA);
 		if (phaseRepetitionNumber != 0 && syncInSlot)
 		{
 			lastPhaseStart = simTime();
@@ -106,56 +104,26 @@ void AnchorAppLayer::initialize(int stage)
 				}
 			}
 		}
-		else
+		else if (phaseRepetitionNumber != 0)
 		{
 			scheduleAt(simTime() + uniform(0, syncFirstMaxRandomTime, 0), delayTimer);
 		}
-	}
-}
-
-int AnchorAppLayer::hasSlot(int *slots, int *slotCounter, int numSlots, int anchor, int numAnchors)
-{
-	int presenceInSlots = 0;
-	for (int i = 0; i < numSlots; i++)
-	{
-		for (int j = 0; j < *(slotCounter + i); j++)
+		else
 		{
-			if (*(slots + (i * numAnchors) + j) == anchor)
-				presenceInSlots++;
+//			// Try for the routing
+//			if (getParentModule()->getIndex() == 21)
+//			{
+//				ApplPkt *pkt = new ApplPkt("Report with CSMA", REPORT_WITH_CSMA);
+//				//int netwAddr = getParentModule()->getParentModule()->getSubmodule("computer",0)->findSubmodule("nic");
+//				int netwAddr = getParentModule()->getParentModule()->getSubmodule("anchor",0)->findSubmodule("nic");
+//				pkt->setBitLength(packetLength);
+////				pkt->setControlInfo(new AppToNetControlInfo(netwAddr, true));
+//				pkt->setDestAddr(netwAddr);
+//				pkt->setSrcAddr(getParentModule()->findSubmodule("nic"));
+//				sendDown(pkt);
+//			}
 		}
 	}
-	return presenceInSlots;
-}
-
-void AnchorAppLayer::orderQueue(int *queue, int *numerTimesQueue, int queueCounter)
-{
-    int tempQueue[(queueCounter+1)]; memset(tempQueue, 0, sizeof(int)*(queueCounter+1));
-    int tempNumerTimesQueue[(queueCounter+1)]; memset(tempNumerTimesQueue, 0, sizeof(int)*(queueCounter+1));
-    int tempQueueCounter = 0;
-    int posMax = 0;
-    int posMin = 0;
-
-    for (int i = 0; i < queueCounter; i++)
-    {
-    	tempQueue[i] = queue[i];
-    	tempNumerTimesQueue[i] = numerTimesQueue[i];
-    	if (numerTimesQueue[i] > numerTimesQueue[posMax])
-    		posMax = i;
-    }
-    for (tempQueueCounter = 0; tempQueueCounter <= queueCounter; tempQueueCounter++)
-    {
-    	posMin = posMax;
-    	for (int i = 0; i < queueCounter; i++)
-    	{
-    		if (tempNumerTimesQueue[i] <= tempNumerTimesQueue[posMin])
-    		{
-    			posMin = i;
-    		}
-    	}
-    	queue[tempQueueCounter] = tempQueue[posMin];
-    	numerTimesQueue[tempQueueCounter] = tempNumerTimesQueue[posMin];
-    	tempNumerTimesQueue[posMin] = tempNumerTimesQueue[posMax] + 1;
-    }
 }
 
 AnchorAppLayer::~AnchorAppLayer() {
@@ -173,7 +141,7 @@ void AnchorAppLayer::handleSelfMsg(cMessage *msg)
 {
 	switch( msg->getKind() )
 	{
-	case SEND_SYNC_TIMER:
+	case SEND_SYNC_TIMER_WITHOUT_CSMA:
 		assert(msg == delayTimer);
 
 		sendBroadcast();
@@ -196,7 +164,6 @@ void AnchorAppLayer::handleSelfMsg(cMessage *msg)
 					case 1:
 						syncPhaseNumber++;
 						lastPhaseStart = lastPhaseStart + timeReportPhase + timeVIPPhase;
-						phaseRepetitionNumber--; //Modificacion temporal
 						break;
 					case 2:
 						syncPhaseNumber++;
@@ -231,8 +198,23 @@ void AnchorAppLayer::handleLowerMsg(cMessage *msg)
 //	Packet p(packetLength, 1, 0);
 //	world->publishBBItem(catPacket, &p, -1);
 
-	delete msg;
-	msg = 0;
+	// Temporal aquí habrá que añadir todos los tipos de paquetes que tratar
+	switch( msg->getKind() )
+    {
+    case AnchorAppLayer::REPORT_WITHOUT_CSMA:
+    case AnchorAppLayer::REPORT_WITH_CSMA:
+    	if ((static_cast<ApplPkt*>(msg))->getDestAddr() == getParentModule()->findSubmodule("nic")) {
+    		getParentModule()->bubble("I've received the message");
+    		delete msg;
+    		msg = 0;
+    	} else {
+    		sendDown(msg);
+    	}
+    	break;
+    default:
+    	delete msg;
+    	msg = 0;
+    }
 }
 
 
@@ -248,7 +230,7 @@ void AnchorAppLayer::handleLowerControl(cMessage *msg)
 				scheduleAt(simTime() + nextSyncSend, delayTimer);
 			}
 		} else if (msg->getKind() == BaseMacLayer::SYNC_SENT) {
-			//syncPacketsPerSyncPhaseCounter++;
+			syncPacketsPerSyncPhaseCounter++;
 			EV << "El mensaje de sync se ha enviado correctamente.";
 			if (syncPacketsPerSyncPhaseCounter <= syncPacketsPerSyncPhase) {
 				nextSyncSend = uniform(0, syncRestMaxRandomTimes, 0);
@@ -267,15 +249,12 @@ void AnchorAppLayer::handleLowerControl(cMessage *msg)
 
 void AnchorAppLayer::sendBroadcast()
 {
-	SyncPkt *pkt = new SyncPkt("SYNC_MESSAGE", SYNC_MESSAGE);
+	//It doesn't matter if we have slotted version or not, CSMA must be disabled, we control random time and retransmision in app layer
+	ApplPkt *pkt = new ApplPkt("SYNC_MESSAGE_WITHOUT_CSMA", SYNC_MESSAGE_WITHOUT_CSMA);
 	pkt->setBitLength(packetLength);
 
-//	pkt->setSrcAddr(myNetwAddr);
-//	pkt->setDestAddr(destination);
-
-	//It doesn't matter if we have slotted version or not, CSMA must be disabled, we control random time and retransmision in app layer
-
-	pkt->setControlInfo(new AppToNetControlInfo(destination,false));
+	pkt->setSrcAddr(myNetwAddr);
+	pkt->setDestAddr(destination);
 
 	pkt->setSequenceId(syncPacketsPerSyncPhaseCounter);
 

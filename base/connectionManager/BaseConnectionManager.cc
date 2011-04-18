@@ -165,7 +165,7 @@ BaseConnectionManager::NicEntries& BaseConnectionManager::getAnchorsList()
 	for(BaseConnectionManager::NicEntries::iterator i = anchors.begin(); i != anchors.end(); ++i)
 	{
 		NicEntry* anchor_i = i->second;
-		if (anchor_i->moduleType != 1)
+		if ((anchor_i->moduleType != 1) && ((anchor_i->moduleType != 3)))
 		{
 			anchors.erase(i);
 		}

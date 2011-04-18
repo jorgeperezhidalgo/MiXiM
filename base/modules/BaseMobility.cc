@@ -81,8 +81,6 @@ void BaseMobility::initialize(int stage)
         	double jumpY = (sizeY / (ceil(sqrt(numAnchors))-1));
         	pos.setX(static_cast<double>(n % static_cast<int>(ceil(sqrt(numAnchors)))) * jumpX);
         	pos.setY(static_cast<double>(n / static_cast<int>(ceil(sqrt(numAnchors)))) * jumpY);
-        	EV << "Holita: " << ceil(sqrt(numAnchors)) << endl;
-        	EV << n << endl;
         }
 
         // set start-position and start-time (i.e. current simulation-time) of the Move

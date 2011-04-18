@@ -13,6 +13,8 @@ import org.mixim.modules.nic.Nic802154_TI_CC2420;
 module PhyMacComputer
 {
     parameters:
+        double numComputers; // total number of hosts in the network
+
         @display("bgb=363,335,white;bgp=10,10");
     gates:
         input radioIn;

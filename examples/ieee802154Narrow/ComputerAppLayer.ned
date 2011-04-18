@@ -30,6 +30,8 @@ simple ComputerAppLayer
     	double syncPacketTime @unit(s) = default(1.5ms); 
     	double phase2VIPPercentage = default(0.4);
     	bool syncInSlot = default(true); // Indicates if the sync packets have to be slotted or not
+    	double syncFirstMaxRandomTime @unit(s) = default(6ms); // First maximum time an anchor must wait to transmit the first sync packet in no slotted mode
+    	double syncRestMaxRandomTimes @unit(s) = default(1ms); // Rest of maximum times an anchor must wait to transmit the rest of the sync packets in no slotted mode
     gates:
     	input lowerGateIn; // from NIC
         output lowerGateOut; // to NIC

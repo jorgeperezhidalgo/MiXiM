@@ -11,6 +11,8 @@ Define_Module(AnchorNetLayer);
 void AnchorNetLayer::initialize(int stage) {
 	BaseNetwLayer::initialize(stage);
 	if (stage == 0) {
+        cc = FindModule<BaseConnectionManager *>::findGlobalModule();
+        if( cc == 0 ) error("Could not find connectionmanager module");
 	}
 }
 void AnchorNetLayer::finish() {
@@ -83,15 +85,44 @@ cMessage* AnchorNetLayer::decapsMsg(NetwPkt *msg)
 NetwPkt* AnchorNetLayer::encapsMsg(cPacket *appPkt) {
     int macAddr;
     int netwAddr;
+    int origen;
+    int destino;
+	// Routing matrix for 25 elements initialization
+	int routing_matrix_25[26][26] = { {0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+		{0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},
+		{1,1,2,3,3,6,6,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3},
+		{2,2,2,3,4,2,2,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25},
+		{3,3,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3},
+		{6,6,6,6,6,5,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6},
+		{2,2,2,2,2,5,6,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},
+		{8,8,8,8,8,8,8,7,8,8,11,11,8,8,8,8,8,8,8,8,8,8,8,8,8,8},
+		{25,25,25,25,25,25,25,7,8,25,7,7,12,25,25,12,12,12,25,25,12,12,12,25,25,25},
+		{25,25,25,25,25,25,25,25,25,9,25,25,25,13,14,25,25,-1,13,14,25,25,25,13,14,25},
+		{11,11,11,11,11,11,11,11,11,11,10,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11},
+		{7,7,7,7,7,7,7,7,7,7,10,11,7,7,7,7,7,7,7,7,7,7,7,7,7,7},
+		{8,8,8,8,8,8,8,8,8,8,8,8,12,8,8,16,16,17,8,8,16,17,17,8,8,8},
+		{9,9,9,9,9,9,9,9,9,9,9,9,9,13,9,9,9,9,18,9,9,9,9,18,9,9},
+		{9,9,9,9,9,9,9,9,9,9,9,9,9,9,14,9,9,9,9,19,9,9,9,9,19,9},
+		{16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,15,16,16,16,16,16,16,16,16,16,16},
+		{12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,15,16,12,12,12,20,12,12,12,12,12},
+		{12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,17,12,12,12,21,22,12,12,12},
+		{13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,18,13,13,13,13,23,13,13},
+		{14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,19,14,14,14,14,24,14},
+		{16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,20,16,16,16,16,16},
+		{17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,21,17,17,17,17},
+		{17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,22,17,17,17},
+		{18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,23,18,18},
+		{19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,24,19},
+		{3,3,3,3,3,3,3,8,8,9,8,8,8,9,9,8,8,8,9,9,8,8,8,9,9,25} };
+
 
     EV <<"in encaps...\n";
 
     NetwPkt *pkt = new NetwPkt(appPkt->getName(), appPkt->getKind());
     pkt->setBitLength(headerLength);
 
-    AppToNetControlInfo* cInfo = dynamic_cast<AppToNetControlInfo*>(appPkt->removeControlInfo());
-    EV<<"NET received a message from upper layer, name is " << appPkt->getName() <<", CInfo removed, mac addr="<< cInfo->getNextHopMac()<<endl;
-	netwAddr = cInfo->getNextHopMac();
+    netwAddr = (static_cast<ApplPkt*>(appPkt))->getDestAddr();
+    EV<<"NET received a message from upper layer, name is " << appPkt->getName() <<", dest mac addr="<< netwAddr <<endl;
 
     pkt->setSrcAddr(myNetwAddr);
     pkt->setDestAddr(netwAddr);
@@ -103,14 +134,37 @@ NetwPkt* AnchorNetLayer::encapsMsg(cPacket *appPkt) {
     }
     else{
         EV <<"sendDown: get the MAC address\n";
-        macAddr = arp->getMacAddr(netwAddr);
+		host = cc->findNic(simulation.getModule(myNetwAddr)->getParentModule()->findSubmodule("nic"));
+		if (host->moduleType == 3)
+			origen = 25;
+		else
+			origen = simulation.getModule(myNetwAddr)->getParentModule()->getIndex();
+
+		host = cc->findNic(simulation.getModule(netwAddr)->getParentModule()->findSubmodule("nic"));
+		if (host->moduleType == 3)
+			destino = 25;
+		else
+			destino = simulation.getModule(netwAddr)->getParentModule()->getIndex();
+
+        if (routing_matrix_25[origen][destino] == 25)
+        	macAddr = arp->getMacAddr(getParentModule()->getParentModule()->getSubmodule("computer",0)->findSubmodule("nic"));
+        else
+        	macAddr = arp->getMacAddr(getParentModule()->getParentModule()->getSubmodule("anchor",routing_matrix_25[origen][destino])->findSubmodule("nic"));
     }
 
-    pkt->setControlInfo(new NetwToMacControlInfo(macAddr, cInfo->getCsmaActive()));
+    switch( appPkt->getKind() )
+    {
+    case AnchorAppLayer::REPORT_WITH_CSMA:
+    case AnchorAppLayer::SYNC_MESSAGE_WITH_CSMA:
+    	pkt->setControlInfo(new NetwToMacControlInfo(macAddr, true));
+    	break;
+    default:
+    	pkt->setControlInfo(new NetwToMacControlInfo(macAddr, false));
+    }
+
 
     //encapsulate the application packet
     pkt->encapsulate(appPkt);
     EV <<" pkt encapsulated\n";
-    delete cInfo;
     return pkt;
 }

@@ -1,4 +1,5 @@
 #include <BaseNetwLayer.h>
+#include <ComputerAppLayer.h>
 
 class ComputerNetLayer : public BaseNetwLayer
 {
@@ -8,6 +9,12 @@ public:
     virtual void finish();
 
 protected:
+
+    /** @brief Pointer to the PropagationModel module*/
+	BaseConnectionManager* cc;
+
+	NicEntry* host;
+
     /**
      * @name Handle Messages
      * @brief Functions to redefine by the programmer

@@ -16,7 +16,7 @@
 #ifndef ANCHORAPPLAYER_H_
 #define ANCHORAPPLAYER_H_
 
-#include "SyncPkt_m.h"
+#include "ApplPkt_m.h"
 #include "SimpleAddress.h"
 #include "BaseLayer.h"
 #include "BaseArp.h"
@@ -37,8 +37,14 @@ public:
 
 	enum TrafficGenMessageKinds{
 
-		SEND_MESSAGE_TIMER = 1,
-		MESSAGE
+		SEND_SYNC_TIMER_WITH_CSMA = 1,
+		SYNC_MESSAGE_WITH_CSMA,
+		SEND_SYNC_TIMER_WITHOUT_CSMA,
+		SYNC_MESSAGE_WITHOUT_CSMA,
+		SEND_REPORT_WITH_CSMA,
+		REPORT_WITH_CSMA,
+		SEND_REPORT_WITHOUT_CSMA,
+		REPORT_WITHOUT_CSMA
 	};
 
 protected:
@@ -62,9 +68,11 @@ protected:
 	int scheduledSlot; //When a node has assigned more than 1 slot, we have to create a new entry in the same sync phase
 	simtime_t lastPhaseStart;
 	simtime_t nextSyncSend;
-	NicEntry* anchor;
+	NicEntry* computer;
 
 	bool syncInSlot; // Indicates if the sync packets have to be slotted or not
+   	simtime_t syncFirstMaxRandomTime; // First maximum time an anchor must wait to transmit the first sync packet in no slotted mode
+   	simtime_t syncRestMaxRandomTimes; // Rest of maximum times an anchor must wait to transmit the rest of the sync packets in no slotted mode
 
 	int catPacket;
 
@@ -86,7 +94,7 @@ public:
 
 	virtual void initialize(int stage);
 
-	virtual int numInitStages() const {return 4;}
+	virtual int numInitStages() const {return 5;}
 
 	virtual void finish();
 

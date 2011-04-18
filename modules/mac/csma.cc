@@ -180,11 +180,11 @@ void csma::handleUpperMsg(cMessage *msg) {
 	EV<<"CSMA received a message from upper layer, name is " << msg->getName() <<", CInfo removed, mac addr="<< cInfo->getNextHopMac()<<endl;
 	int dest = cInfo->getNextHopMac();
 	macPkt->setCsmaActive(cInfo->getCsmaActive());
-	macPkt->setSequenceId((static_cast<SyncPkt*>(msg))->getSequenceId());
+	macPkt->setSequenceId((static_cast<ApplPkt*>(msg))->getSequenceId());
 	macPkt->setDestAddr(dest);
 	delete cInfo;
 	macPkt->setSrcAddr(myMacAddr);
-	(static_cast<SyncPkt*>(msg))->setSrcAddr(myMacAddr);
+	(static_cast<ApplPkt*>(msg))->setSrcAddr(myMacAddr);
 
 	if(useMACAcks) {
 		if(SeqNrParent.find(dest) == SeqNrParent.end()) {

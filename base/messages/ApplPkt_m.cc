@@ -34,8 +34,15 @@ Register_Class(ApplPkt);
 
 ApplPkt::ApplPkt(const char *name, int kind) : cPacket(name,kind)
 {
+    this->sequenceId_var = 0;
     this->destAddr_var = -1;
     this->srcAddr_var = -1;
+    this->priority_var = 0;
+    this->status_var = 0;
+    this->posX_var = 0;
+    this->posY_var = 0;
+    this->posZ_var = 0;
+    this->timestamp_var = 0;
 }
 
 ApplPkt::ApplPkt(const ApplPkt& other) : cPacket()
@@ -52,23 +59,54 @@ ApplPkt& ApplPkt::operator=(const ApplPkt& other)
 {
     if (this==&other) return *this;
     cPacket::operator=(other);
+    this->sequenceId_var = other.sequenceId_var;
     this->destAddr_var = other.destAddr_var;
     this->srcAddr_var = other.srcAddr_var;
+    this->priority_var = other.priority_var;
+    this->status_var = other.status_var;
+    this->posX_var = other.posX_var;
+    this->posY_var = other.posY_var;
+    this->posZ_var = other.posZ_var;
+    this->timestamp_var = other.timestamp_var;
     return *this;
 }
 
 void ApplPkt::parsimPack(cCommBuffer *b)
 {
     cPacket::parsimPack(b);
+    doPacking(b,this->sequenceId_var);
     doPacking(b,this->destAddr_var);
     doPacking(b,this->srcAddr_var);
+    doPacking(b,this->priority_var);
+    doPacking(b,this->status_var);
+    doPacking(b,this->posX_var);
+    doPacking(b,this->posY_var);
+    doPacking(b,this->posZ_var);
+    doPacking(b,this->timestamp_var);
 }
 
 void ApplPkt::parsimUnpack(cCommBuffer *b)
 {
     cPacket::parsimUnpack(b);
+    doUnpacking(b,this->sequenceId_var);
     doUnpacking(b,this->destAddr_var);
     doUnpacking(b,this->srcAddr_var);
+    doUnpacking(b,this->priority_var);
+    doUnpacking(b,this->status_var);
+    doUnpacking(b,this->posX_var);
+    doUnpacking(b,this->posY_var);
+    doUnpacking(b,this->posZ_var);
+    doUnpacking(b,this->timestamp_var);
+}
+
+int ApplPkt::getSequenceId() const
+{
+    return sequenceId_var;
+}
+
+void ApplPkt::setSequenceId(int sequenceId_var)
+{
+    this->sequenceId_var = sequenceId_var;
 }
 
 int ApplPkt::getDestAddr() const
@@ -89,6 +127,66 @@ int ApplPkt::getSrcAddr() const
 void ApplPkt::setSrcAddr(int srcAddr_var)
 {
     this->srcAddr_var = srcAddr_var;
+}
+
+int ApplPkt::getPriority() const
+{
+    return priority_var;
+}
+
+void ApplPkt::setPriority(int priority_var)
+{
+    this->priority_var = priority_var;
+}
+
+int8 ApplPkt::getStatus() const
+{
+    return status_var;
+}
+
+void ApplPkt::setStatus(int8 status_var)
+{
+    this->status_var = status_var;
+}
+
+int16 ApplPkt::getPosX() const
+{
+    return posX_var;
+}
+
+void ApplPkt::setPosX(int16 posX_var)
+{
+    this->posX_var = posX_var;
+}
+
+int16 ApplPkt::getPosY() const
+{
+    return posY_var;
+}
+
+void ApplPkt::setPosY(int16 posY_var)
+{
+    this->posY_var = posY_var;
+}
+
+int16 ApplPkt::getPosZ() const
+{
+    return posZ_var;
+}
+
+void ApplPkt::setPosZ(int16 posZ_var)
+{
+    this->posZ_var = posZ_var;
+}
+
+int32 ApplPkt::getTimestamp() const
+{
+    return timestamp_var;
+}
+
+void ApplPkt::setTimestamp(int32 timestamp_var)
+{
+    this->timestamp_var = timestamp_var;
 }
 
 class ApplPktDescriptor : public cClassDescriptor
@@ -138,7 +236,7 @@ const char *ApplPktDescriptor::getProperty(const char *propertyname) const
 int ApplPktDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 2+basedesc->getFieldCount(object) : 2;
+    return basedesc ? 9+basedesc->getFieldCount(object) : 9;
 }
 
 unsigned int ApplPktDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -152,8 +250,15 @@ unsigned int ApplPktDescriptor::getFieldTypeFlags(void *object, int field) const
     static unsigned int fieldTypeFlags[] = {
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<2) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<9) ? fieldTypeFlags[field] : 0;
 }
 
 const char *ApplPktDescriptor::getFieldName(void *object, int field) const
@@ -165,18 +270,32 @@ const char *ApplPktDescriptor::getFieldName(void *object, int field) const
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldNames[] = {
+        "sequenceId",
         "destAddr",
         "srcAddr",
+        "priority",
+        "status",
+        "posX",
+        "posY",
+        "posZ",
+        "timestamp",
     };
-    return (field>=0 && field<2) ? fieldNames[field] : NULL;
+    return (field>=0 && field<9) ? fieldNames[field] : NULL;
 }
 
 int ApplPktDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
-    if (fieldName[0]=='d' && strcmp(fieldName, "destAddr")==0) return base+0;
-    if (fieldName[0]=='s' && strcmp(fieldName, "srcAddr")==0) return base+1;
+    if (fieldName[0]=='s' && strcmp(fieldName, "sequenceId")==0) return base+0;
+    if (fieldName[0]=='d' && strcmp(fieldName, "destAddr")==0) return base+1;
+    if (fieldName[0]=='s' && strcmp(fieldName, "srcAddr")==0) return base+2;
+    if (fieldName[0]=='p' && strcmp(fieldName, "priority")==0) return base+3;
+    if (fieldName[0]=='s' && strcmp(fieldName, "status")==0) return base+4;
+    if (fieldName[0]=='p' && strcmp(fieldName, "posX")==0) return base+5;
+    if (fieldName[0]=='p' && strcmp(fieldName, "posY")==0) return base+6;
+    if (fieldName[0]=='p' && strcmp(fieldName, "posZ")==0) return base+7;
+    if (fieldName[0]=='t' && strcmp(fieldName, "timestamp")==0) return base+8;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -191,8 +310,15 @@ const char *ApplPktDescriptor::getFieldTypeString(void *object, int field) const
     static const char *fieldTypeStrings[] = {
         "int",
         "int",
+        "int",
+        "int",
+        "int8",
+        "int16",
+        "int16",
+        "int16",
+        "int32",
     };
-    return (field>=0 && field<2) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<9) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *ApplPktDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -232,8 +358,15 @@ std::string ApplPktDescriptor::getFieldAsString(void *object, int field, int i) 
     }
     ApplPkt *pp = (ApplPkt *)object; (void)pp;
     switch (field) {
-        case 0: return long2string(pp->getDestAddr());
-        case 1: return long2string(pp->getSrcAddr());
+        case 0: return long2string(pp->getSequenceId());
+        case 1: return long2string(pp->getDestAddr());
+        case 2: return long2string(pp->getSrcAddr());
+        case 3: return long2string(pp->getPriority());
+        case 4: return long2string(pp->getStatus());
+        case 5: return long2string(pp->getPosX());
+        case 6: return long2string(pp->getPosY());
+        case 7: return long2string(pp->getPosZ());
+        case 8: return long2string(pp->getTimestamp());
         default: return "";
     }
 }
@@ -248,8 +381,15 @@ bool ApplPktDescriptor::setFieldAsString(void *object, int field, int i, const c
     }
     ApplPkt *pp = (ApplPkt *)object; (void)pp;
     switch (field) {
-        case 0: pp->setDestAddr(string2long(value)); return true;
-        case 1: pp->setSrcAddr(string2long(value)); return true;
+        case 0: pp->setSequenceId(string2long(value)); return true;
+        case 1: pp->setDestAddr(string2long(value)); return true;
+        case 2: pp->setSrcAddr(string2long(value)); return true;
+        case 3: pp->setPriority(string2long(value)); return true;
+        case 4: pp->setStatus(string2long(value)); return true;
+        case 5: pp->setPosX(string2long(value)); return true;
+        case 6: pp->setPosY(string2long(value)); return true;
+        case 7: pp->setPosZ(string2long(value)); return true;
+        case 8: pp->setTimestamp(string2long(value)); return true;
         default: return false;
     }
 }
@@ -265,8 +405,15 @@ const char *ApplPktDescriptor::getFieldStructName(void *object, int field) const
     static const char *fieldStructNames[] = {
         NULL,
         NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
     };
-    return (field>=0 && field<2) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<9) ? fieldStructNames[field] : NULL;
 }
 
 void *ApplPktDescriptor::getFieldStructPointer(void *object, int field, int i) const

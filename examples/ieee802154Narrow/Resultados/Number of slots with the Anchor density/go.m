@@ -8,7 +8,9 @@ columna_scalar= 9; % Column where the data begins, starts with 0, 9 and not 3 be
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 num = 0;
 
-for N = 6:80
+n= [2:70];
+
+for N = 2:70
        
         num = num + 1;
 

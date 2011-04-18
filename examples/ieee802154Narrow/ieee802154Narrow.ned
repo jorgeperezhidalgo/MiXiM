@@ -9,6 +9,7 @@ network ieee802154Narrow
         double playgroundSizeX @unit(m); // x size of the area the nodes are in (in meters)
         double playgroundSizeY @unit(m); // y size of the area the nodes are in (in meters)
         double playgroundSizeZ @unit(m); // z size of the area the nodes are in (in meters)
+        double numComputers; //total number of computers in the network
         double numAnchors; //total number of anchors in the network
         double numNodes; // total number of mobile nodes in the network
         double fullPhaseTime @unit(s) = default(1.5s); // Time of every full phase
@@ -42,8 +43,9 @@ network ieee802154Narrow
                 @display("p=60,147;b=0,0,rect,yellow;i=device/pocketpc");
 
         }
-        computer: PhyMacComputer {
+        computer[numComputers]: PhyMacComputer {
             parameters:
+                numComputers = numComputers;
                 @display("p=141,118;b=50,50,rect,red;i=device/laptop");
 
         }

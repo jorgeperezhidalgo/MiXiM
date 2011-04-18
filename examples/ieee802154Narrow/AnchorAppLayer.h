@@ -16,7 +16,7 @@
 #ifndef ANCHORAPPLAYER_H_
 #define ANCHORAPPLAYER_H_
 
-#include "SyncPkt_m.h"
+#include "ApplPkt_m.h"
 #include "SimpleAddress.h"
 #include "BaseLayer.h"
 #include "BaseArp.h"
@@ -37,8 +37,14 @@ public:
 
 	enum TrafficGenMessageKinds{
 
-		SEND_SYNC_TIMER = 1,
-		SYNC_MESSAGE
+		SEND_SYNC_TIMER_WITH_CSMA = 1,
+		SYNC_MESSAGE_WITH_CSMA,
+		SEND_SYNC_TIMER_WITHOUT_CSMA,
+		SYNC_MESSAGE_WITHOUT_CSMA,
+		SEND_REPORT_WITH_CSMA,
+		REPORT_WITH_CSMA,
+		SEND_REPORT_WITHOUT_CSMA,
+		REPORT_WITHOUT_CSMA
 	};
 
 protected:
@@ -118,12 +124,6 @@ protected:
 
 	/** @brief Send a broadcast message to lower layer. */
 	virtual void sendBroadcast();
-
-	// Returns from the already assigned slots how many time a nicId appears
-	int hasSlot(int *slots, int *slotCounter, int numSlots, int anchor, int numAnchors);
-
-	// Order Queue min to max
-	void orderQueue(int *queue, int *numerTimesQueue, int queueCounter);
 
 };
 

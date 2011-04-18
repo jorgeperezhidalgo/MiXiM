@@ -20,17 +20,30 @@
  * <pre>
  * packet ApplPkt
  * {
+ *     int sequenceId = 0;
  *     int destAddr = -1; 
  *     int srcAddr = -1; 
- * 
+ *     int priority = 0; 
+ *     int8 status = 0;
+ * 	int16 posX = 0;
+ * 	int16 posY = 0;
+ * 	int16 posZ = 0;
+ * 	int32 timestamp = 0;
  * }
  * </pre>
  */
 class ApplPkt : public ::cPacket
 {
   protected:
+    int sequenceId_var;
     int destAddr_var;
     int srcAddr_var;
+    int priority_var;
+    int8 status_var;
+    int16 posX_var;
+    int16 posY_var;
+    int16 posZ_var;
+    int32 timestamp_var;
 
     // protected and unimplemented operator==(), to prevent accidental usage
     bool operator==(const ApplPkt&);
@@ -45,10 +58,24 @@ class ApplPkt : public ::cPacket
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
+    virtual int getSequenceId() const;
+    virtual void setSequenceId(int sequenceId_var);
     virtual int getDestAddr() const;
     virtual void setDestAddr(int destAddr_var);
     virtual int getSrcAddr() const;
     virtual void setSrcAddr(int srcAddr_var);
+    virtual int getPriority() const;
+    virtual void setPriority(int priority_var);
+    virtual int8 getStatus() const;
+    virtual void setStatus(int8 status_var);
+    virtual int16 getPosX() const;
+    virtual void setPosX(int16 posX_var);
+    virtual int16 getPosY() const;
+    virtual void setPosY(int16 posY_var);
+    virtual int16 getPosZ() const;
+    virtual void setPosZ(int16 posZ_var);
+    virtual int32 getTimestamp() const;
+    virtual void setTimestamp(int32 timestamp_var);
 };
 
 inline void doPacking(cCommBuffer *b, ApplPkt& obj) {obj.parsimPack(b);}

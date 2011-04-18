@@ -416,7 +416,6 @@ $O/mac/csma.o: mac/csma.cc \
 	../base/modules/BatteryAccess.h \
 	../base/phyLayer/PhyToMacControlInfo.h \
 	../base/phyLayer/Decider.h \
-	../base/messages/SyncPkt_m.h \
 	../base/connectionManager/BaseConnectionManager.h \
 	mac/csma.h \
 	../base/phyLayer/Interpolation.h \
@@ -430,6 +429,7 @@ $O/mac/csma.o: mac/csma.cc \
 	../base/utils/FWMath.h \
 	../base/modules/ArpInterface.h \
 	../base/utils/ImNotifiable.h \
+	../base/messages/ApplPkt_m.h \
 	../base/modules/BaseArp.h \
 	../base/phyLayer/MappingBase.h \
 	../base/utils/FindModule.h \
@@ -551,7 +551,6 @@ $O/mac/CSMA802154.o: mac/CSMA802154.cc \
 	../base/modules/BatteryAccess.h \
 	../base/phyLayer/Decider.h \
 	../base/phyLayer/PhyToMacControlInfo.h \
-	../base/messages/SyncPkt_m.h \
 	../base/connectionManager/BaseConnectionManager.h \
 	mac/csma.h \
 	../base/phyLayer/Interpolation.h \
@@ -562,6 +561,7 @@ $O/mac/CSMA802154.o: mac/CSMA802154.cc \
 	../base/phyLayer/PhyUtils.h \
 	../base/utils/FWMath.h \
 	../base/utils/ImNotifiable.h \
+	../base/messages/ApplPkt_m.h \
 	../base/phyLayer/MappingBase.h \
 	../base/utils/FindModule.h \
 	../base/phyLayer/MacToPhyInterface.h \
