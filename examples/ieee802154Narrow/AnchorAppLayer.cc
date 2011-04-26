@@ -14,7 +14,7 @@
 //
 
 #include "AnchorAppLayer.h"
-#include "AppToNetControlInfo.h"
+#include "NetwControlInfo.h"
 #include <cassert>
 #include <Packet.h>
 #include <BaseMacLayer.h>
@@ -197,6 +197,11 @@ void AnchorAppLayer::handleLowerMsg(cMessage *msg)
 {
 //	Packet p(packetLength, 1, 0);
 //	world->publishBBItem(catPacket, &p, -1);
+	//get control info attached by base class decapsMsg method
+	assert(dynamic_cast<NetwControlInfo*>(msg->getControlInfo()));
+	NetwControlInfo* cInfo = static_cast<NetwControlInfo*>(msg->getControlInfo());
+	EV << "La RSSI en Appl es: " << cInfo->getRSSI() << endl;
+	EV << "La BER en Appl es: " << cInfo->getBitErrorRate() << endl;
 
 	// Temporal aquí habrá que añadir todos los tipos de paquetes que tratar
 	switch( msg->getKind() )

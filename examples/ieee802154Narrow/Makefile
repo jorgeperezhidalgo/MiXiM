@@ -150,7 +150,6 @@ $O/NodeAppLayer.o: NodeAppLayer.cc \
 	../../base/modules/BaseLayer.h \
 	../../base/modules/BatteryAccess.h \
 	../../base/connectionManager/BaseConnectionManager.h \
-	../../base/messages/SyncPkt_m.h \
 	NodeAppLayer.h \
 	../../base/phyLayer/Interpolation.h \
 	../../base/utils/Move.h \
@@ -161,6 +160,7 @@ $O/NodeAppLayer.o: NodeAppLayer.cc \
 	../../base/utils/FWMath.h \
 	../../base/modules/ArpInterface.h \
 	../../base/utils/ImNotifiable.h \
+	../../base/messages/ApplPkt_m.h \
 	../../base/modules/BaseArp.h \
 	../../base/phyLayer/MappingBase.h \
 	../../base/utils/FindModule.h \
@@ -175,7 +175,7 @@ $O/NodeAppLayer.o: NodeAppLayer.cc \
 	../../base/phyLayer/MappingUtils.h \
 	../../base/phyLayer/Signal_.h \
 	../../base/utils/PassedMessage.h \
-	../../base/utils/NetwToMacControlInfo.h \
+	../../base/utils/NetwControlInfo.h \
 	../../base/messages/MacPkt_m.h
 $O/ComputerAppLayer.o: ComputerAppLayer.cc \
 	../../base/modules/AddressingInterface.h \
@@ -190,7 +190,6 @@ $O/ComputerAppLayer.o: ComputerAppLayer.cc \
 	ComputerAppLayer.h \
 	../../base/utils/Move.h \
 	../../base/phyLayer/ChannelState.h \
-	../../base/utils/AppToNetControlInfo.h \
 	../../base/modules/BaseBattery.h \
 	../../base/phyLayer/PhyUtils.h \
 	../../base/utils/SimpleAddress.h \
@@ -212,6 +211,7 @@ $O/ComputerAppLayer.o: ComputerAppLayer.cc \
 	../../base/phyLayer/MappingUtils.h \
 	../../base/phyLayer/Signal_.h \
 	../../base/utils/PassedMessage.h \
+	../../base/utils/NetwControlInfo.h \
 	../../base/messages/MacPkt_m.h
 $O/ComputerNetLayer.o: ComputerNetLayer.cc \
 	../../base/modules/AddressingInterface.h \
@@ -237,6 +237,7 @@ $O/ComputerNetLayer.o: ComputerNetLayer.cc \
 	../../base/connectionManager/NicEntry.h \
 	../../base/utils/HostState.h \
 	../../base/modules/BaseModule.h \
+	../../base/utils/MacToNetwControlInfo.h \
 	../../base/utils/PassedMessage.h \
 	../../base/utils/NetwToMacControlInfo.h \
 	../../base/messages/NetwPkt_m.h \
@@ -267,7 +268,6 @@ $O/AnchorAppLayer.o: AnchorAppLayer.cc \
 	../../base/phyLayer/Interpolation.h \
 	../../base/utils/Move.h \
 	../../base/phyLayer/ChannelState.h \
-	../../base/utils/AppToNetControlInfo.h \
 	../../base/modules/BaseBattery.h \
 	../../base/phyLayer/PhyUtils.h \
 	../../base/utils/SimpleAddress.h \
@@ -290,29 +290,37 @@ $O/AnchorAppLayer.o: AnchorAppLayer.cc \
 	../../base/phyLayer/MappingUtils.h \
 	../../base/phyLayer/Signal_.h \
 	../../base/utils/PassedMessage.h \
+	../../base/utils/NetwControlInfo.h \
 	../../base/messages/MacPkt_m.h
 $O/NodeNetLayer.o: NodeNetLayer.cc \
 	../../base/modules/AddressingInterface.h \
-	../../base/utils/ImNotifiable.h \
 	../../base/modules/Blackboard.h \
 	../../base/modules/BaseUtility.h \
+	../../base/modules/BatteryAccess.h \
+	../../base/modules/BaseLayer.h \
+	../../base/connectionManager/BaseConnectionManager.h \
+	NodeAppLayer.h \
+	../../base/utils/AppToNetControlInfo.h \
+	../../base/modules/BaseBattery.h \
+	NodeNetLayer.h \
+	../../base/utils/SimpleAddress.h \
+	../../base/modules/ArpInterface.h \
+	../../base/utils/FWMath.h \
+	../../base/utils/ImNotifiable.h \
+	../../base/modules/BaseArp.h \
+	../../base/messages/ApplPkt_m.h \
 	../../base/utils/FindModule.h \
 	../../base/modules/BaseNetwLayer.h \
 	../../base/utils/Coord.h \
-	../../base/modules/BatteryAccess.h \
-	../../base/modules/BaseLayer.h \
+	../../base/modules/BaseWorldUtility.h \
+	../../base/connectionManager/NicEntry.h \
 	../../base/utils/HostState.h \
-	../../base/utils/AppToNetControlInfo.h \
-	../../base/modules/BaseBattery.h \
 	../../base/modules/BaseModule.h \
+	../../base/utils/MacToNetwControlInfo.h \
 	../../base/utils/PassedMessage.h \
-	NodeNetLayer.h \
-	../../base/messages/NetwPkt_m.h \
 	../../base/utils/NetwToMacControlInfo.h \
-	../../base/utils/SimpleAddress.h \
-	../../base/utils/FWMath.h \
-	../../base/utils/NetwControlInfo.h \
-	../../base/modules/ArpInterface.h
+	../../base/messages/NetwPkt_m.h \
+	../../base/utils/NetwControlInfo.h
 $O/AnchorNetLayer.o: AnchorNetLayer.cc \
 	../../base/modules/AddressingInterface.h \
 	../../base/modules/Blackboard.h \
@@ -337,6 +345,7 @@ $O/AnchorNetLayer.o: AnchorNetLayer.cc \
 	../../base/connectionManager/NicEntry.h \
 	../../base/utils/HostState.h \
 	../../base/modules/BaseModule.h \
+	../../base/utils/MacToNetwControlInfo.h \
 	../../base/utils/NetwToMacControlInfo.h \
 	../../base/messages/NetwPkt_m.h \
 	../../base/utils/PassedMessage.h \

@@ -16,8 +16,7 @@
 #ifndef NODEAPPLAYER_H_
 #define NODEAPPLAYER_H_
 
-#include "SyncPkt_m.h"
-//#include "NetwPkt_m.h"
+#include "ApplPkt_m.h"
 #include "SimpleAddress.h"
 #include "BaseLayer.h"
 #include "BaseArp.h"
@@ -38,8 +37,14 @@ public:
 
 	enum TrafficGenMessageKinds{
 
-		SEND_SYNC_TIMER = 1,
-		SYNC_MESSAGE
+		SEND_SYNC_TIMER_WITH_CSMA = 1,
+		SYNC_MESSAGE_WITH_CSMA,
+		SEND_SYNC_TIMER_WITHOUT_CSMA,
+		SYNC_MESSAGE_WITHOUT_CSMA,
+		SEND_REPORT_WITH_CSMA,
+		REPORT_WITH_CSMA,
+		SEND_REPORT_WITHOUT_CSMA,
+		REPORT_WITHOUT_CSMA
 	};
 
 protected:

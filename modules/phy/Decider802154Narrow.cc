@@ -87,6 +87,9 @@ simtime_t Decider802154Narrow::processSignalEnd(AirFrame* frame)
 	bool noErrors = true;
 	double ber;
 	double errorProbability;
+	// Added by Jorge
+	double rcvPower;
+	simtime_t time = MappingUtils::post(phy->getSimTime());
 
 	simtime_t receivingStart = MappingUtils::post(start);
 	ConstMappingIterator* iter = snrMapping->createConstIterator(Argument(receivingStart));
@@ -146,6 +149,7 @@ simtime_t Decider802154Narrow::processSignalEnd(AirFrame* frame)
 	double rssi = 10*log10(snirAvg);
 	if (noErrors)
 	{
+		//Added by Jorge, here we could add a random behaviour to the rssi
 		phy->sendUp(frame,
 					new DeciderResult802154Narrow(true, bitrate, snirMin, avgBER, rssi));
 	} else {

@@ -4,6 +4,7 @@
 #include "AddressingInterface.h"
 #include "NetwPkt_m.h"
 #include <NetwToMacControlInfo.h>
+#include <MacToNetwControlInfo.h>
 #include <cassert>
 
 Define_Module(ComputerNetLayer);
@@ -71,7 +72,12 @@ void ComputerNetLayer::handleUpperControl(cMessage* msg)
 cMessage* ComputerNetLayer::decapsMsg(NetwPkt *msg)
 {
     cMessage *m = msg->decapsulate();
-    m->setControlInfo(new NetwControlInfo(msg->getSrcAddr()));
+	//get control info attached by base class decapsMsg method
+	//and set its rssi and ber
+	assert(dynamic_cast<MacToNetwControlInfo*>(msg->getControlInfo()));
+	MacToNetwControlInfo* cInfo = static_cast<MacToNetwControlInfo*>(msg->getControlInfo());
+
+	m->setControlInfo(new NetwControlInfo(msg->getSrcAddr(), cInfo->getBitErrorRate(), cInfo->getRSSI()));
     // delete the netw packet
     delete msg;
     return m;

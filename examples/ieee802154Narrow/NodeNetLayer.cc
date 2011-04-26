@@ -4,6 +4,7 @@
 #include "AddressingInterface.h"
 #include "NetwPkt_m.h"
 #include <NetwToMacControlInfo.h>
+#include <MacToNetwControlInfo.h>
 #include <cassert>
 
 Define_Module(NodeNetLayer);
@@ -13,6 +14,7 @@ void NodeNetLayer::initialize(int stage) {
 	if (stage == 0) {
 	}
 }
+
 void NodeNetLayer::finish() {
 }
 
@@ -69,7 +71,12 @@ void NodeNetLayer::handleUpperControl(cMessage* msg)
 cMessage* NodeNetLayer::decapsMsg(NetwPkt *msg)
 {
     cMessage *m = msg->decapsulate();
-    m->setControlInfo(new NetwControlInfo(msg->getSrcAddr()));
+	//get control info attached by base class decapsMsg method
+	//and set its rssi and ber
+	assert(dynamic_cast<MacToNetwControlInfo*>(msg->getControlInfo()));
+	MacToNetwControlInfo* cInfo = static_cast<MacToNetwControlInfo*>(msg->getControlInfo());
+
+	m->setControlInfo(new NetwControlInfo(msg->getSrcAddr(), cInfo->getBitErrorRate(), cInfo->getRSSI()));
     // delete the netw packet
     delete msg;
     return m;
@@ -89,9 +96,8 @@ NetwPkt* NodeNetLayer::encapsMsg(cPacket *appPkt) {
     NetwPkt *pkt = new NetwPkt(appPkt->getName(), appPkt->getKind());
     pkt->setBitLength(headerLength);
 
-    AppToNetControlInfo* cInfo = dynamic_cast<AppToNetControlInfo*>(appPkt->removeControlInfo());
-    EV<<"NET received a message from upper layer, name is " << appPkt->getName() <<", CInfo removed, mac addr="<< cInfo->getNextHopMac()<<endl;
-	netwAddr = cInfo->getNextHopMac();
+    netwAddr = (static_cast<ApplPkt*>(appPkt))->getDestAddr();
+    EV<<"NET received a message from upper layer, name is " << appPkt->getName() <<", dest mac addr="<< netwAddr <<endl;
 
     pkt->setSrcAddr(myNetwAddr);
     pkt->setDestAddr(netwAddr);
@@ -106,11 +112,18 @@ NetwPkt* NodeNetLayer::encapsMsg(cPacket *appPkt) {
         macAddr = arp->getMacAddr(netwAddr);
     }
 
-    pkt->setControlInfo(new NetwToMacControlInfo(macAddr, cInfo->getCsmaActive()));
+    switch( appPkt->getKind() )
+    {
+    case NodeAppLayer::REPORT_WITH_CSMA:
+    case NodeAppLayer::SYNC_MESSAGE_WITH_CSMA:
+    	pkt->setControlInfo(new NetwToMacControlInfo(macAddr, true));
+    	break;
+    default:
+    	pkt->setControlInfo(new NetwToMacControlInfo(macAddr, false));
+    }
 
     //encapsulate the application packet
     pkt->encapsulate(appPkt);
     EV <<" pkt encapsulated\n";
-    delete cInfo;
     return pkt;
 }

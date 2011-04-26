@@ -227,7 +227,7 @@ Mapping* BaseDecider::calculateSnrMapping(AirFrame* frame)
 	ConstMapping* recvPowerMap = signal.getReceivingPower();
 	assert(recvPowerMap);
 
-	//TODO: handle noise of zero (must not devide with zero!)
+	//TODO: handle noise of zero (must not divide with zero!)
 	Mapping* snrMap = MappingUtils::divide( *recvPowerMap, *noiseMap, 0.0 );
 
 	delete noiseMap;

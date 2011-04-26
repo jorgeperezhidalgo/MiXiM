@@ -14,7 +14,7 @@
 //
 
 #include "NodeAppLayer.h"
-#include "NetwToMacControlInfo.h"
+#include "NetwControlInfo.h"
 #include <cassert>
 #include <Packet.h>
 #include <BaseMacLayer.h>
@@ -92,22 +92,29 @@ void NodeAppLayer::handleLowerMsg(cMessage *msg)
 {
 //	Packet p(packetLength, 1, 0);
 //	world->publishBBItem(catPacket, &p, -1);
-	SyncPkt *pkt = static_cast<SyncPkt*>(msg);
+	assert(dynamic_cast<NetwControlInfo*>(msg->getControlInfo()));
+	NetwControlInfo* cInfo = static_cast<NetwControlInfo*>(msg->getControlInfo());
+	EV << "La RSSI en Appl es: " << cInfo->getRSSI() << endl;
+	EV << "La BER en Appl es: " << cInfo->getBitErrorRate() << endl;
 
-
-	//sequenceId
+	// Temporal aquí habrá que añadir todos los tipos de paquetes que tratar
 	switch( msg->getKind() )
-	{
-	case SYNC_MESSAGE:
-		EV << "Lowermessage " << msg->getName() << " number " << pkt->getSequenceId() << " from anchor " << pkt->getSrcAddr() << " received in Appl Layer in Node " << this->getId() << endl;
-		vReceivedPacketsSource.recordWithTimestamp(simTime(), pkt->getSrcAddr());
-		break;
-	default:
-		EV << "Unkown lowermessage! -> delete, kind: "<< msg->getKind() << endl;
-	}
-
-	delete msg;
-	msg = 0;
+    {
+    case NodeAppLayer::REPORT_WITHOUT_CSMA:
+    case NodeAppLayer::REPORT_WITH_CSMA:
+    	if ((static_cast<ApplPkt*>(msg))->getDestAddr() == getParentModule()->findSubmodule("nic")) {
+    		getParentModule()->bubble("I've received the message");
+    		delete msg;
+    		msg = 0;
+    	} else { // Do nothing, the Mobile Node doesn't route the packet
+    		delete msg;
+    		msg = 0;
+    	}
+    	break;
+    default:
+    	delete msg;
+    	msg = 0;
+    }
 }
 
 

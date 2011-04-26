@@ -1,4 +1,5 @@
 #include <BaseNetwLayer.h>
+#include <NodeAppLayer.h>
 
 class NodeNetLayer : public BaseNetwLayer
 {

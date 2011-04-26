@@ -45,9 +45,21 @@ class NetwControlInfo : public cObject
     /** @brief netw address of the sending or receiving node*/
     int netwAddr;
 
+	/** @brief The bit error rate for this packet.*/
+	double bitErrorRate;
+
+	/** @brief The received signal strength for this packet.*/
+	double rssi;
+
+
   public:
     /** @brief Default constructor*/
-    NetwControlInfo(int addr = 0) : netwAddr(addr) {};
+    NetwControlInfo(int addr = 0, double ber = 0, double rssi = 0):
+    	netwAddr(addr),
+		bitErrorRate(ber),
+		rssi(rssi)
+    {};
+
     /** @brief Destructor*/
     virtual ~NetwControlInfo(){};
 
@@ -56,11 +68,44 @@ class NetwControlInfo : public cObject
 	return netwAddr;
     };
 
+	/**
+	 * @brief Returns the bit error rate for this packet.
+	 */
+	double getBitErrorRate() const
+    {
+        return bitErrorRate;
+    };
+
+	/**
+	 * @brief Returns the packets received signal strength.
+	 *
+	 * @return The received signal strength
+	 */
+	virtual const double getRSSI() {
+		return rssi;
+	};
+
     /** @brief Setter method*/
     virtual void setNetwAddr(const int addr){
 	netwAddr = addr;
     };
 
+    /**
+	 * @brief Sets the bit error rate for this control infos packet.
+	 *
+	 * @param ber The bit error rate
+	 */
+	virtual void setBitErrorRate(double ber) {
+		bitErrorRate = ber;
+	};
+
+	/**
+	 * @brief Sets the packets received signal strength.
+	 * @param _rssi The received signal strength
+	 */
+	void setRSSI(double _rssi) {
+		rssi = _rssi;
+	};
 };
 
 
