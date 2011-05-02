@@ -1,0 +1,31 @@
+En este análisis se pretende comparar los resultados de la fase sync entre la fase con slots y la fase con transmisiones aleatorias.
+
+Para ello, se busca primero el mejor caso de la fase aleatoria y se compara con la fase slot.
+
+El escenario cuenta con 80 nodos móviles distribuidos uniformemente de forma aleatoria y con 30, 40, 50, 60 y 70 AN distribuidos también de forma uniforme y aleatoria.
+Una de las medidas a realizar es el tiempo del último paquete recibido, el último 1er, el último 2o ... y así, este caso todavía está pendiente, dado que al sacar todos los tiempos y luego sacar los que nos interesan con Matlab, tarda muchisimo. Así que queda pendiente coger directamente los tiempos de los paquetes que nos interese en Omnet.
+La otra medida es el numero medio de paquetes recibidos en cada uno de los casos, lo usaremos como comparación entre casos primero para detectar cual es la situación óptima y poder llegar a comparar esto con el caso con slots, también lo compararemos con el número medio de paquetes recibidos.
+
+Para calcular los valores, primero calcularemos el número medio de los 80 nodos móviles, teniendo así por ejemplo el número medio de paquetes recibidos por nodo móvil (de los 80 nodos móviles), y luego esto lo repetiremos 100 veces para tener una media de un número aleatorio.
+
+
+En la primera gráfica:
+
+Random Time, checking the best interpacket random time
+------------------------------------------------------
+
+En este caso, cada AN manda tantos paquetes como le de tiempo en un tiempo fijo (este tiempo corresponde al tiempo en el que en el caso slotted, se repite 3 veces la fase sync). Se analiza cual es el tiempo máximo aleatorio a dejar entre transmisiones de paquetes de un mismo nodo para ver cual sería el óptimo para cada caso. En la gráfica se aprecia como cuando el tiempo es pequeño el número de paquetes entregados correctamente a los nodos móviles es pequeño debido al gran número de colisiones, este tiempo va creciendo hasta que alcanza un máximo, a partir de ahí decrece dado que el tiempo entre paquetes aumenta y no da tiempo a entregar tantos paquetes en ese tiempo fijo máximo, antes cuando no había un tiempo fijo máximo sino que hasta que terminaran de enviar un número determinado de paquetes, la gráfica siempre aumentaba.
+
+Se puede ver además que cuantos más AN tenemos, más tiempo tarda en llegar ese máximo, pues el número de colisiones sigue siendo importante durante maś tiempo. Además lógicamente, cuanto mayor es el número de AN, mayor es en media el número de paquetes entregados correctamente.
+
+Si trazamos una curva por los máximos de cada número de AN, tendremos la distribución a tomar cuando queramos elegir un tiempo maximo de expera entre transmisiones, para un número cualquiera de AN. Esta curva se ve que es una recta, en la gráfica no es fácil elegir el máximo, debido a que al ser aleatorio y solo 100 muestras no es una curva definida. El problema es que debido al tiempo de simulación y dado que los intervalos de confianza dan muy bien y que de la curva con un poco de imaginación se extrae fácilmente el máximo, no se ha decidido simular más iteraciones.
+
+Random Time, checking the best number of sended packets for anchor
+------------------------------------------------------------------
+
+En este caso, se fija como tiempo maximo entre paquetes enviados por cada AN, el tiempo encontrado como óptimo en la gráfica anterior, que corresponde a 5, 7, 9, 11 y 13 para 30, 40, 50, 60 y 70 AN respectivamente. Se ve claramente en la gráfica como el número de paquetes medio recibidos por los nodos móviles aumenta hasta que llega a un nivel (aproximadamente para 10 paquetes enviados por cada AN) donde ya se mantiene, esto es debido a que en el tiempo máximo de transmisión (3 fases sync del modo slotted) no da tiempo a más y por muchos más que peuda mandar, se acaba el tiempo antes y el nodo móvil no recibe más.
+
+Slotted vs Random, checking the average received packets to compare with random best time and number of packets
+---------------------------------------------------------------------------------------------------------------
+
+In this case we compare for 30, 40, 50, 60 and 70 AN the average number of packets received in the mobile nodes for the cases of sync phase slotted, the best case for random transmisions (seen in previous plot), the worst case (T=1ms), and two cases in the middle (one with T=3 ms and the other with T=5 ms as the maximum time between packet transmisions in the AN). We can easyly see that the higher the T the more the received packets till we get to the best case and even over that we find the slotted case, seeing that the slotted strategy is way better than most of the cases and even better that the best case for a random transmission decission.

@@ -4,6 +4,10 @@ fila_scalar_random1 = 1; % File where the data begins, starts with 0
 columna_scalar_random1= 13; % Column where the data begins, starts with
 fila_scalar_random2 = 1; % File where the data begins, starts with 0
 columna_scalar_random2= 11; % Column where the data begins, starts with
+fila_scalar_random3 = 1; % File where the data begins, starts with 0
+columna_scalar_random3= 11; % Column where the data begins, starts with
+fila_scalar_random4 = 1; % File where the data begins, starts with 0
+columna_scalar_random4= 11; % Column where the data begins, starts with
 fila_scalar_slotted = 1;
 columna_scalar_slotted = 9;
 
@@ -85,14 +89,20 @@ for N = [30, 40, 50, 60, 70]
 
         data_paquetes_random1 = csvread(strcat('scalar-N=', num2str(N), '-P=', num2str(P), '-T=', num2str(T), '.csv'), fila_scalar_random1, columna_scalar_random1);
         data_paquetes_random2 = csvread(strcat('scalar-N=', num2str(N), '-T=1.csv'), fila_scalar_random2, columna_scalar_random2);
+        data_paquetes_random3 = csvread(strcat('scalar-N=', num2str(N), '-T=3.csv'), fila_scalar_random3, columna_scalar_random3);
+        data_paquetes_random4 = csvread(strcat('scalar-N=', num2str(N), '-T=5.csv'), fila_scalar_random4, columna_scalar_random4);
         data_paquetes_slotted = csvread(strcat('scalar-N=', num2str(N), '.csv'), fila_scalar_slotted, columna_scalar_slotted);
         
         paquetes_random1 = data_paquetes_random1(:, 3) - data_paquetes_random1(:, 4) + data_paquetes_random1(:, 1) - data_paquetes_random1(:, 2);
         paquetes_random2 = data_paquetes_random2(:, 3) - data_paquetes_random2(:, 4) + data_paquetes_random2(:, 1) - data_paquetes_random2(:, 2);
+        paquetes_random3 = data_paquetes_random3(:, 3) - data_paquetes_random3(:, 4) + data_paquetes_random3(:, 1) - data_paquetes_random3(:, 2);
+        paquetes_random4 = data_paquetes_random4(:, 3) - data_paquetes_random4(:, 4) + data_paquetes_random4(:, 1) - data_paquetes_random4(:, 2);
         paquetes_slotted = data_paquetes_slotted(:, 3) - data_paquetes_slotted(:, 4) + data_paquetes_slotted(:, 1) - data_paquetes_slotted(:, 2);
         
         paqmat_random1 = vec2mat(paquetes_random1, 100);
         paqmat_random2 = vec2mat(paquetes_random2, 100);
+        paqmat_random3 = vec2mat(paquetes_random3, 100);
+        paqmat_random4 = vec2mat(paquetes_random4, 100);
         paqmat_slotted = vec2mat(paquetes_slotted, 100);
         
         
@@ -143,6 +153,12 @@ for N = [30, 40, 50, 60, 70]
         promedio_paquetes_random2(num) = mean(mean(paqmat_random2));
         desv_paquetes_random2(num) = std(mean(paqmat_random2));
         ci_promedio_paquetes_random2(num) = desv_paquetes_random2(num)/sqrt(size(paqmat_random2,2))*norminv(.05/2);
+        promedio_paquetes_random3(num) = mean(mean(paqmat_random3));
+        desv_paquetes_random3(num) = std(mean(paqmat_random3));
+        ci_promedio_paquetes_random3(num) = desv_paquetes_random3(num)/sqrt(size(paqmat_random3,2))*norminv(.05/2);
+        promedio_paquetes_random4(num) = mean(mean(paqmat_random4));
+        desv_paquetes_random4(num) = std(mean(paqmat_random4));
+        ci_promedio_paquetes_random4(num) = desv_paquetes_random4(num)/sqrt(size(paqmat_random4,2))*norminv(.05/2);
         promedio_paquetes_slotted(num) = mean(mean(paqmat_slotted));
         desv_paquetes_slotted(num) = std(mean(paqmat_slotted));
         ci_promedio_paquetes_slotted(num) = desv_paquetes_slotted(num)/sqrt(size(paqmat_slotted,2))*norminv(.05/2);
@@ -155,3 +171,5 @@ errorbar([30 40 50 60 70],promedio_paquetes_random1,ci_promedio_paquetes_random1
 hold on
 errorbar([30 40 50 60 70],promedio_paquetes_slotted,ci_promedio_paquetes_slotted,'r')
 errorbar([30 40 50 60 70],promedio_paquetes_random2,ci_promedio_paquetes_random2,'g')
+errorbar([30 40 50 60 70],promedio_paquetes_random3,ci_promedio_paquetes_random3,'k')
+errorbar([30 40 50 60 70],promedio_paquetes_random4,ci_promedio_paquetes_random4,'y')
