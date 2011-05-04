@@ -9,7 +9,8 @@ public:
     virtual void finish();
 
 protected:
-    /**
+
+	/**
      * @name Handle Messages
      * @brief Functions to redefine by the programmer
      *

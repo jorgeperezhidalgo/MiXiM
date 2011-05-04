@@ -40,7 +40,16 @@ void ComputerNetLayer::handleLowerMsg(cMessage* msg)
  **/
 void ComputerNetLayer::handleLowerControl(cMessage* msg)
 {
-	sendControlUp(msg);
+    // When we send a control message from Mac to Appl, we send the original message (in case we need to retransmit it)
+	// so we have to decapsulate in Net also and change kind and name, to the ones we got from MAC
+	const char *name = msg->getName();
+	short kind = msg->getKind();
+	cMessage *m = (static_cast<NetwPkt*>(msg))->decapsulate();
+	m->setName(name);
+	m->setKind(kind);
+    sendControlUp(m);
+    delete msg;
+    msg = 0;
 }
 
 /**
@@ -158,13 +167,9 @@ NetwPkt* ComputerNetLayer::encapsMsg(cPacket *appPkt) {
         	macAddr = arp->getMacAddr(getParentModule()->getParentModule()->getSubmodule("anchor",routing_matrix_25[origen][destino])->findSubmodule("nic"));
     }
 
-    switch( appPkt->getKind() )
-    {
-    case ComputerAppLayer::REPORT_WITH_CSMA:
-    case ComputerAppLayer::SYNC_MESSAGE_WITH_CSMA:
+    if ((static_cast<ApplPkt*>(appPkt))->getCSMA()) {
     	pkt->setControlInfo(new NetwToMacControlInfo(macAddr, true));
-    	break;
-    default:
+    } else {
     	pkt->setControlInfo(new NetwToMacControlInfo(macAddr, false));
     }
 

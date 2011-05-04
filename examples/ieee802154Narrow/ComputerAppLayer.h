@@ -1,100 +1,24 @@
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-//
-
 #ifndef ANCHORAPPLAYER_H_
 #define ANCHORAPPLAYER_H_
 
-#include "ApplPkt_m.h"
-#include "SimpleAddress.h"
-#include "BaseLayer.h"
-#include "BaseArp.h"
-#include <BaseWorldUtility.h>
-#include "BaseConnectionManager.h"
+#include "AppLayer.h"
 
-
-#include <omnetpp.h>
-
-/**
- * @brief A module to generate traffic for the NIC, used for testing purposes.
- *
- * @ingroup exampleIEEE802154Narrow
- */
-class ComputerAppLayer : public BaseLayer
+class ComputerAppLayer : public AppLayer
 {
-public:
-
-	enum TrafficGenMessageKinds{
-
-		SEND_SYNC_TIMER_WITH_CSMA = 1,
-		SYNC_MESSAGE_WITH_CSMA,
-		SEND_SYNC_TIMER_WITHOUT_CSMA,
-		SYNC_MESSAGE_WITHOUT_CSMA,
-		SEND_REPORT_WITH_CSMA,
-		REPORT_WITH_CSMA,
-		SEND_REPORT_WITHOUT_CSMA,
-		REPORT_WITHOUT_CSMA
-	};
-
 protected:
 
-	int packetLength;
-	simtime_t packetTime;
-	int phaseRepetitionNumber;
-	int syncPacketsPerSyncPhase; // Determines how many times do we repeat all the slots per sync phase
-	int syncPacketsPerSyncPhaseCounter; // In which of the repetitions are we already
-	int syncPhaseNumber; //To identify in which of the 3 sync phases are we inside the fullphase
-	int numSlots;
-	long destination;
-	int numAnchors;
-	simtime_t syncPacketTime;
-	simtime_t fullPhaseTime;
-	simtime_t timeComSinkPhase;
-	simtime_t timeSyncPhase;
-	simtime_t timeReportPhase;
-	simtime_t timeVIPPhase;
-	double phase2VIPPercentage;
-	int scheduledSlot; //When a node has assigned more than 1 slot, we have to create a new entry in the same sync phase
-	simtime_t lastPhaseStart;
-	simtime_t nextSyncSend;
-	NicEntry* computer;
+	cQueue packetsQueue;			// FIFO to store the packets we receive in Com Sink 1 to send them back in Com Sink 2
+	simtime_t startTimeComSink2;	// Variable to store the time start of Com Sink 2 to schedule new queue processing
+	simtime_t *randomQueueTime;		// Vector of random times to transmit the queue along the Com Sink 2
+	simtime_t stepTimeComSink2;		// Step time in which we divide the Com Sink 2 Phase - The guard time. We divide it in so many parts like elements in the queue
+	int queueElementCounter;		// Variable to know how many queue elements have we already transmitted, therefore to calculate all the random transmitting times when = 0 or knowing which randomQueueTime is the next to use
 
-	bool syncInSlot; // Indicates if the sync packets have to be slotted or not
-   	simtime_t syncFirstMaxRandomTime; // First maximum time an anchor must wait to transmit the first sync packet in no slotted mode
-   	simtime_t syncRestMaxRandomTimes; // Rest of maximum times an anchor must wait to transmit the rest of the sync packets in no slotted mode
-
-	int catPacket;
-
-	long nbPacketDropped;
-
-
-	BaseArp* arp;
-	int myNetwAddr;
-
-	cMessage *delayTimer;
-
-	BaseWorldUtility* world;
-
-	/** @brief Pointer to the PropagationModel module*/
-	BaseConnectionManager* cc;
+	cMessage *checkQueue;			// Variable to schedule the events to process the Queue elements
 
 public:
 	virtual ~ComputerAppLayer();
 
 	virtual void initialize(int stage);
-
-	virtual int numInitStages() const {return 5;}
 
 	virtual void finish();
 
@@ -122,15 +46,11 @@ protected:
 		delete msg;
 	}
 
-	/** @brief Send a broadcast message to lower layer. */
-	virtual void sendBroadcast();
-
-	// Returns from the already assigned slots how many time a nicId appears
+	// Returns from the already assigned slots how many times a nicId appears
 	int hasSlot(int *slots, int *slotCounter, int numSlots, int anchor, int numAnchors);
 
-	// Order Queue min to max
+	// Order Queue min to max in number of slots assigned (numberTimesQueue)
 	void orderQueue(int *queue, int *numerTimesQueue, int queueCounter);
-
 };
 
 #endif

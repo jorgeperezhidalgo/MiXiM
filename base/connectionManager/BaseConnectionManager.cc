@@ -159,20 +159,6 @@ BaseConnectionManager::NicEntries& BaseConnectionManager::getNicList()
 	return nics;
 }
 
-BaseConnectionManager::NicEntries& BaseConnectionManager::getAnchorsList()
-{
-	NicEntries& anchors = nics;
-	for(BaseConnectionManager::NicEntries::iterator i = anchors.begin(); i != anchors.end(); ++i)
-	{
-		NicEntry* anchor_i = i->second;
-		if ((anchor_i->moduleType != 1) && ((anchor_i->moduleType != 3)))
-		{
-			anchors.erase(i);
-		}
-	}
-	return anchors;
-}
-
 NicEntry* BaseConnectionManager::findNic( int nicID)
 {
 	for(BaseConnectionManager::NicEntries::iterator i = nics.begin(); i != nics.end(); ++i)

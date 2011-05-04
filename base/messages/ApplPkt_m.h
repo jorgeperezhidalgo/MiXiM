@@ -20,15 +20,23 @@
  * <pre>
  * packet ApplPkt
  * {
- *     int sequenceId = 0;
- *     int destAddr = -1; 
- *     int srcAddr = -1; 
- *     int priority = 0; 
+ *     int sequenceId = 0;				
+ *     int destAddr = -1; 				
+ *     int srcAddr = -1; 				
+ *     int priority = 0; 				
  *     int8 status = 0;
  * 	int16 posX = 0;
  * 	int16 posY = 0;
  * 	int16 posZ = 0;
  * 	int32 timestamp = 0;
+ * 	
+ * 	
+ * 	int realDestAddr = -1;
+ * 	int realSrcAddr = -1;
+ * 	int retransmisionCounter = 0;	
+ * 	bool CSMA; 						
+ * 	bool askForRequest;				
+ * 	bool requestPacket;				
  * }
  * </pre>
  */
@@ -44,6 +52,12 @@ class ApplPkt : public ::cPacket
     int16 posY_var;
     int16 posZ_var;
     int32 timestamp_var;
+    int realDestAddr_var;
+    int realSrcAddr_var;
+    int retransmisionCounter_var;
+    bool CSMA_var;
+    bool askForRequest_var;
+    bool requestPacket_var;
 
     // protected and unimplemented operator==(), to prevent accidental usage
     bool operator==(const ApplPkt&);
@@ -76,6 +90,18 @@ class ApplPkt : public ::cPacket
     virtual void setPosZ(int16 posZ_var);
     virtual int32 getTimestamp() const;
     virtual void setTimestamp(int32 timestamp_var);
+    virtual int getRealDestAddr() const;
+    virtual void setRealDestAddr(int realDestAddr_var);
+    virtual int getRealSrcAddr() const;
+    virtual void setRealSrcAddr(int realSrcAddr_var);
+    virtual int getRetransmisionCounter() const;
+    virtual void setRetransmisionCounter(int retransmisionCounter_var);
+    virtual bool getCSMA() const;
+    virtual void setCSMA(bool CSMA_var);
+    virtual bool getAskForRequest() const;
+    virtual void setAskForRequest(bool askForRequest_var);
+    virtual bool getRequestPacket() const;
+    virtual void setRequestPacket(bool requestPacket_var);
 };
 
 inline void doPacking(cCommBuffer *b, ApplPkt& obj) {obj.parsimPack(b);}

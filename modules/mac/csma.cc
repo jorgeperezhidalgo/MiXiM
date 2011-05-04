@@ -219,20 +219,20 @@ void csma::updateStatusIdle(t_mac_event event, cMessage *msg) {
 			if (anchor && !((static_cast<MacPkt *> (msg))->getCsmaActive()))
 			{
 				EV<<"(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> No BACKOFF. Wait for SIFS " << sifs << "s" << endl;
-				scheduleAt(simTime() + sifs, backoffTimer);
 				NB = macMaxCSMABackoffs; // if csma deactivated we drop the packet directly
+				scheduleAt(simTime() + sifs, backoffTimer);
 			}
 			else
 			{
 				EV<<"(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> BACKOFF." << endl;
-				startTimer(TIMER_BACKOFF);
 				NB = 0;
+				startTimer(TIMER_BACKOFF);
 			}
 		} else {
 			// queue is full, message has to be deleted
 			EV << "(12) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff not avail]: dropping packet -> IDLE." << endl;
 			msg->setName("MAC ERROR");
-			msg->setKind(PACKET_DROPPED);
+			msg->setKind(QUEUE_FULL);
 			sendControlUp(msg);
 			droppedPacket.setReason(DroppedPacket::QUEUE);
 			utility->publishBBItem(catDroppedPacket, &droppedPacket, nicId);
@@ -280,7 +280,7 @@ void csma::updateStatusBackoff(t_mac_event event, cMessage *msg) {
 		<< " starting CCA timer." << endl;
 		startTimer(TIMER_CCA);
 		updateMacState(CCA_3);
-		EV<< "Estado de la Radio: " << phy->getRadioState()<<endl;
+		EV<< "Radio Status: " << phy->getRadioState()<<endl;
 		phy->setRadioState(Radio::RX);
 		break;
 	case EV_DUPLICATE_RECEIVED:
@@ -334,7 +334,7 @@ void csma::updateStatusBackoff(t_mac_event event, cMessage *msg) {
 
 void csma::attachSignal(MacPkt* mac, simtime_t startTime) {
 	simtime_t duration = (mac->getBitLength() + phyHeaderLength)/bitrate;
-	EV << "Tamaño: " << mac->getBitLength() + phyHeaderLength <<", Duracion: " << duration<<endl;
+	EV << "Size: " << mac->getBitLength() + phyHeaderLength <<", Duration: " << duration<<endl;
 	Signal* s = createSignal(startTime, duration, txPower, bitrate);
 	MacToPhyControlInfo* cinfo = new MacToPhyControlInfo(s);
 
@@ -369,12 +369,13 @@ void csma::updateStatusCCA(t_mac_event event, cMessage *msg) {
 				// drop the frame
 				EV << "Tried " << NB << " backoffs, all reported a busy "
 				<< "channel. Dropping the packet." << endl;
-				cMessage * mac = macQueue.front();
+				// Modified by Jorge, we send up the App Packet but in the control channel and change type and name
+				cMessage * mac = (static_cast<MacPkt*>(macQueue.front()))->decapsulate();
 				macQueue.pop_front();
 				txAttempts = 0;
 				nbDroppedFrames++;
 				mac->setName("MAC ERROR");
-				mac->setKind(PACKET_DROPPED);
+				mac->setKind(PACKET_DROPPED_BACKOFF);
 				sendControlUp(mac);
 				manageQueue();
 			} else {
@@ -516,7 +517,8 @@ void csma::manageMissingAck(t_mac_event event, cMessage *msg) {
 		// drop packet
 		EV << "Packet was transmitted " << txAttempts
 		<< " times and I never got an Ack. I drop the packet." << endl;
-		cMessage * mac = macQueue.front();
+		// Modified by Jorge, we send up the App Packet but in the control channel and change type and name
+		cMessage * mac = (static_cast<MacPkt*>(macQueue.front()))->decapsulate();
 		macQueue.pop_front();
 		txAttempts = 0;
 		mac->setName("MAC ERROR");
@@ -583,7 +585,7 @@ void csma::updateStatusNotIdle(cMessage *msg) {
 		<< " and [TxBuff not avail]: dropping packet and don't move."
 		<< endl;
 		msg->setName("MAC ERROR");
-		msg->setKind(PACKET_DROPPED);
+		msg->setKind(QUEUE_FULL);
 		sendControlUp(msg);
 		droppedPacket.setReason(DroppedPacket::QUEUE);
 		utility->publishBBItem(catDroppedPacket, &droppedPacket, nicId);
@@ -629,9 +631,7 @@ void csma::executeMac(t_mac_event event, cMessage *msg) {
 void csma::manageQueue() {
 	if (macQueue.size() != 0) {
 		EV<< "(manageQueue) there are " << macQueue.size() << " packets to send, entering backoff wait state." << endl;
-		if(! backoffTimer->isScheduled())
-		startTimer(TIMER_BACKOFF);
-		updateMacState(BACKOFF_2);
+		//Modified by Jorge, this if was after the updateMacState but I think must be here to reset the NB and start with minBE
 		if( transmissionAttemptInterruptedByRx) {
 			// resume a transmission cycle which was interrupted by
 			// a frame reception during CCA check
@@ -642,6 +642,9 @@ void csma::manageQueue() {
 			NB = 0;
 			//BE = macMinBE;
 		}
+		if(! backoffTimer->isScheduled())
+		startTimer(TIMER_BACKOFF);
+		updateMacState(BACKOFF_2);
 	} else {
 		EV << "(manageQueue) no packets to send, entering IDLE state." << endl;
 		updateMacState(IDLE_1);

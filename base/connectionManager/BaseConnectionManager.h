@@ -378,9 +378,6 @@ public:
 	/** @brief Returns all nics*/
 	NicEntries& getNicList();
 
-	// Returns all anchors
-	NicEntries& getAnchorsList();
-
 	// Finds a Nic with a NicID
 	NicEntry* findNic( int nicID);
 

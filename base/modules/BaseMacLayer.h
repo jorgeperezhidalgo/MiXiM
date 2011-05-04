@@ -60,6 +60,10 @@ public:
 		/** Stores the id on which classes extending BaseMac should
 		 * continue their own control kinds.*/
 		LAST_BASE_MAC_CONTROL_KIND,
+		// Tells the netw layer that a packet to be sent reached its maximum backoffs
+		PACKET_DROPPED_BACKOFF,
+		// If the queue is full
+		QUEUE_FULL,
 	};
 protected:
 

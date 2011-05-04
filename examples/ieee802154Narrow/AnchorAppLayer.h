@@ -1,100 +1,43 @@
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-//
-
 #ifndef ANCHORAPPLAYER_H_
 #define ANCHORAPPLAYER_H_
 
-#include "ApplPkt_m.h"
-#include "SimpleAddress.h"
-#include "BaseLayer.h"
-#include "BaseArp.h"
-#include <BaseWorldUtility.h>
-#include "BaseConnectionManager.h"
+#include "AppLayer.h"
 
-
-#include <omnetpp.h>
-
-/**
- * @brief A module to generate traffic for the NIC, used for testing purposes.
- *
- * @ingroup exampleIEEE802154Narrow
- */
-class AnchorAppLayer : public BaseLayer
+class AnchorAppLayer : public AppLayer
 {
-public:
-
-	enum TrafficGenMessageKinds{
-
-		SEND_SYNC_TIMER_WITH_CSMA = 1,
-		SYNC_MESSAGE_WITH_CSMA,
-		SEND_SYNC_TIMER_WITHOUT_CSMA,
-		SYNC_MESSAGE_WITHOUT_CSMA,
-		SEND_REPORT_WITH_CSMA,
-		REPORT_WITH_CSMA,
-		SEND_REPORT_WITHOUT_CSMA,
-		REPORT_WITHOUT_CSMA
-	};
-
 protected:
 
-	int packetLength;
-	simtime_t packetTime;
-	int phaseRepetitionNumber;
-	int syncPacketsPerSyncPhase; // Determines how many times do we repeat all the slots per sync phase
-	int syncPacketsPerSyncPhaseCounter; // In which of the repetitions are we already
-	int syncPhaseNumber; //To identify in which of the 3 sync phases are we inside the fullphase
-	int numSlots;
-	long destination;
-	int numAnchors;
-	simtime_t syncPacketTime;
-	simtime_t fullPhaseTime;
-	simtime_t timeComSinkPhase;
-	simtime_t timeSyncPhase;
-	simtime_t timeReportPhase;
-	simtime_t timeVIPPhase;
-	double phase2VIPPercentage;
-	int scheduledSlot; //When a node has assigned more than 1 slot, we have to create a new entry in the same sync phase
-	simtime_t lastPhaseStart;
-	simtime_t nextSyncSend;
-	NicEntry* anchor;
+	int phaseRepetitionNumber;			// Total number of full phases, -1 = unlimited
+	bool syncInSlot; 					// Indicates if the sync packets have to be slotted or not
 
-	bool syncInSlot; // Indicates if the sync packets have to be slotted or not
-   	simtime_t syncFirstMaxRandomTime; // First maximum time an anchor must wait to transmit the first sync packet in no slotted mode
-   	simtime_t syncRestMaxRandomTimes; // Rest of maximum times an anchor must wait to transmit the rest of the sync packets in no slotted mode
+	int syncPacketsPerSyncPhaseCounter; // In which of the repetitions (mini sync phases) are we already in the sync phase now
+	PhaseType syncPhaseNumber; 			// To identify in which of the 3 sync phases are we inside the full phase
+	int scheduledSlot; 					// When a node has assigned more than 1 slot, we have to create a new entry in the same sync phase, this variable count how many slots did we already assign
 
-	int catPacket;
+	simtime_t nextPhaseStart;			// Start time for the next slot period
+	simtime_t nextSyncSend;				//
+   	simtime_t syncFirstMaxRandomTime; 	// First maximum time an anchor must wait to transmit the first sync packet in no slotted mode
+   	simtime_t syncRestMaxRandomTimes; 	// Rest of maximum times an anchor must wait to transmit the rest of the sync packets in no slotted mode
 
-	long nbPacketDropped;
+	cQueue packetsQueue;				// FIFO to store the packets we receive in Report and VIP phases to send them to Comptuer in Com Sink 1
+	simtime_t startTimeComSink1;		// Variable to store the time start of Com Sink 1 to schedule new queue processing
+	simtime_t *randomQueueTime;			// Vector of random times to transmit the queue along the Com Sink 1
+	simtime_t stepTimeComSink1;			// Step time in which we divide the Com Sink 1 Phase - The guard time. We divide it in so many parts like elements in the queue
+	int queueElementCounter;			// Variable to know how many queue elements have we already transmitted, therefore to calculate all the random transmitting times when = 0 or knowing which randomQueueTime is the next to use
 
+	cMessage *delayTimer;				// Pointer to the event we use to schedule all the sync packets in the sync phases
+	cMessage *checkQueue;				// Variable to schedule the events to process the Queue elements
 
-	BaseArp* arp;
-	int myNetwAddr;
+	cQueue requestQueue;				// Queue to store the info we receive from the computer that we will provide to a mobile node under request
+	bool messageInQueue;				// True when we can find the message for the mobile node who requested in the queue
 
-	cMessage *delayTimer;
-
-	BaseWorldUtility* world;
-
-	/** @brief Pointer to the PropagationModel module*/
-	BaseConnectionManager* cc;
+	NicEntry* anchor;					// Pointer to the NIC of this anchor to access some NIC variables
+	NicEntry* dest;						// Pointer to the destination, we use it to point the module who the message is sent to, to check what type of module is (AN, MN, Comp)
 
 public:
 	virtual ~AnchorAppLayer();
 
 	virtual void initialize(int stage);
-
-	virtual int numInitStages() const {return 5;}
 
 	virtual void finish();
 

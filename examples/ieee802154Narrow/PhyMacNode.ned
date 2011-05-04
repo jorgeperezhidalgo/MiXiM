@@ -39,15 +39,15 @@ module PhyMacNode
         }
         appl: NodeAppLayer {
             parameters:
-                @display("p=80,132;b=20,20,rect,white;i=block/app");
+                @display("p=49,34;b=20,20,rect,white;i=block/app");
         }
         trans: NodeTransLayer {
             parameters:
-                @display("p=59,96;b=20,20,rect,white;i=block/join");
+                @display("p=113,81;b=20,20,rect,white;i=block/join");
         }
         net: NodeNetLayer {
             parameters:
-                @display("p=119,152;b=20,20,rect,white;i=block/network2");
+                @display("p=60,146;b=20,20,rect,white;i=block/network2");
         }
         nic: Nic802154_TI_CC2420 {
             parameters:

@@ -1,40 +1,22 @@
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
-
 package org.mixim.examples.ieee802154Narrow;
 
-//
-// TODO auto-generated module
-//
 simple AnchorAppLayer
 {
     parameters:
-        double packetTime @unit(s);
-        bool debug; // debug switch
-        int phaseRepetitionNumber = default(-1); // How many full phases should we do
-        int syncPacketsPerSyncPhase = default(4); // How many sync packets to send every sync phase
-    	int packetLength @unit("bit"); // length of the generated packet (in bits)
-    	int destination = default(-1);
-    	double syncPacketTime @unit(s) = default(1.5ms); 
-    	double phase2VIPPercentage = default(0.4);
-    	bool syncInSlot = default(true); // Indicates if the sync packets have to be slotted or not
-    	double syncFirstMaxRandomTime @unit(s) = default(6ms); // First maximum time an anchor must wait to transmit the first sync packet in no slotted mode
-    	double syncRestMaxRandomTimes @unit(s) = default(1ms); // Rest of maximum times an anchor must wait to transmit the rest of the sync packets in no slotted mode
+        double packetTime @unit(s);								// We'll have to change the packet time according to the Packet Length
+        int phaseRepetitionNumber = default(-1); 				// Total number of full phases, -1 = unlimited
+        int syncPacketsPerSyncPhase = default(4); 				// Determines how many times do we repeat all the slots per sync phase
+    	int packetLength @unit("bit"); 							// Standard Packet Length, in some cases when we transmit info we'll have to change it
+    	int destination = default(-1);							// Broadcast destination, usually -1
+    	double syncPacketTime @unit(s) = default(1.5ms); 		// Max. duration of a Sync Packet, determines the slot size
+    	double phase2VIPPercentage = default(0.4);				// Percentage of the time Phase Report + Phase VIP that the Phase VIP takes
+
+    	bool syncInSlot = default(true);						// Indicates if the sync packets have to be slotted or not
+    	double syncFirstMaxRandomTime @unit(s) = default(6ms); 	// First maximum time an anchor must wait to transmit the first sync packet in no slotted mode
+    	double syncRestMaxRandomTimes @unit(s) = default(1ms); 	// Rest of maximum times an anchor must wait to transmit the rest of the sync packets in no slotted mode
     gates:
-    	input lowerGateIn; // from NIC
-        output lowerGateOut; // to NIC
-        input lowerControlIn; // control from NIC
-        output lowerControlOut; // control to NIC
+    	input lowerGateIn; 										// from NIC
+        output lowerGateOut; 									// to NIC
+        input lowerControlIn; 									// control from NIC
+        output lowerControlOut; 								// control to NIC
 }

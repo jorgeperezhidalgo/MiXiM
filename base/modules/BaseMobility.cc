@@ -2,11 +2,14 @@
  * file:        BaseMobility.cc
  *
  * author:      Daniel Willkomm, Andras Varga
+ * modified by: Jorge Perez Hidalgo (TU-Dresden)
  *
  * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
  *              Technische Universitaet Berlin, Germany.
  *
  *              (C) 2005 Andras Varga
+ *
+ *              (C) 2011 Jorge Perez (TU-Dreden)
  *
  *              This program is free software; you can redistribute it
  *              and/or modify it under the terms of the GNU General Public
@@ -123,10 +126,11 @@ void BaseMobility::initialize(int stage)
         double z = hasPar("z") ? par("z").doubleValue() : -1;
         if ((x == -1) && (y == -1))
         {
-			//Minimum distance between any anchor and any mobile node
+			//Minimum distance between any anchor and minimum distance between any mobile node
 			double minimumDistanceAnchor = par("minimumDistanceAnchor");
 			EV << "Minimum Distance Anchor = " << minimumDistanceAnchor << endl;
 			double minimumDistanceNode = par("minimumDistanceNode");
+			EV << "Minimum Distance MN = " << minimumDistanceNode << endl;
 			//check whether anchors and nodes have a minimum distance among them separately or not
 			BaseConnectionManager::NicEntries& nicList = cc->getNicList();
 			double distance;
@@ -154,7 +158,7 @@ void BaseMobility::initialize(int stage)
 						move.setStart(newPos);
 						updatePosition();
 						coreEV << "PosMove (" << move.getStartPos().getX() << ", " << move.getStartPos().getY() << ")"<< endl;
-						coreEV << "PosNic antes (" << (cc->findNic(getParentModule()->findSubmodule("nic")))->pos.getX() << ", " << (cc->findNic(getParentModule()->findSubmodule("nic")))->pos.getY() << ")" << endl;
+						coreEV << "PosNic before (" << (cc->findNic(getParentModule()->findSubmodule("nic")))->pos.getX() << ", " << (cc->findNic(getParentModule()->findSubmodule("nic")))->pos.getY() << ")" << endl;
 						break;
 					}
 				}

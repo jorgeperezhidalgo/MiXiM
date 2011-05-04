@@ -55,19 +55,14 @@ class NicEntry : public cObject
     /** @brief Geographic location of the nic*/
     Coord pos;
 
-    // Modified by Jorge Perez: Module type, 1:anchor, 2:node or 3:computer
-    int moduleType;
-    int transmisionSlot[100];
-    int numSlots;
-    int numTotalSlots;
+    // Modified by Jorge Perez:
+    int moduleType;				// Module type, 1:anchor, 2:node or 3:computer
+    int transmisionSlot[100];	// Transmission slots this anchor has
+    int numSlots; 				// Slots that this anchor has (mobile nodes and computer doesn't)
+    int numTotalSlots; 			// Total slots that are in the network
 
     /** @brief Points to this nics ChannelAccess module */
     ChannelAccess* chAccess;
-
-  protected:
-    /** @brief Debug output switch*/
-    bool coreDebug;
-
     /** @brief Outgoing connections of this nic
      *
      * This map stores all connection for this nic to other nics
@@ -76,6 +71,11 @@ class NicEntry : public cObject
      * going to and the second the gate to send the msg to
      **/
     GateList outConns;
+
+  protected:
+    /** @brief Debug output switch*/
+    bool coreDebug;
+
 
   public:
     /**
