@@ -17,20 +17,20 @@
 class AppToNetControlInfo : public cObject
 {
   protected:
-    /** @brief MAC address of the sending or receiving node*/
-    int nextHopMac;
+    /** @brief MAC address of the receiving node*/
+    int destAddr;
     // CSMA Active
     bool csmaActive;
 
 
   public:
     /** @brief Default constructor*/
-    AppToNetControlInfo(const int addr) : nextHopMac(addr) {};
+    AppToNetControlInfo(const int addr) : destAddr(addr) {};
 
     //Constructor with BE
     AppToNetControlInfo(const int addr, const bool csma)
     {
-       	nextHopMac = addr;
+    	destAddr = addr;
        	csmaActive = csma;
     };
 
@@ -38,8 +38,8 @@ class AppToNetControlInfo : public cObject
     virtual ~AppToNetControlInfo() {};
 
     /** @brief Getter method */
-    virtual const int getNextHopMac() {
-    	return nextHopMac;
+    virtual const int getDestAddr() {
+    	return destAddr;
     };
 
     // Getter method
@@ -48,8 +48,8 @@ class AppToNetControlInfo : public cObject
     };
 
     /** @brief Setter method */
-    virtual void setNextHopMac(const int addr){
-    	nextHopMac = addr;
+    virtual void setDestAddr(const int addr){
+    	destAddr = addr;
     };
     // Setter method
     virtual void setCsmaActive(const int csma) {

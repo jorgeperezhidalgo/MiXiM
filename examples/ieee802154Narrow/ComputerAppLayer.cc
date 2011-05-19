@@ -8,7 +8,7 @@ void ComputerAppLayer::initialize(int stage)
 
 	if (stage == 1) {
 		// Assign the type of host to 3 (computer)
-		computer = cc->findNic(getParentModule()->findSubmodule("nic"));
+		computer = cc->findNic(myNetwAddr);
 		computer->moduleType = 3;
 	// We have to wait till stage 3 to make this because in case the anchors are randomly situated, it's done in stage 2
 	} else if (stage == 3) { // Slot calculation
@@ -133,6 +133,10 @@ void ComputerAppLayer::initialize(int stage)
 		}
 
 		// This for prints the SLot configuration and assigns slot number values
+		// -----------------------------------------------------------------------------------
+		// - To have a more real system, here the computer would send packets to the Anchors -
+		// - with the slot configuration, we just configured the directly --------------------
+		// -----------------------------------------------------------------------------------
 		for (j = 0; j < numTotalSlots; j++)
 		{
 			EV << "Slot " << j << ": ";
@@ -175,20 +179,34 @@ void ComputerAppLayer::initialize(int stage)
 		startTimeComSink2 = simTime() + timeSyncPhase + timeReportPhase + timeVIPPhase + timeSyncPhase + timeComSinkPhase + timeSyncPhase;
 		scheduleAt(startTimeComSink2 , checkQueue);
 		queueElementCounter = -1;
+		maxQueueElements = 200;
 	}
 }
 
 ComputerAppLayer::~ComputerAppLayer() {
 	cancelAndDelete(checkQueue);
+	cancelAndDelete(beginPhases);
+	for(cQueue::Iterator iter(packetsQueue, 1); !iter.end(); iter++) {
+		delete(iter());
+	}
+	for(cQueue::Iterator iter(transfersQueue, 1); !iter.end(); iter++) {
+		delete(iter());
+	}
 }
 
 void ComputerAppLayer::finish()
 {
-	recordScalar("dropped_AN", nbPacketDroppedReportAN);
-	recordScalar("dropped_backoff_AN", nbPacketDroppedBackOffAN);
-	recordScalar("numTotalSlots", numTotalSlots);
-	recordScalar("dropped_no_time_in_Com_Sink", nbPacketDroppedNoTimeAN);
-	recordScalar("packets_rcv_in_wrong_phase", numOfPcktsRcvdInWrongPhase);
+	recordScalar("Dropped Packets in Comp - No ACK received", nbPacketDroppedNoACK);
+	recordScalar("Dropped Packets in Comp - Max MAC BackOff tries", nbPacketDroppedBackOff);
+	recordScalar("Dropped Packets in Comp - App Queue Full", nbPacketDroppedAppQueueFull);
+	recordScalar("Dropped Packets in Comp - Mac Queue Full", nbPacketDroppedMacQueueFull);
+	recordScalar("Dropped Packets in Comp - No Time in the Phase", nbPacketDroppedNoTimeApp);
+	recordScalar("Erased Packets in Comp - No more BackOff retries", nbErasedPacketsBackOffMax);
+	recordScalar("Erased Packets in Comp - No more No ACK retries", nbErasedPacketsNoACKMax);
+	recordScalar("Erased Packets in Comp - No more MAC Queue Full retries", nbErasedPacketsMacQueueFull);
+	recordScalar("Number of Comp Reports with ACK", nbReportsWithACK);
+	recordScalar("Number of Reports received in Comp", nbReportsReceived);
+	recordScalar("Number of Reports really for me received in Comp", nbReportsForMeReceived);
 }
 
 void ComputerAppLayer::handleSelfMsg(cMessage *msg)
@@ -203,13 +221,24 @@ void ComputerAppLayer::handleSelfMsg(cMessage *msg)
 				randomQueueTime = (simtime_t*)calloc(sizeof(simtime_t), packetsQueue.length());
 				for (int i = 0; i < packetsQueue.length(); i++) {
 					randomQueueTime[i] = startTimeComSink2 + (i * stepTimeComSink2) + uniform(0, stepTimeComSink2, 0);
+					EV << "Tiempo " << i << ": " << randomQueueTime[i] << endl;
 				}
 			}
 			startTimeComSink2 = simTime() + fullPhaseTime; // Calculate now the start of the next Com Sink 2 phase
 		} else {
 			cMessage * msg = (cMessage *)packetsQueue.pop();
 			EV << "Sending packet from the Queue" << endl;
-			sendDown(msg);
+			// Prior to send the message, we check that we are still in the Com Sink 2 Phase
+			switch(InWhichPhaseAmI(fullPhaseTime, timeSyncPhase, timeReportPhase, timeVIPPhase, timeComSinkPhase))
+			{
+			case AppLayer::COM_SINK_PHASE_2: // In Computer case, it only transmits in this phase
+				transfersQueue.insert(msg->dup()); // Make a copy of the sent packet till the MAC says it's ok or to retransmit it when something fails
+				sendDown(msg);
+				break;
+			default: // If we are in any of the other phases, we don't retransmit
+				nbPacketDroppedNoTimeApp++;
+				delete msg;
+			}
 		}
 		// Calculates the next time this selfmessage will be scheduled, in this fullphase (still elements in queue) or in the next one
 		if (packetsQueue.length() == 0) {
@@ -219,205 +248,283 @@ void ComputerAppLayer::handleSelfMsg(cMessage *msg)
 		} else {
 			queueElementCounter ++;
 			EV << "Still " << packetsQueue.length() << " elements in the Queue." << endl;
-			EV << "Next queue random transmission at : " << randomQueueTime[queueElementCounter] << " s" << endl;
+			EV << "Next queue random transmission at : " << randomQueueTime[queueElementCounter] << " s" << queueElementCounter << endl;
 			scheduleAt(randomQueueTime[queueElementCounter], checkQueue);
 		}
 		break;
+	case BEGIN_PHASE:
+		switch (nextPhase)
+		{
+		case AppLayer::SYNC_PHASE_1:
+			nextPhase = AppLayer::REPORT_PHASE;
+			nextPhaseStartTime = simTime() + timeSyncPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		case AppLayer::REPORT_PHASE:
+			nextPhase = AppLayer::VIP_PHASE;
+			nextPhaseStartTime = simTime() + timeReportPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		case AppLayer::VIP_PHASE:
+			nextPhase = AppLayer::SYNC_PHASE_2;
+			nextPhaseStartTime = simTime() + timeVIPPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		case AppLayer::SYNC_PHASE_2:
+			nextPhase = AppLayer::COM_SINK_PHASE_1;
+			nextPhaseStartTime = simTime() + timeSyncPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		case AppLayer::COM_SINK_PHASE_1:
+			nextPhase = AppLayer::SYNC_PHASE_3;
+			nextPhaseStartTime = simTime() + timeComSinkPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		case AppLayer::SYNC_PHASE_3:
+			nextPhase = AppLayer::COM_SINK_PHASE_2;
+			nextPhaseStartTime = simTime() + timeSyncPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		case AppLayer::COM_SINK_PHASE_2:
+			nextPhase = AppLayer::SYNC_PHASE_1;
+			nextPhaseStartTime = simTime() + timeComSinkPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		}
+		// Empty the transmission Queue
+		if (!transfersQueue.empty()) {
+			EV << "Emptying the queue with " << transfersQueue.length() << " elements in phase change" << endl;
+			nbPacketDroppedNoTimeApp = nbPacketDroppedNoTimeApp + transfersQueue.length();
+			transfersQueue.clear();
+			// --------------------------------------------------------------------------------------
+			// - If we don't want to clear the queue and lose the packets, --------------------------
+			// - we could somehow here leave the rest of the queue for the next full phase (period) -
+			// --------------------------------------------------------------------------------------
+		} else {
+			EV << "App Transmission Queue empty in phase change." << endl;
+		}
+		break;
 	default:
-		EV << "Unkown selfmessage! -> delete, kind: " << msg->getKind() << endl;
+		EV << "Unknown selfmessage! -> delete, kind: " << msg->getKind() << endl;
 		delete msg;
-		msg = 0;
 	}
 }
 
 void ComputerAppLayer::handleLowerMsg(cMessage *msg)
 {
+	// Convert the message to an Appl Packet
+	ApplPkt* pkt = check_and_cast<ApplPkt*>(msg);
+	EV << "Received packet from (" << pkt->getSrcAddr() << ", " << pkt->getRealSrcAddr() << ") to (" << pkt->getDestAddr() << ", " << pkt->getRealDestAddr() << ") with Name: " << pkt->getName() << endl;
+
 	// Get control info attached by base class decapsMsg method to get RSSI and BER
-	assert(dynamic_cast<NetwControlInfo*>(msg->getControlInfo()));
-	NetwControlInfo* cInfo = static_cast<NetwControlInfo*>(msg->getControlInfo());
+	assert(dynamic_cast<NetwControlInfo*>(pkt->getControlInfo()));
+	NetwControlInfo* cInfo = static_cast<NetwControlInfo*>(pkt->removeControlInfo());
 	EV << "The RSSI in Appl Layer is: " << cInfo->getRSSI() << endl;
 	EV << "The BER in Appl Layer is: " << cInfo->getBitErrorRate() << endl;
 
 	// Pointer to the source host
-	host = cc->findNic(simulation.getModule((static_cast<ApplPkt*>(msg))->getSrcAddr())->getParentModule()->findSubmodule("nic"));
+	host = cc->findNic(pkt->getSrcAddr());
 
-	switch(msg->getKind())
-    {
-	// The computer treats just reports, it doesn't process any broadcast
-    case AppLayer::REPORT_WITHOUT_CSMA:
-    case AppLayer::REPORT_WITH_CSMA:
-		switch(InWhichPhaseAmI(fullPhaseTime, timeSyncPhase, timeReportPhase, timeVIPPhase, timeComSinkPhase))
-		{
-		case AppLayer::SYNC_PHASE_1:
-		case AppLayer::SYNC_PHASE_2:
-		case AppLayer::SYNC_PHASE_3:
-			EV << "Here we should not receive any Report, just Broadcasts from the AN" << endl;
-			numOfPcktsRcvdInWrongPhase++;
+	// Filter first according to the phase we are in
+	switch(InWhichPhaseAmI(fullPhaseTime, timeSyncPhase, timeReportPhase, timeVIPPhase, timeComSinkPhase))
+	{
+	case AppLayer::SYNC_PHASE_1:
+	case AppLayer::SYNC_PHASE_2:
+	case AppLayer::SYNC_PHASE_3:
+		switch(pkt->getKind())
+	    {
+	    case AppLayer::REPORT_WITHOUT_CSMA:
+	    case AppLayer::REPORT_WITH_CSMA:
+	    	if (host->moduleType == 2) { // Mobile Node
+				EV << "Discarding the packet, in Sync Phase computer cannot receive any Report from a Mobile Node" << endl;
+	    	} else { // Computer or AN
+	    		EV << "Discarding the packet, in Sync Phase computer cannot receive any Report from a Anchor" << endl;
+	    	}
 			delete msg;
-			msg = 0;
 			break;
-		case AppLayer::REPORT_PHASE:
-		case AppLayer::VIP_PHASE:
-    		if (host->moduleType == 2) { // Mobile Node
-    			// The computer should not receive packets from any Mobile Node
-    			error ("The computer cannot receive reports from a Mobile Node");
-    			delete msg;
-    			msg = 0;
-			} else { // Anchor or computer
-    			// Don't do anything an Anchor would not communicate with another Anchor in this phases
-				error ("The MAC should have discarded this packet, if an AN transmits in this phases is for a Mobile Node");
-    			delete msg;
-    			msg = 0;
-    		}
-			break;
-		case AppLayer::COM_SINK_PHASE_1:
-		case AppLayer::COM_SINK_PHASE_2:
-    		if (host->moduleType == 2) { // Mobile Node
-    			error ("We cannot receive in this phase any packet from a Mobile Node");
-    			delete msg;
-    			msg = 0;
-    		} else { // Anchor
-				if ((static_cast<ApplPkt*>(msg))->getDestAddr() == getParentModule()->findSubmodule("nic")) {
-					if ((static_cast<ApplPkt*>(msg))->getRealDestAddr() == getParentModule()->findSubmodule("nic")) {
-						// The packet its for me, communication between from an Anchor
+	    case AppLayer::SYNC_MESSAGE_WITHOUT_CSMA:
+	    case AppLayer::SYNC_MESSAGE_WITH_CSMA:
+	    	if (host->moduleType == 2) { // Mobile Node
+				EV << "Discarding the packet, in Sync Phase computer cannot receive any Broadcast from a Mobile Node" << endl;
+	    	} else { // Computer or AN
+	    		// --------------------------------------------------------------------------------------
+	    		// - If we need to do something with the sync packets from the Anchors, it will be here -
+	    		// --------------------------------------------------------------------------------------
+	    		EV << "Discarding the packet, computer doesn't make anything with Sync Broadcast packets from the AN" << endl;
+	    	}
+			delete msg;
+	    	break;
+	    default:
+			EV << "Unknown Packet! -> delete, kind: " << msg->getKind() << endl;
+			delete msg;
+	    }
+		break;
+	case AppLayer::REPORT_PHASE:
+	case AppLayer::VIP_PHASE:
+		EV << "Discarding the packet, computer doesn't receive any packet during the Report and VIP phases" << endl;
+		delete msg;
+		break;
+	case AppLayer::COM_SINK_PHASE_1:
+		if (host->moduleType == 2) { // Mobile Node
+			EV << "Discarding the packet, computer cannot receive in Com Sink 1 Phase any packet from a Mobile Node" << endl;
+			delete msg;
+		} else { // Anchor
+			switch(pkt->getKind())
+		    {
+		    case AppLayer::REPORT_WITHOUT_CSMA:
+		    case AppLayer::REPORT_WITH_CSMA:
+		    	nbReportsReceived++;
+				if (pkt->getDestAddr() == myNetwAddr) { // If the packet is for the computer
+					if (pkt->getRealDestAddr() == myNetwAddr) { // If the packet was really for the computer
+						nbReportsForMeReceived++;
+						// The packet its for the computer, communication received from an Anchor
 						getParentModule()->bubble("I've received the message");
-						// Here the Computer would do all the calculations to answer the anchor or the mobile node through an AN
+						// ---------------------------------------------------------------------------------------------------------
+						// - Here the Computer would do all the calculations to answer the anchor or the mobile node through an AN -
+						// ---------------------------------------------------------------------------------------------------------
 						// Now we interchange destination and source to send it back to the mobile node
-						int realSrc = (static_cast<ApplPkt*>(msg))->getRealDestAddr();
-						int src = (static_cast<ApplPkt*>(msg))->getDestAddr();
-						(static_cast<ApplPkt*>(msg))->setRealDestAddr((static_cast<ApplPkt*>(msg))->getRealSrcAddr());
-						(static_cast<ApplPkt*>(msg))->setDestAddr((static_cast<ApplPkt*>(msg))->getSrcAddr());
-						(static_cast<ApplPkt*>(msg))->setRealSrcAddr(realSrc);
-						(static_cast<ApplPkt*>(msg))->setSrcAddr(src);
-						(static_cast<ApplPkt*>(msg))->setRetransmisionCounter(0); // Reset the retransmission counter
-						EV << "Enqueing  packet" << endl;
-						packetsQueue.insert(msg);
+						int realSrc = pkt->getRealDestAddr();
+						int src = pkt->getDestAddr();
+						pkt->setRealDestAddr(pkt->getRealSrcAddr());
+						pkt->setDestAddr(pkt->getSrcAddr());
+						pkt->setRealSrcAddr(realSrc);
+						pkt->setSrcAddr(src);
+						pkt->setRetransmisionCounterBO(0);	// Reset the retransmission counter BackOff
+						pkt->setRetransmisionCounterACK(0);	// Reset the retransmission counter ACK
+						pkt->setCSMA(true);
+						if (packetsQueue.length() < maxQueueElements) { // There is still place in the queue for more packets
+							EV << "Enqueing  packet" << endl;
+							packetsQueue.insert(pkt);
+							EV << "Origen: " << pkt->getSrcAddr() << endl;
+							EV << "Origen real: " << pkt->getRealSrcAddr() << endl;
+							EV << "Destino: " << pkt->getDestAddr() << endl;
+							EV << "Destino real: " << pkt->getRealDestAddr() << endl;
+							EV << "Tipo: " << pkt->getKind() << endl;
+							EV << "Nombre: " << pkt->getName() << endl;
+							EV << "CSMA: " << pkt->getCSMA() << endl;
+						} else {
+							EV << "Queue full, discarding packet" << endl;
+							nbPacketDroppedAppQueueFull++;
+							delete msg;
+						}
 					} else {
 						// This case won't happen, a packet for the computer will be always in real for the computer
+						EV << "Discarding packet, the computer received a packet that was not really for him, for us not possible" << endl;
 		    			delete msg;
-		    			msg = 0;
 					}
 				} else { // The computer doesn't route the packet
 					// In this case we will not have this situation because the AN cannot communicate with each other,
 					// they communicate with the computer and then this sends the packet to the other AN
+					EV << "Discarding packet, the computer received a packet for another Anchor, and the computer does not route packets" << endl;
 	    			delete msg;
-	    			msg = 0;
 				}
-    		}
-			break;
+				break;
+		    case AppLayer::SYNC_MESSAGE_WITHOUT_CSMA:
+		    case AppLayer::SYNC_MESSAGE_WITH_CSMA:
+		    	EV << "Discarding Packet, computer won't receive any Sync Broadcast Packet during Com Sink 1 Phase" << endl;
+		    	delete msg;
+		    	break;
+		    default:
+				EV << "Unknown Packet! -> delete, kind: " << msg->getKind() << endl;
+				delete msg;
+		    }
 		}
 		break;
-    default:
-    	// Here we could program if we need to process the sync packets
-    	delete msg;
-    	msg = 0;
-    }
+	case AppLayer::COM_SINK_PHASE_2:
+		EV << "Discarding packet, the computer doesn't receive any packet during Com Sink 2 Phase" << endl;
+		delete msg;
+		break;
+	default:
+		EV << "Unknown Phase! -> deleting packet, kind: " << msg->getKind() << endl;
+		delete msg;
+	}
+	delete cInfo;
 }
 
 void ComputerAppLayer::handleLowerControl(cMessage *msg)
 {
+	ApplPkt* pkt;
 	switch (msg->getKind())
 	{
 	case BaseMacLayer::PACKET_DROPPED_BACKOFF: // In case its dropped due to maximum BackOffs periods reached
-		nbPacketDroppedBackOffAN++;
+		// Take the first message from the transmission queue, the first is always the one the MAC is refering to...
+		pkt = check_and_cast<ApplPkt*>((cMessage *)transfersQueue.pop());
+		nbPacketDroppedBackOff++;
 		// Will check if we already tried the maximum number of tries and if not increase the number of retransmission in the packet variable
 		EV << "Packet was dropped because it reached maximum BackOff periods, ";
-		if ((static_cast<ApplPkt*>(msg))->getRetransmisionCounter() < maxRetransDroppedBackOff) {
-			(static_cast<ApplPkt*>(msg))->setRetransmisionCounter((static_cast<ApplPkt*>(msg))->getRetransmisionCounter() + 1);
-			if ((static_cast<ApplPkt*>(msg))->getDestAddr() == destination) { // Its a broadcast
-				EV << " Broadcast retransmission number " << (static_cast<ApplPkt*>(msg))->getRetransmisionCounter() << " of " << maxRetransDroppedBackOff;
-				if ((static_cast<ApplPkt*>(msg))->getCSMA()) { // Set Name and Kind of the packet for CSMA transmission
-					(static_cast<ApplPkt*>(msg))->setName("SYNC_MESSAGE_WITH_CSMA");
-					(static_cast<ApplPkt*>(msg))->setKind(SYNC_MESSAGE_WITH_CSMA);
-				} else { // Set Name and Kind of the packet for non CSMA transmission
-					(static_cast<ApplPkt*>(msg))->setName("SYNC_MESSAGE_WITHOUT_CSMA");
-					(static_cast<ApplPkt*>(msg))->setKind(SYNC_MESSAGE_WITHOUT_CSMA);
-				}
-			} else { // Its a Report
-				EV << " Report retransmission number " << (static_cast<ApplPkt*>(msg))->getRetransmisionCounter() << " of " << maxRetransDroppedBackOff;
-				if ((static_cast<ApplPkt*>(msg))->getCSMA()) { // Set Name and Kind of the packet for CSMA transmission
-					(static_cast<ApplPkt*>(msg))->setName("Report with CSMA");
-					(static_cast<ApplPkt*>(msg))->setKind(REPORT_WITH_CSMA);
-				} else { // Set Name and Kind of the packet for non CSMA transmission
-					(static_cast<ApplPkt*>(msg))->setName("Report without CSMA");
-					(static_cast<ApplPkt*>(msg))->setKind(REPORT_WITHOUT_CSMA);
-				}
-			}
+		if (pkt->getRetransmisionCounterBO() < maxRetransDroppedBackOff) {
+			pkt->setRetransmisionCounterBO(pkt->getRetransmisionCounterBO() + 1);
+			EV << " retransmission number " << pkt->getRetransmisionCounterBO() << " of " << maxRetransDroppedBackOff;
 			// In case the packet transmission failed, we have to check before retransmission that we are still in the transmission phase
 			switch(InWhichPhaseAmI(fullPhaseTime, timeSyncPhase, timeReportPhase, timeVIPPhase, timeComSinkPhase))
 			{
 			case AppLayer::COM_SINK_PHASE_2: // In Computer case, it only transmits in this phase
-				sendDown(msg);
+				transfersQueue.insert(pkt->dup()); // Make a copy of the sent packet till the MAC says it's ok or to retransmit it when something fails
+				sendDown(pkt);
 				break;
 			default: // If we are in any of the other phases, we don't retransmit
-				nbPacketDroppedNoTimeAN++;
-				delete msg;
-				msg = 0;
-				break;
+				nbPacketDroppedNoTimeApp++;
+				delete pkt;
 			}
 		} else { // We reached the maximum number of retransmissions
 			EV << " maximum number of retransmission reached, dropping the packet in App Layer.";
-			delete msg;
-			msg = 0;
+			nbErasedPacketsBackOffMax++;
+			delete pkt;
 		}
 		EV << endl;
 		break;
 	case BaseMacLayer::PACKET_DROPPED: // In case its dropped due to no ACK received...
-		nbPacketDroppedReportAN++;
+		// Take the first message from the transmission queue, the first is always the one the MAC is refering to...
+		pkt = check_and_cast<ApplPkt*>((cMessage *)transfersQueue.pop());
+		nbPacketDroppedNoACK++;
 		// Will check if we already tried the maximum number of tries and if not increase the number of retransmission in the packet variable
 		EV << "Packet was dropped because it reached maximum tries of transmission in MAC without ACK, ";
-		if ((static_cast<ApplPkt*>(msg))->getRetransmisionCounter() < maxRetransDroppedReportAN) {
-			(static_cast<ApplPkt*>(msg))->setRetransmisionCounter((static_cast<ApplPkt*>(msg))->getRetransmisionCounter() + 1);
-			if ((static_cast<ApplPkt*>(msg))->getDestAddr() == destination) { // Its a broadcast (it cannot be, but just in cas)
-				EV << " Broadcast retransmission number " << (static_cast<ApplPkt*>(msg))->getRetransmisionCounter() << " of " << maxRetransDroppedReportAN;
-				if ((static_cast<ApplPkt*>(msg))->getCSMA()) { // Set Name and Kind of the packet for CSMA transmission
-					(static_cast<ApplPkt*>(msg))->setName("SYNC_MESSAGE_WITH_CSMA");
-					(static_cast<ApplPkt*>(msg))->setKind(SYNC_MESSAGE_WITH_CSMA);
-				} else { // Set Name and Kind of the packet for non CSMA transmission
-					(static_cast<ApplPkt*>(msg))->setName("SYNC_MESSAGE_WITHOUT_CSMA");
-					(static_cast<ApplPkt*>(msg))->setKind(SYNC_MESSAGE_WITHOUT_CSMA);
-				}
-			} else { // Its a Report
-				EV << " Report retransmission number " << (static_cast<ApplPkt*>(msg))->getRetransmisionCounter() << " of " << maxRetransDroppedReportAN;
-				if ((static_cast<ApplPkt*>(msg))->getCSMA()) { // Set Name and Kind of the packet for CSMA transmission
-					(static_cast<ApplPkt*>(msg))->setName("Report with CSMA");
-					(static_cast<ApplPkt*>(msg))->setKind(REPORT_WITH_CSMA);
-				} else { // Set Name and Kind of the packet for non CSMA transmission
-					(static_cast<ApplPkt*>(msg))->setName("Report without CSMA");
-					(static_cast<ApplPkt*>(msg))->setKind(REPORT_WITHOUT_CSMA);
-				}
-			}
+		if (pkt->getRetransmisionCounterACK() < maxRetransDroppedReportAN) {
+			pkt->setRetransmisionCounterACK(pkt->getRetransmisionCounterACK() + 1);
+			EV << " retransmission number " << pkt->getRetransmisionCounterACK() << " of " << maxRetransDroppedReportAN;
 			// In case the packet transmission failed, we have to check before retransmission that we are still in the transmission phase
 			switch(InWhichPhaseAmI(fullPhaseTime, timeSyncPhase, timeReportPhase, timeVIPPhase, timeComSinkPhase))
 			{
 			case AppLayer::COM_SINK_PHASE_2: // In Computer case, it only transmits in this phase
-				sendDown(msg);
+				transfersQueue.insert(pkt->dup()); // Make a copy of the sent packet till the MAC says it's ok or to retransmit it when something fails
+				sendDown(pkt);
 				break;
 			default: // If we are in any of the other phases, we don't retransmit
-				nbPacketDroppedNoTimeAN++;
-				delete msg;
-				msg = 0;
+				nbPacketDroppedNoTimeApp++;
+				delete pkt;
 				break;
 			}
 		} else { // We reached the maximum number of retransmissions
 			EV << " maximum number of retransmission reached, dropping the packet in App Layer.";
-			delete msg;
-			msg = 0;
+			nbErasedPacketsNoACKMax++;
+			delete pkt;
 		}
 		EV << endl;
 		break;
 	case BaseMacLayer::QUEUE_FULL:
-		nbPacketDroppedReportAN++;
+		// Take the last message from the transmission queue, the last because as the mac queue is full the Mac queue never had this packet
+		pkt = check_and_cast<ApplPkt*>((cMessage *)transfersQueue.remove(transfersQueue.back()));
 		EV << "The queue in MAC is full, discarding the message" << endl;
-		delete msg;
-		msg = 0;
+		nbPacketDroppedMacQueueFull++;
+		nbErasedPacketsMacQueueFull++;
+		delete pkt;
 		break;
-	default:
-		EV << "Message correctly transmitted." << endl;
-		delete msg;
-		msg = 0;
+	case BaseMacLayer::SYNC_SENT:
+		// Take the first message from the transmission queue, the first is always the one the MAC is refering to...
+		pkt = check_and_cast<ApplPkt*>((cMessage *)transfersQueue.pop());
+		EV << "The Broadcast packet was successfully transmitted into the air" << endl;
+		nbBroadcastPacketsSent++;
+		delete pkt;
+		break;
+	case BaseMacLayer::TX_OVER:
+		// Take the first message from the transmission queue, the first is always the one the MAC is refering to...
+		pkt = check_and_cast<ApplPkt*>((cMessage *)transfersQueue.pop());
+		EV << "Message correctly transmitted, received the ACK." << endl;
+		nbReportsWithACK++;
+		delete pkt;
 		break;
 	}
+	delete msg;
 }
 
 int ComputerAppLayer::hasSlot(int *slots, int *slotCounter, int numTotalSlots, int anchor, int numAnchors)

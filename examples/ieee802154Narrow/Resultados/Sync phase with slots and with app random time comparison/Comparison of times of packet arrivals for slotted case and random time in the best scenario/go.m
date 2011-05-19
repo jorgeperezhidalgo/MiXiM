@@ -1,4 +1,4 @@
-%clc; clear;
+clc; clear;
 
 fila_vector = 1; % Row where the data begins, starts with 0
 columna_vector = 0; % Column where the data begins, starts with 0
@@ -7,8 +7,6 @@ columna_vector = 0; % Column where the data begins, starts with 0
 % Variables for file name %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 num = 0;
-% int tiempo[][][];
-% int tiempos[][][];
 N = 30:10:70;
 T = 5:2:13;
 P = 10;
@@ -25,7 +23,8 @@ for nodes = 1:5
     %data_tiempo = csvread(strcat('vector-N=', num2str(N(nodes)), '-P=', num2str(P), '-T=', num2str(T(nodes)), '.csv'), fila_vector, columna_vector);
     data_tiempo = csvread(strcat('vector-N=', num2str(N(nodes)), '.csv'), fila_vector, columna_vector);
 
-    tiempos(nodes, size(data_tiempo,2)-1, 11) = 0; % 10 because it is the last 1, 2, ... 8 the first, the last and interpacket mean arrival
+    tiempos(nodes, size(data_tiempo,2)-1, 11) = 0; % 11 because it is the last 1, 2, ... 8 the first, the last and interpacket mean arrival
+    numero_paquetes(nodes, size(data_tiempo,2)-1, 8) = 0; % 10 because it is the last 1, 2, ... 8 and the total
     
     for i=2:size(data_tiempo,2)
         num_paq_rec = 0;
@@ -35,6 +34,9 @@ for nodes = 1:5
                 tiempo(num_paq_rec,1)=data_tiempo(j,1); % Time of packet arrival column
                 tiempo(num_paq_rec,2)=data_tiempo(j,i); % Sender AN id column
                 tiempo(num_paq_rec,3)=size(find(tiempo(:,2) == data_tiempo(j,i)), 1); % Number of received packet from an AN column
+                if (tiempo(num_paq_rec,3) <= 8)
+                    numero_paquetes(nodes,i-1,tiempo(num_paq_rec,3)) = numero_paquetes(nodes,i-1,tiempo(num_paq_rec,3)) + 1;
+                end
             end
         end
         for k=1:size(tiempo,1)
@@ -60,6 +62,11 @@ for i=1:5
             tiempos_medios_nodos(i, k, j) = mean(tiempos(i, find(tiempos(i, (k-1)*80+1:k*80, j) ~= 0), j), 2);
         end
     end
+    for j=1:8
+        for k=1:100 % Number of iterations
+            numero_medio_paquetes(i, k, j) = mean(numero_paquetes(i, find(numero_paquetes(i, (k-1)*80+1:k*80, j) ~= 0), j), 2);
+        end
+    end
 end
 
 % Average from the 100 repetitions
@@ -68,9 +75,14 @@ for i=1:5
         media_tiempos(i, j) = mean(tiempos_medios_nodos(i, find(tiempos_medios_nodos(i, :, j) ~= 0), j), 2);
         desv_tiempos(i, j) = std(tiempos_medios_nodos(i, find(tiempos_medios_nodos(i, :, j) ~= 0), j), 0, 2);
     end
+    for j=1:8
+        media_paquetes(i, j) = mean(numero_medio_paquetes(i, find(numero_medio_paquetes(i, :, j) ~= 0), j), 2);
+        desv_paquetes(i, j) = std(numero_medio_paquetes(i, find(numero_medio_paquetes(i, :, j) ~= 0), j), 0, 2);
+    end
 end
 
 ci_media_tiempos = desv_tiempos/sqrt(size(tiempos_medios_nodos, 2)) * norminv(.05/2);
+ci_media_paquetes = desv_paquetes/sqrt(size(numero_medio_paquetes, 2)) * norminv(.05/2);
 
         
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%

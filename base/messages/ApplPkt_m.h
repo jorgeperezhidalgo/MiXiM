@@ -20,9 +20,9 @@
  * <pre>
  * packet ApplPkt
  * {
- *     int sequenceId = 0;				
  *     int destAddr = -1; 				
  *     int srcAddr = -1; 				
+ *     int sequenceId = 0;				
  *     int priority = 0; 				
  *     int8 status = 0;
  * 	int16 posX = 0;
@@ -31,21 +31,24 @@
  * 	int32 timestamp = 0;
  * 	
  * 	
- * 	int realDestAddr = -1;
- * 	int realSrcAddr = -1;
- * 	int retransmisionCounter = 0;	
- * 	bool CSMA; 						
- * 	bool askForRequest;				
- * 	bool requestPacket;				
+ * 
+ * 	int realDestAddr = -1;			
+ * 	int realSrcAddr = -1;			
+ * 	int retransmisionCounterBO = 0;	
+ * 	int retransmisionCounterACK = 0;
+ * 	bool CSMA = true;				
+ * 	bool askForRequest = false;		
+ * 	bool requestPacket = false;		
+ * 	int numberOfBroadcasts = 0;		
  * }
  * </pre>
  */
 class ApplPkt : public ::cPacket
 {
   protected:
-    int sequenceId_var;
     int destAddr_var;
     int srcAddr_var;
+    int sequenceId_var;
     int priority_var;
     int8 status_var;
     int16 posX_var;
@@ -54,10 +57,12 @@ class ApplPkt : public ::cPacket
     int32 timestamp_var;
     int realDestAddr_var;
     int realSrcAddr_var;
-    int retransmisionCounter_var;
+    int retransmisionCounterBO_var;
+    int retransmisionCounterACK_var;
     bool CSMA_var;
     bool askForRequest_var;
     bool requestPacket_var;
+    int numberOfBroadcasts_var;
 
     // protected and unimplemented operator==(), to prevent accidental usage
     bool operator==(const ApplPkt&);
@@ -72,12 +77,12 @@ class ApplPkt : public ::cPacket
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual int getSequenceId() const;
-    virtual void setSequenceId(int sequenceId_var);
     virtual int getDestAddr() const;
     virtual void setDestAddr(int destAddr_var);
     virtual int getSrcAddr() const;
     virtual void setSrcAddr(int srcAddr_var);
+    virtual int getSequenceId() const;
+    virtual void setSequenceId(int sequenceId_var);
     virtual int getPriority() const;
     virtual void setPriority(int priority_var);
     virtual int8 getStatus() const;
@@ -94,14 +99,18 @@ class ApplPkt : public ::cPacket
     virtual void setRealDestAddr(int realDestAddr_var);
     virtual int getRealSrcAddr() const;
     virtual void setRealSrcAddr(int realSrcAddr_var);
-    virtual int getRetransmisionCounter() const;
-    virtual void setRetransmisionCounter(int retransmisionCounter_var);
+    virtual int getRetransmisionCounterBO() const;
+    virtual void setRetransmisionCounterBO(int retransmisionCounterBO_var);
+    virtual int getRetransmisionCounterACK() const;
+    virtual void setRetransmisionCounterACK(int retransmisionCounterACK_var);
     virtual bool getCSMA() const;
     virtual void setCSMA(bool CSMA_var);
     virtual bool getAskForRequest() const;
     virtual void setAskForRequest(bool askForRequest_var);
     virtual bool getRequestPacket() const;
     virtual void setRequestPacket(bool requestPacket_var);
+    virtual int getNumberOfBroadcasts() const;
+    virtual void setNumberOfBroadcasts(int numberOfBroadcasts_var);
 };
 
 inline void doPacking(cCommBuffer *b, ApplPkt& obj) {obj.parsimPack(b);}

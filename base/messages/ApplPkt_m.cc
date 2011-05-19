@@ -34,9 +34,9 @@ Register_Class(ApplPkt);
 
 ApplPkt::ApplPkt(const char *name, int kind) : cPacket(name,kind)
 {
-    this->sequenceId_var = 0;
     this->destAddr_var = -1;
     this->srcAddr_var = -1;
+    this->sequenceId_var = 0;
     this->priority_var = 0;
     this->status_var = 0;
     this->posX_var = 0;
@@ -45,10 +45,12 @@ ApplPkt::ApplPkt(const char *name, int kind) : cPacket(name,kind)
     this->timestamp_var = 0;
     this->realDestAddr_var = -1;
     this->realSrcAddr_var = -1;
-    this->retransmisionCounter_var = 0;
-    this->CSMA_var = 0;
-    this->askForRequest_var = 0;
-    this->requestPacket_var = 0;
+    this->retransmisionCounterBO_var = 0;
+    this->retransmisionCounterACK_var = 0;
+    this->CSMA_var = true;
+    this->askForRequest_var = false;
+    this->requestPacket_var = false;
+    this->numberOfBroadcasts_var = 0;
 }
 
 ApplPkt::ApplPkt(const ApplPkt& other) : cPacket()
@@ -65,9 +67,9 @@ ApplPkt& ApplPkt::operator=(const ApplPkt& other)
 {
     if (this==&other) return *this;
     cPacket::operator=(other);
-    this->sequenceId_var = other.sequenceId_var;
     this->destAddr_var = other.destAddr_var;
     this->srcAddr_var = other.srcAddr_var;
+    this->sequenceId_var = other.sequenceId_var;
     this->priority_var = other.priority_var;
     this->status_var = other.status_var;
     this->posX_var = other.posX_var;
@@ -76,19 +78,21 @@ ApplPkt& ApplPkt::operator=(const ApplPkt& other)
     this->timestamp_var = other.timestamp_var;
     this->realDestAddr_var = other.realDestAddr_var;
     this->realSrcAddr_var = other.realSrcAddr_var;
-    this->retransmisionCounter_var = other.retransmisionCounter_var;
+    this->retransmisionCounterBO_var = other.retransmisionCounterBO_var;
+    this->retransmisionCounterACK_var = other.retransmisionCounterACK_var;
     this->CSMA_var = other.CSMA_var;
     this->askForRequest_var = other.askForRequest_var;
     this->requestPacket_var = other.requestPacket_var;
+    this->numberOfBroadcasts_var = other.numberOfBroadcasts_var;
     return *this;
 }
 
 void ApplPkt::parsimPack(cCommBuffer *b)
 {
     cPacket::parsimPack(b);
-    doPacking(b,this->sequenceId_var);
     doPacking(b,this->destAddr_var);
     doPacking(b,this->srcAddr_var);
+    doPacking(b,this->sequenceId_var);
     doPacking(b,this->priority_var);
     doPacking(b,this->status_var);
     doPacking(b,this->posX_var);
@@ -97,18 +101,20 @@ void ApplPkt::parsimPack(cCommBuffer *b)
     doPacking(b,this->timestamp_var);
     doPacking(b,this->realDestAddr_var);
     doPacking(b,this->realSrcAddr_var);
-    doPacking(b,this->retransmisionCounter_var);
+    doPacking(b,this->retransmisionCounterBO_var);
+    doPacking(b,this->retransmisionCounterACK_var);
     doPacking(b,this->CSMA_var);
     doPacking(b,this->askForRequest_var);
     doPacking(b,this->requestPacket_var);
+    doPacking(b,this->numberOfBroadcasts_var);
 }
 
 void ApplPkt::parsimUnpack(cCommBuffer *b)
 {
     cPacket::parsimUnpack(b);
-    doUnpacking(b,this->sequenceId_var);
     doUnpacking(b,this->destAddr_var);
     doUnpacking(b,this->srcAddr_var);
+    doUnpacking(b,this->sequenceId_var);
     doUnpacking(b,this->priority_var);
     doUnpacking(b,this->status_var);
     doUnpacking(b,this->posX_var);
@@ -117,20 +123,12 @@ void ApplPkt::parsimUnpack(cCommBuffer *b)
     doUnpacking(b,this->timestamp_var);
     doUnpacking(b,this->realDestAddr_var);
     doUnpacking(b,this->realSrcAddr_var);
-    doUnpacking(b,this->retransmisionCounter_var);
+    doUnpacking(b,this->retransmisionCounterBO_var);
+    doUnpacking(b,this->retransmisionCounterACK_var);
     doUnpacking(b,this->CSMA_var);
     doUnpacking(b,this->askForRequest_var);
     doUnpacking(b,this->requestPacket_var);
-}
-
-int ApplPkt::getSequenceId() const
-{
-    return sequenceId_var;
-}
-
-void ApplPkt::setSequenceId(int sequenceId_var)
-{
-    this->sequenceId_var = sequenceId_var;
+    doUnpacking(b,this->numberOfBroadcasts_var);
 }
 
 int ApplPkt::getDestAddr() const
@@ -151,6 +149,16 @@ int ApplPkt::getSrcAddr() const
 void ApplPkt::setSrcAddr(int srcAddr_var)
 {
     this->srcAddr_var = srcAddr_var;
+}
+
+int ApplPkt::getSequenceId() const
+{
+    return sequenceId_var;
+}
+
+void ApplPkt::setSequenceId(int sequenceId_var)
+{
+    this->sequenceId_var = sequenceId_var;
 }
 
 int ApplPkt::getPriority() const
@@ -233,14 +241,24 @@ void ApplPkt::setRealSrcAddr(int realSrcAddr_var)
     this->realSrcAddr_var = realSrcAddr_var;
 }
 
-int ApplPkt::getRetransmisionCounter() const
+int ApplPkt::getRetransmisionCounterBO() const
 {
-    return retransmisionCounter_var;
+    return retransmisionCounterBO_var;
 }
 
-void ApplPkt::setRetransmisionCounter(int retransmisionCounter_var)
+void ApplPkt::setRetransmisionCounterBO(int retransmisionCounterBO_var)
 {
-    this->retransmisionCounter_var = retransmisionCounter_var;
+    this->retransmisionCounterBO_var = retransmisionCounterBO_var;
+}
+
+int ApplPkt::getRetransmisionCounterACK() const
+{
+    return retransmisionCounterACK_var;
+}
+
+void ApplPkt::setRetransmisionCounterACK(int retransmisionCounterACK_var)
+{
+    this->retransmisionCounterACK_var = retransmisionCounterACK_var;
 }
 
 bool ApplPkt::getCSMA() const
@@ -271,6 +289,16 @@ bool ApplPkt::getRequestPacket() const
 void ApplPkt::setRequestPacket(bool requestPacket_var)
 {
     this->requestPacket_var = requestPacket_var;
+}
+
+int ApplPkt::getNumberOfBroadcasts() const
+{
+    return numberOfBroadcasts_var;
+}
+
+void ApplPkt::setNumberOfBroadcasts(int numberOfBroadcasts_var)
+{
+    this->numberOfBroadcasts_var = numberOfBroadcasts_var;
 }
 
 class ApplPktDescriptor : public cClassDescriptor
@@ -320,7 +348,7 @@ const char *ApplPktDescriptor::getProperty(const char *propertyname) const
 int ApplPktDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 15+basedesc->getFieldCount(object) : 15;
+    return basedesc ? 17+basedesc->getFieldCount(object) : 17;
 }
 
 unsigned int ApplPktDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -347,8 +375,10 @@ unsigned int ApplPktDescriptor::getFieldTypeFlags(void *object, int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<15) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<17) ? fieldTypeFlags[field] : 0;
 }
 
 const char *ApplPktDescriptor::getFieldName(void *object, int field) const
@@ -360,9 +390,9 @@ const char *ApplPktDescriptor::getFieldName(void *object, int field) const
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldNames[] = {
-        "sequenceId",
         "destAddr",
         "srcAddr",
+        "sequenceId",
         "priority",
         "status",
         "posX",
@@ -371,21 +401,23 @@ const char *ApplPktDescriptor::getFieldName(void *object, int field) const
         "timestamp",
         "realDestAddr",
         "realSrcAddr",
-        "retransmisionCounter",
+        "retransmisionCounterBO",
+        "retransmisionCounterACK",
         "CSMA",
         "askForRequest",
         "requestPacket",
+        "numberOfBroadcasts",
     };
-    return (field>=0 && field<15) ? fieldNames[field] : NULL;
+    return (field>=0 && field<17) ? fieldNames[field] : NULL;
 }
 
 int ApplPktDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
-    if (fieldName[0]=='s' && strcmp(fieldName, "sequenceId")==0) return base+0;
-    if (fieldName[0]=='d' && strcmp(fieldName, "destAddr")==0) return base+1;
-    if (fieldName[0]=='s' && strcmp(fieldName, "srcAddr")==0) return base+2;
+    if (fieldName[0]=='d' && strcmp(fieldName, "destAddr")==0) return base+0;
+    if (fieldName[0]=='s' && strcmp(fieldName, "srcAddr")==0) return base+1;
+    if (fieldName[0]=='s' && strcmp(fieldName, "sequenceId")==0) return base+2;
     if (fieldName[0]=='p' && strcmp(fieldName, "priority")==0) return base+3;
     if (fieldName[0]=='s' && strcmp(fieldName, "status")==0) return base+4;
     if (fieldName[0]=='p' && strcmp(fieldName, "posX")==0) return base+5;
@@ -394,10 +426,12 @@ int ApplPktDescriptor::findField(void *object, const char *fieldName) const
     if (fieldName[0]=='t' && strcmp(fieldName, "timestamp")==0) return base+8;
     if (fieldName[0]=='r' && strcmp(fieldName, "realDestAddr")==0) return base+9;
     if (fieldName[0]=='r' && strcmp(fieldName, "realSrcAddr")==0) return base+10;
-    if (fieldName[0]=='r' && strcmp(fieldName, "retransmisionCounter")==0) return base+11;
-    if (fieldName[0]=='C' && strcmp(fieldName, "CSMA")==0) return base+12;
-    if (fieldName[0]=='a' && strcmp(fieldName, "askForRequest")==0) return base+13;
-    if (fieldName[0]=='r' && strcmp(fieldName, "requestPacket")==0) return base+14;
+    if (fieldName[0]=='r' && strcmp(fieldName, "retransmisionCounterBO")==0) return base+11;
+    if (fieldName[0]=='r' && strcmp(fieldName, "retransmisionCounterACK")==0) return base+12;
+    if (fieldName[0]=='C' && strcmp(fieldName, "CSMA")==0) return base+13;
+    if (fieldName[0]=='a' && strcmp(fieldName, "askForRequest")==0) return base+14;
+    if (fieldName[0]=='r' && strcmp(fieldName, "requestPacket")==0) return base+15;
+    if (fieldName[0]=='n' && strcmp(fieldName, "numberOfBroadcasts")==0) return base+16;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -422,11 +456,13 @@ const char *ApplPktDescriptor::getFieldTypeString(void *object, int field) const
         "int",
         "int",
         "int",
+        "int",
         "bool",
         "bool",
         "bool",
+        "int",
     };
-    return (field>=0 && field<15) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<17) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *ApplPktDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -466,9 +502,9 @@ std::string ApplPktDescriptor::getFieldAsString(void *object, int field, int i) 
     }
     ApplPkt *pp = (ApplPkt *)object; (void)pp;
     switch (field) {
-        case 0: return long2string(pp->getSequenceId());
-        case 1: return long2string(pp->getDestAddr());
-        case 2: return long2string(pp->getSrcAddr());
+        case 0: return long2string(pp->getDestAddr());
+        case 1: return long2string(pp->getSrcAddr());
+        case 2: return long2string(pp->getSequenceId());
         case 3: return long2string(pp->getPriority());
         case 4: return long2string(pp->getStatus());
         case 5: return long2string(pp->getPosX());
@@ -477,10 +513,12 @@ std::string ApplPktDescriptor::getFieldAsString(void *object, int field, int i) 
         case 8: return long2string(pp->getTimestamp());
         case 9: return long2string(pp->getRealDestAddr());
         case 10: return long2string(pp->getRealSrcAddr());
-        case 11: return long2string(pp->getRetransmisionCounter());
-        case 12: return bool2string(pp->getCSMA());
-        case 13: return bool2string(pp->getAskForRequest());
-        case 14: return bool2string(pp->getRequestPacket());
+        case 11: return long2string(pp->getRetransmisionCounterBO());
+        case 12: return long2string(pp->getRetransmisionCounterACK());
+        case 13: return bool2string(pp->getCSMA());
+        case 14: return bool2string(pp->getAskForRequest());
+        case 15: return bool2string(pp->getRequestPacket());
+        case 16: return long2string(pp->getNumberOfBroadcasts());
         default: return "";
     }
 }
@@ -495,9 +533,9 @@ bool ApplPktDescriptor::setFieldAsString(void *object, int field, int i, const c
     }
     ApplPkt *pp = (ApplPkt *)object; (void)pp;
     switch (field) {
-        case 0: pp->setSequenceId(string2long(value)); return true;
-        case 1: pp->setDestAddr(string2long(value)); return true;
-        case 2: pp->setSrcAddr(string2long(value)); return true;
+        case 0: pp->setDestAddr(string2long(value)); return true;
+        case 1: pp->setSrcAddr(string2long(value)); return true;
+        case 2: pp->setSequenceId(string2long(value)); return true;
         case 3: pp->setPriority(string2long(value)); return true;
         case 4: pp->setStatus(string2long(value)); return true;
         case 5: pp->setPosX(string2long(value)); return true;
@@ -506,10 +544,12 @@ bool ApplPktDescriptor::setFieldAsString(void *object, int field, int i, const c
         case 8: pp->setTimestamp(string2long(value)); return true;
         case 9: pp->setRealDestAddr(string2long(value)); return true;
         case 10: pp->setRealSrcAddr(string2long(value)); return true;
-        case 11: pp->setRetransmisionCounter(string2long(value)); return true;
-        case 12: pp->setCSMA(string2bool(value)); return true;
-        case 13: pp->setAskForRequest(string2bool(value)); return true;
-        case 14: pp->setRequestPacket(string2bool(value)); return true;
+        case 11: pp->setRetransmisionCounterBO(string2long(value)); return true;
+        case 12: pp->setRetransmisionCounterACK(string2long(value)); return true;
+        case 13: pp->setCSMA(string2bool(value)); return true;
+        case 14: pp->setAskForRequest(string2bool(value)); return true;
+        case 15: pp->setRequestPacket(string2bool(value)); return true;
+        case 16: pp->setNumberOfBroadcasts(string2long(value)); return true;
         default: return false;
     }
 }
@@ -538,8 +578,10 @@ const char *ApplPktDescriptor::getFieldStructName(void *object, int field) const
         NULL,
         NULL,
         NULL,
+        NULL,
+        NULL,
     };
-    return (field>=0 && field<15) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<17) ? fieldStructNames[field] : NULL;
 }
 
 void *ApplPktDescriptor::getFieldStructPointer(void *object, int field, int i) const

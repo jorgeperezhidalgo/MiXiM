@@ -36,7 +36,6 @@
 #include "BaseMacLayer.h"
 #include <DroppedPacket.h>
 #include <MacPkt_m.h>
-#include "ApplPkt_m.h"
 
 
 
@@ -64,7 +63,7 @@ class  csma : public BaseMacLayer
     /** @brief Initialization of the module and some variables*/
     virtual void initialize(int);
 
-    virtual int numInitStages() const {return 3;}
+    virtual int numInitStages() const {return 5;}
 
     /** @brief Delete all dynamically allocated objects of the module*/
     virtual void finish();
@@ -96,6 +95,11 @@ class  csma : public BaseMacLayer
 	long nbBackoffs;
 	double backoffValues;
 	/*@}*/
+
+	// Added by Jorge
+	long nbDroppedFromMACQueueNoTimeInPhase;
+	long nbDroppedMACNoTimeBeforePhaseEnd;
+
 
 	/** @brief Records general statistics?*/
 	bool stats;
@@ -146,7 +150,8 @@ class  csma : public BaseMacLayer
       EV_DUPLICATE_RECEIVED,
       EV_TIMER_SIFS,                       // 17
       EV_BROADCAST_RECEIVED, 		   // 23, 24
-      EV_TIMER_CCA
+      EV_TIMER_CCA,
+      EV_BEGIN_PHASE
     };
 
     /** @brief Types for frames sent by the CSMA.*/
@@ -201,7 +206,7 @@ class  csma : public BaseMacLayer
     simtime_t rxSetupTime;
     /** @brief Time to switch radio from Rx to Tx state */
     simtime_t aTurnaroundTime;
-    // Time to leave between end of packet and start of the next one according to standard
+    // Jorge: Time to leave between end of packet and start of the next one according to standard
     simtime_t LIFS;
     /** @brief maximum number of backoffs before frame drop */
     int macMaxCSMABackoffs;
@@ -267,9 +272,37 @@ class  csma : public BaseMacLayer
     /** @brief This MAC layers MAC address.*/
     //int macaddress;
 
-    // True if its an anchor, false if its a mobile node
-    bool anchor;
+    // Modified by Jorge
+	simtime_t syncPacketTime;			// Max. duration of a Sync Packet, determines the slot size
+	simtime_t fullPhaseTime;			// Duration of the Full Phase or Period
+	simtime_t timeComSinkPhase;			// Duration of every Com Sink Phase
+	simtime_t timeSyncPhase;			// Duration of every Sync Phase, everyone is formed by syncPacketsPerSyncPhase mini sync phases
+	simtime_t timeReportPhase;			// Duration of the Report Phase
+	simtime_t timeVIPPhase;				// Duration of the VIP Phase
+	simtime_t smallTime;				// Time to add to another time when we want to make an event after another when they should execute at the same time
+	simtime_t guardTransmitTime;		// Time to leave before the end of the phase together with Backoff + aTurnaroundTime + rxSetupTime to ensure any packet is delivered after the end of the phase
+	simtime_t nextPhaseStartTime;		// Time to know the next Phase Start Time
+	simtime_t timeFromBackOffToTX;		// Time that goes between the end of the backoff time and the transmission of a packet
 
+	int syncPacketsPerSyncPhase; 		// Determines how many times do we repeat all the slots per sync phase
+	double phase2VIPPercentage;			// Percentage of the time Phase Report + Phase VIP that the Phase VIP takes
+
+	NicEntry* computer;					// Pointer to the NIC of the computer to take general data over the configurations
+
+	enum PhaseType{						// Phases of the Full Phase or Period
+		SYNC_PHASE_1 = 1,
+		REPORT_PHASE ,
+		VIP_PHASE,
+		SYNC_PHASE_2,
+		COM_SINK_PHASE_1,
+		SYNC_PHASE_3,
+		COM_SINK_PHASE_2
+	};
+
+	PhaseType nextPhase;					// To know in which phase are we
+	cMessage * beginPhases;				// Event to drop all the elements in the queue at the beginning from every phase
+
+	BaseConnectionManager* cc;			// Pointer to the Propagation Model module
 
 protected:
 	// FSM functions

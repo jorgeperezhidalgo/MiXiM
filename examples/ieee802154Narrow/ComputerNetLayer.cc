@@ -40,16 +40,7 @@ void ComputerNetLayer::handleLowerMsg(cMessage* msg)
  **/
 void ComputerNetLayer::handleLowerControl(cMessage* msg)
 {
-    // When we send a control message from Mac to Appl, we send the original message (in case we need to retransmit it)
-	// so we have to decapsulate in Net also and change kind and name, to the ones we got from MAC
-	const char *name = msg->getName();
-	short kind = msg->getKind();
-	cMessage *m = (static_cast<NetwPkt*>(msg))->decapsulate();
-	m->setName(name);
-	m->setKind(kind);
-    sendControlUp(m);
-    delete msg;
-    msg = 0;
+	sendControlUp(msg);
 }
 
 /**

@@ -65,6 +65,8 @@ void csma::initialize(int stage) {
 		nbDuplicates = 0;
 		nbBackoffs = 0;
 		backoffValues = 0;
+		nbDroppedFromMACQueueNoTimeInPhase = 0;
+		nbDroppedMACNoTimeBeforePhaseEnd = 0;
 		stats = par("stats");
 		trace = par("trace");
 		macMaxCSMABackoffs = par("macMaxCSMABackoffs");
@@ -118,7 +120,7 @@ void csma::initialize(int stage) {
 		txAttempts = 0;
 
 	} else if(stage == 2) {
-		BaseConnectionManager* cc = getConnectionManager();
+		cc = getConnectionManager();
 
     	if(cc->hasPar("pMax") && txPower > cc->par("pMax").doubleValue())
             opp_error("TranmitterPower can't be bigger than pMax in ConnectionManager! "
@@ -130,9 +132,24 @@ void csma::initialize(int stage) {
 
 		EV << "finished csma init stage 1." << endl;
 
-		anchor = true;
-		if (((cc->findNic(getParentModule()->getId()))->moduleType) == 2)
-			anchor = false;
+	} else if (stage == 4) { // Modified by Jorge, in this stage we calculate the necessary things to cancel the queue and don't permit to schedule more packets after a determined time
+		beginPhases = new cMessage("next-phase",csma::EV_BEGIN_PHASE);
+		nextPhase = csma::REPORT_PHASE;
+		syncPacketsPerSyncPhase = getParentModule()->getParentModule()->getParentModule()->getSubmodule("computer", 0)->getSubmodule("appl")->par("syncPacketsPerSyncPhase");
+		syncPacketTime = getParentModule()->getParentModule()->getParentModule()->getSubmodule("computer", 0)->getSubmodule("appl")->par("syncPacketTime");
+		phase2VIPPercentage = getParentModule()->getParentModule()->getParentModule()->getSubmodule("computer", 0)->getSubmodule("appl")->par("phase2VIPPercentage");
+		fullPhaseTime = getParentModule()->getParentModule()->getParentModule()->par("fullPhaseTime");
+		timeComSinkPhase = getParentModule()->getParentModule()->getParentModule()->par("timeComSinkPhase");
+		smallTime = 0.000001;			//  1 us
+		guardTransmitTime = 0.002;		//  2 ms, we use this time as guard time at the end of every phase
+		timeFromBackOffToTX = ccaDetectionTime + aTurnaroundTime + rxSetupTime + guardTransmitTime;
+
+		computer = cc->findNic(getParentModule()->getParentModule()->getParentModule()->getSubmodule("computer", 0)->findSubmodule("nic"));
+		timeSyncPhase = syncPacketsPerSyncPhase * computer->numTotalSlots * syncPacketTime ;
+		timeVIPPhase = (fullPhaseTime - (2 * timeComSinkPhase) - (3 * timeSyncPhase)) * phase2VIPPercentage;
+		timeReportPhase = (fullPhaseTime - (2 * timeComSinkPhase) - (3 * timeSyncPhase)) * (1 - phase2VIPPercentage);
+		nextPhaseStartTime = simTime() + timeSyncPhase - smallTime;
+		scheduleAt(nextPhaseStartTime, beginPhases);
 	}
 }
 
@@ -152,6 +169,8 @@ void csma::finish() {
 		}
 		recordScalar("nbBackoffs", nbBackoffs);
 		recordScalar("backoffDurations", backoffValues);
+		recordScalar("nbDroppedFromMACQueueNoTimeInPhase", nbDroppedFromMACQueueNoTimeInPhase);
+		recordScalar("nbDroppedMACNoTimeBeforePhaseEnd",nbDroppedMACNoTimeBeforePhaseEnd);
 	}
 }
 
@@ -166,6 +185,7 @@ csma::~csma() {
 	for (it = macQueue.begin(); it != macQueue.end(); ++it) {
 		delete (*it);
 	}
+	cancelAndDelete(beginPhases);
 }
 
 /**
@@ -180,11 +200,9 @@ void csma::handleUpperMsg(cMessage *msg) {
 	EV<<"CSMA received a message from upper layer, name is " << msg->getName() <<", CInfo removed, mac addr="<< cInfo->getNextHopMac()<<endl;
 	int dest = cInfo->getNextHopMac();
 	macPkt->setCsmaActive(cInfo->getCsmaActive());
-	macPkt->setSequenceId((static_cast<ApplPkt*>(msg))->getSequenceId());
 	macPkt->setDestAddr(dest);
 	delete cInfo;
 	macPkt->setSrcAddr(myMacAddr);
-	(static_cast<ApplPkt*>(msg))->setSrcAddr(myMacAddr);
 
 	if(useMACAcks) {
 		if(SeqNrParent.find(dest) == SeqNrParent.end()) {
@@ -213,20 +231,31 @@ void csma::updateStatusIdle(t_mac_event event, cMessage *msg) {
 	switch (event) {
 	case EV_SEND_REQUEST:
 		if (macQueue.size() <= queueLength) {
-			macQueue.push_back(static_cast<MacPkt *> (msg));
-			updateMacState(BACKOFF_2);
 			//BE = macMinBE;
-			if (anchor && !((static_cast<MacPkt *> (msg))->getCsmaActive()))
-			{
-				EV<<"(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> No BACKOFF. Wait for SIFS " << sifs << "s" << endl;
-				NB = macMaxCSMABackoffs; // if csma deactivated we drop the packet directly
-				scheduleAt(simTime() + sifs, backoffTimer);
-			}
-			else
+			if ((static_cast<MacPkt *> (msg))->getCsmaActive())
 			{
 				EV<<"(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> BACKOFF." << endl;
 				NB = 0;
 				startTimer(TIMER_BACKOFF);
+				if (backoffTimer->isScheduled()) {
+					updateMacState(BACKOFF_2);
+					macQueue.push_back(static_cast<MacPkt *> (msg));
+				} else {
+					manageQueue();
+					delete msg;
+					nbDroppedMACNoTimeBeforePhaseEnd++;
+				}
+			}
+			else
+			{
+				EV<<"(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> No BACKOFF. Wait for SIFS " << sifs << "s" << endl;
+				NB = macMaxCSMABackoffs; // if csma deactivated we drop the packet directly
+				scheduleAt(simTime() + sifs, backoffTimer);
+				updateMacState(BACKOFF_2);
+				macQueue.push_back(static_cast<MacPkt *> (msg));
+				// -------------------------------------------------------------------------------------------------------------
+				// - Here we could have also the same security as just above but we just use this type in Sync Slotted Packets -
+				// -------------------------------------------------------------------------------------------------------------
 			}
 		} else {
 			// queue is full, message has to be deleted
@@ -243,7 +272,6 @@ void csma::updateStatusIdle(t_mac_event event, cMessage *msg) {
 		EV << "(15) FSM State IDLE_1, EV_DUPLICATE_RECEIVED: setting up radio tx -> WAITSIFS." << endl;
 		//sendUp(decapsMsg(static_cast<MacSeqPkt *>(msg)));
 		delete msg;
-
 		if(useMACAcks) {
 			phy->setRadioState(Radio::TX);
 			updateMacState(WAITSIFS_6);
@@ -369,19 +397,27 @@ void csma::updateStatusCCA(t_mac_event event, cMessage *msg) {
 				// drop the frame
 				EV << "Tried " << NB << " backoffs, all reported a busy "
 				<< "channel. Dropping the packet." << endl;
-				// Modified by Jorge, we send up the App Packet but in the control channel and change type and name
-				cMessage * mac = (static_cast<MacPkt*>(macQueue.front()))->decapsulate();
+				cMessage * mac = macQueue.front();
 				macQueue.pop_front();
 				txAttempts = 0;
 				nbDroppedFrames++;
-				mac->setName("MAC ERROR");
+				mac->setName("MAC BACKOFF ERROR");
 				mac->setKind(PACKET_DROPPED_BACKOFF);
 				sendControlUp(mac);
 				manageQueue();
 			} else {
 				// redo backoff
-				updateMacState(BACKOFF_2);
+				// Modified by Jorge
 				startTimer(TIMER_BACKOFF);
+				if (backoffTimer->isScheduled()) {
+					updateMacState(BACKOFF_2);
+				} else {
+					cMessage *mac = macQueue.front();
+					macQueue.pop_front();
+					delete mac;
+					manageQueue();
+					nbDroppedMACNoTimeBeforePhaseEnd++;
+				}
 			}
 		}
 		break;
@@ -499,6 +535,7 @@ void csma::updateStatusWaitAck(t_mac_event event, cMessage *msg) {
 		sendUp(decapsMsg(static_cast<MacPkt*>(msg)));
 	case EV_DUPLICATE_RECEIVED:
 		EV << "Error ! Received a frame during SIFS !" << endl;
+		EV << "EV_DUPLICATE_RECEIVED" << endl;
 		delete msg;
 		break;
 	default:
@@ -517,11 +554,10 @@ void csma::manageMissingAck(t_mac_event event, cMessage *msg) {
 		// drop packet
 		EV << "Packet was transmitted " << txAttempts
 		<< " times and I never got an Ack. I drop the packet." << endl;
-		// Modified by Jorge, we send up the App Packet but in the control channel and change type and name
-		cMessage * mac = (static_cast<MacPkt*>(macQueue.front()))->decapsulate();
+		cMessage * mac = macQueue.front();
 		macQueue.pop_front();
 		txAttempts = 0;
-		mac->setName("MAC ERROR");
+		mac->setName("MAC ACK ERROR");
 		mac->setKind(PACKET_DROPPED);
 		sendControlUp(mac);
 	}
@@ -547,6 +583,15 @@ void csma::updateStatusSIFS(t_mac_event event, cMessage *msg) {
 		EV << "(16) FSM State WAITSIFS_6, EV_TIMER_BACKOFF. "
 		<< "Restart backoff timer and don't move." << endl;
 		startTimer(TIMER_BACKOFF);
+		if (backoffTimer->isScheduled()) {
+			updateMacState(BACKOFF_2);
+		} else {
+			cMessage *mac = macQueue.front();
+			macQueue.pop_front();
+			delete mac;
+			manageQueue();
+			nbDroppedMACNoTimeBeforePhaseEnd++;
+		}
 		break;
 	case EV_BROADCAST_RECEIVED:
 	case EV_FRAME_RECEIVED:
@@ -642,9 +687,21 @@ void csma::manageQueue() {
 			NB = 0;
 			//BE = macMinBE;
 		}
-		if(! backoffTimer->isScheduled())
-		startTimer(TIMER_BACKOFF);
-		updateMacState(BACKOFF_2);
+		if(! backoffTimer->isScheduled()) {
+			startTimer(TIMER_BACKOFF);
+		}
+		else if (backoffTimer->getTimestamp() + timeFromBackOffToTX >= nextPhaseStartTime) {
+			cancelEvent(backoffTimer);
+		}
+		if (backoffTimer->isScheduled()) {
+			updateMacState(BACKOFF_2);
+		} else {
+			cMessage *mac = macQueue.front();
+			macQueue.pop_front();
+			delete mac;
+			nbDroppedMACNoTimeBeforePhaseEnd++;
+			manageQueue();
+		}
 	} else {
 		EV << "(manageQueue) no packets to send, entering IDLE state." << endl;
 		updateMacState(IDLE_1);
@@ -666,7 +723,10 @@ void csma::fsmError(t_mac_event event, cMessage *msg) {
 
 void csma::startTimer(t_mac_timer timer) {
 	if (timer == TIMER_BACKOFF) {
-		scheduleAt(scheduleBackoff(), backoffTimer);
+		simtime_t temp = scheduleBackoff();
+		if ((temp.dbl() + timeFromBackOffToTX.dbl()) < nextPhaseStartTime.dbl()) {
+			scheduleAt(temp, backoffTimer);
+		}
 	} else if (timer == TIMER_CCA) {
 		simtime_t ccaTime = rxSetupTime + ccaDetectionTime;
 		EV<< "(startTimer) ccaTimer value=" << ccaTime
@@ -696,12 +756,7 @@ double csma::scheduleBackoff() {
 		int BE = std::min(macMinBE + NB, macMaxBE);
 		double d = std::pow((double) 2, (int) BE);
 		int v = (int) d - 1;
-		int r;
-		if (v != 0)
-			r = intuniform(1, v, 0);
-		else
-			r = 0;
-
+		int r = intuniform(1, v, 0);
 		backoffTime = r * aUnitBackoffPeriod.dbl();
 
 		EV<< "(startTimer) backoffTimer value=" << backoffTime
@@ -747,6 +802,57 @@ void csma::handleSelfMsg(cMessage *msg) {
 	else if(msg==rxAckTimer) {
 		nbMissedAcks++;
 		executeMac(EV_ACK_TIMEOUT, msg);
+	} else if(msg==beginPhases) {
+		switch (nextPhase)
+		{
+		case csma::SYNC_PHASE_1:
+			nextPhase = csma::REPORT_PHASE;
+			nextPhaseStartTime = simTime() + timeSyncPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		case csma::REPORT_PHASE:
+			nextPhase = csma::VIP_PHASE;
+			nextPhaseStartTime = simTime() + timeReportPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		case csma::VIP_PHASE:
+			nextPhase = csma::SYNC_PHASE_2;
+			nextPhaseStartTime = simTime() + timeVIPPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		case csma::SYNC_PHASE_2:
+			nextPhase = csma::COM_SINK_PHASE_1;
+			nextPhaseStartTime = simTime() + timeSyncPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		case csma::COM_SINK_PHASE_1:
+			nextPhase = csma::SYNC_PHASE_3;
+			nextPhaseStartTime = simTime() + timeComSinkPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		case csma::SYNC_PHASE_3:
+			nextPhase = csma::COM_SINK_PHASE_2;
+			nextPhaseStartTime = simTime() + timeSyncPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		case csma::COM_SINK_PHASE_2:
+			nextPhase = csma::SYNC_PHASE_1;
+			nextPhaseStartTime = simTime() + timeComSinkPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		}
+		// Empty the Queue
+		if (macQueue.size() > 0) {
+			EV << "Removing " << macQueue.size() << " Queue elements in phase change" << endl;
+			nbDroppedFromMACQueueNoTimeInPhase = nbDroppedFromMACQueueNoTimeInPhase + macQueue.size();
+			while (macQueue.size() > 0) {
+				cMessage *mac = macQueue.front();
+				macQueue.pop_front();
+				delete mac;
+			}
+		} else {
+			EV << "MAC Queue empty in phase change." << endl;
+		}
 	} else
 		EV << "CSMA Error: unknown timer fired:" << msg << endl;
 }
@@ -806,10 +912,12 @@ void csma::handleLowerMsg(cMessage *msg) {
 					if(SeqNr < ExpectedNr) {
 						//Duplicate Packet, count and do not send to upper layer
 						nbDuplicates++;
+						EV << "Duplicate Packet Received" << endl;
 						executeMac(EV_DUPLICATE_RECEIVED, macPkt);
 					}
 					else {
 						SeqNrChild[src] = SeqNr + 1;
+						EV << "Normal Packet Received" << endl;
 						executeMac(EV_FRAME_RECEIVED, macPkt);
 					}
 				}

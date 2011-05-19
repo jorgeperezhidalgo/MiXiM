@@ -24,15 +24,15 @@ protected:
 	simtime_t *randomQueueTime;			// Vector of random times to transmit the queue along the Com Sink 1
 	simtime_t stepTimeComSink1;			// Step time in which we divide the Com Sink 1 Phase - The guard time. We divide it in so many parts like elements in the queue
 	int queueElementCounter;			// Variable to know how many queue elements have we already transmitted, therefore to calculate all the random transmitting times when = 0 or knowing which randomQueueTime is the next to use
+	int maxQueueElements;				// Maximum number of packets in the queue to transmit in the next Com Sink 2 Phase
+
+	int *broadcastCounter;				// Vector of number of broadcasts from Mobile Node already read, to check if we just read the last one
+	int indexBroadcast;					// Number of Mobile Node who sent the broadcast to store the value of Broadcast received in the correct field
 
 	cMessage *delayTimer;				// Pointer to the event we use to schedule all the sync packets in the sync phases
 	cMessage *checkQueue;				// Variable to schedule the events to process the Queue elements
 
-	cQueue requestQueue;				// Queue to store the info we receive from the computer that we will provide to a mobile node under request
-	bool messageInQueue;				// True when we can find the message for the mobile node who requested in the queue
-
 	NicEntry* anchor;					// Pointer to the NIC of this anchor to access some NIC variables
-	NicEntry* dest;						// Pointer to the destination, we use it to point the module who the message is sent to, to check what type of module is (AN, MN, Comp)
 
 public:
 	virtual ~AnchorAppLayer();

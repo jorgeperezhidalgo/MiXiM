@@ -12,6 +12,7 @@ protected:
 	simtime_t *randomQueueTime;		// Vector of random times to transmit the queue along the Com Sink 2
 	simtime_t stepTimeComSink2;		// Step time in which we divide the Com Sink 2 Phase - The guard time. We divide it in so many parts like elements in the queue
 	int queueElementCounter;		// Variable to know how many queue elements have we already transmitted, therefore to calculate all the random transmitting times when = 0 or knowing which randomQueueTime is the next to use
+	int maxQueueElements;			// Maximum number of packets in the queue to transmit in the next Com Sink 2 Phase
 
 	cMessage *checkQueue;			// Variable to schedule the events to process the Queue elements
 

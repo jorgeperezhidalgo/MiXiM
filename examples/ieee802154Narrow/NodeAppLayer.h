@@ -40,10 +40,9 @@ protected:
 	int askFrequencyCounter;			// Counter to know when do we reach the askFrequency and mark the packet with askForRequest Flag
 	bool askForRequest;					// This FLAG in the packet tells the AN that in the next full phase (period) the Mobile Node will ask for some information and the AN has to have it ready
 	bool requestPacket;					// This FLAG in the packet tells the AN that it has to answer the Mobile Node with some info and if it doesn't have anything ask anyway saying the info is not yet there
+	bool requestPacketSent;				// Variable to see if the packet we are waiting the Success from MAC from, is a request packet and so we can start the waiting timing
 	int waitForAnchor;					// This value will be set to the MAC of the AN we are waiting the packet from when we make a request
 	int anchorDestinationRequest;		// Here we would save the MAC address of the Anchor where we send the report to have it when we send the request in case we delete the RSSI values
-
-	long nbPacketRequestedFailed;		// Variable to count the number of packets that were requested but never arrived in the receiving time
 
 	int numberOfBroadcasts; 			// Number of broadcasts (VIP or normal) done by a MN type 3 or 4
 	int numberOfBroadcastsCounter; 		// Counter to know when we reach the numberOfBroadcasts

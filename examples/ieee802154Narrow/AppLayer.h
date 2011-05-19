@@ -8,6 +8,7 @@
 #include <BaseWorldUtility.h>
 #include "BaseConnectionManager.h"
 #include "NetwControlInfo.h"
+#include "AppToNetControlInfo.h"
 #include <cassert>
 #include <Packet.h>
 #include <BaseMacLayer.h>
@@ -31,7 +32,8 @@ public:
 		CONFIGURE_EXTRA_REPORT,			// Event to schedule the extra reports for all the hosts when they are needed
 		CALCULATE_POSITION,				// Event to simulate the processing time of the Mobile Node type 2 when it calculates its position
 		CHECK_QUEUE,					// Event to check the transmission queues from Anchors (Com Sink 1) and Computer (Com Sink 2)
-		WAITING_REQUEST					// Event to simulate the waiting time since we send the request till we receive the answer from the Anchor
+		WAITING_REQUEST,				// Event to simulate the waiting time since we send the request till we receive the answer from the Anchor
+		BEGIN_PHASE						// Event to be executed at the beginning of every phase
 	};
 
 	enum PhaseType{						// Phases of the Full Phase or Period
@@ -71,19 +73,29 @@ protected:
 	simtime_t guardTimeReportPhase;		// Guard time to leave at the end of the Report Phase, so the transmissions don't invade next phase
 	simtime_t guardTimeVIPPhase;		// Guard time to leave at the end of the VIP Phase, so the transmissions don't invade next phase
 	simtime_t guardTimeComSinkPhase;	// Guard time to leave at the end of every Com Sink Phase, so the transmissions don't invade next phase
+	simtime_t smallTime;				// Time to add to another time when we want to make an event after another when they should execute at the same time
+	simtime_t nextPhaseStartTime;		// Time to know the next Phase Start Time
 
 	int numTotalSlots;					// Number of Slots in every mini sync Phase, they are calculated by the computer in the initialize method
 	int numberOfAnchors;				// Number of Anchors in the Network
 	int numberOfNodes;					// Number of Mobile Nodes in the Network
 
-	long nbPacketDroppedReportMN;		// Variable to count the number of packets that were dropped when sending a Report from a Mobile Node and don't getting ACK
-	long nbPacketDroppedReportAN;		// Variable to count the number of packets that were dropped when sending a Report from an Anchor or Computer and don't getting ACK
-	long nbPacketDroppedBackOffMN;		// Variable to count the number of packets that were dropped when sending a Report from a Mobile Node and reaching maximum BackOff number
-	long nbPacketDroppedBackOffAN;		// Variable to count the number of packets that were dropped when sending a Report from an Anchor or Computer and reaching maximum BackOff number
-	long nbPacketDroppedNoTimeAN;		// Variable to count the number of packets that were dropped at application layer when there was no more time for an AN to transmit more
-	long nbPacketDroppedNoTimeMN;		// Variable to count the number of packets that were dropped at application layer when there was no more time for a MN to transmit more
-	long numOfPcktsRcvdInWrongPhase;	// Variable to count the number of packets that arrived to any host in a phase they are not supposed to arrive
-	long nbRqstWihoutAnswer;			// Variable to count the number of requests from the Mobile Node that didn't get any answer from an Anchor
+	long nbPacketDroppedNoACK;			// Variable to count the number of packets that were dropped when sending a Report from a Mobile Node and don't getting ACK
+	long nbPacketDroppedBackOff;		// Variable to count the number of packets that were dropped when sending a Report and reaching maximum BackOff number
+	long nbPacketDroppedAppQueueFull;	// Variable to count the number of dropped packets because the App queue is full
+	long nbPacketDroppedMacQueueFull;	// Variable to count the number of dropped packets because the Mac queue is full
+	long nbPacketDroppedNoTimeApp;		// Variable to count the number of packets that were dropped at application layer when there was no more time for an AN to transmit more
+	long nbAnswersRequestOutOfTime;		// Variable to count the number of packets that arrived to the mobile node when the waiting time was over
+	long nbRequestWihoutAnswer;			// Variable to count the number of requests from the Mobile Node that didn't get any answer from an Anchor
+	long nbErasedPacketsBackOffMax;		// Variable to count the number of definitely erased packets due to maximum Backoff retransmissions in App Layer
+	long nbErasedPacketsNoACKMax;		// Variable to count the number of definitely erased packets due to maximum No ACK received retransmissions in App Layer
+	long nbErasedPacketsMacQueueFull;	// Variable to count the number of definitely erased packets due to maximum Mac Queue Full
+
+	long nbBroadcastPacketsSent;		// Variable to count the number of broadcast packets successfully sent in the air, broadcast for MN or sync for AN
+	long nbReportsWithACK;				// Variable to count the number of Reports successfully sent -> ACK received
+	long nbBroadcastPacketsReceived;	// Variable to count the number of broadcast packets successfully received
+	long nbReportsReceived;				// Variable to count the number of reports successfully received
+	long nbReportsForMeReceived;		// Variable to count the number of reports that were really for me and I received
 
 	NicEntry* computer;					// Pointer to the NIC of the computer to take general data over the configurations
 	NicEntry* host;						// Pointer to a host, we use it to point the module who sent the message to check what type of module is (AN, MN, Comp)
@@ -91,6 +103,10 @@ protected:
 	int maxRetransDroppedReportMN;		// Maximum number of retransmissions from the App Layer when a Mobile Node gets a drop from MAC when it sends a Report
 	int maxRetransDroppedReportAN;		// Maximum number of retransmissions from the App Layer when an Anchor gets a drop from MAC when it sends a Report
 	int maxRetransDroppedBackOff;		// Maximum number of retransmissions from the App Layer when we get a CAF (Drop because of too many backoffs) from the MAC
+
+	cQueue transfersQueue;				// FIFO to store the packets that we sent until we receive a confirmation from the MAC that they were sent or until we receive a drop and then try again
+	cMessage * beginPhases;				// Event to drop all the elements in the queue at the beginning from every phase
+	PhaseType nextPhase;					// To know in which phase are we
 
 public:
 
