@@ -22,22 +22,28 @@ void NodeAppLayer::initialize(int stage)
 		centralized = par("centralized");
 
 		// Variable initialization, we could change this into parameters if necesary
-		activePhasesCounter = 1;
-		syncListen = false;
-		syncListenReport = false;
-		numberOfBroadcastsCounter = 0;
-		minimumSeparation = 0.002; 			// Separation time 2 ms for example, redefine if we want other
-		minimumDistanceFulfilled = false;
-		positionsSavedCounter = 0;
-		processingTime = 0.000870; 			// 870 ns MinMax Algorithm
-		isProcessing = false;
-		askForRequest = false;
-		requestPacket = false;
-		requestPacketSent = false;
-		askFrequencyCounter = 0;
-		waitForAnchor = 0;
-		waitForRequestTime = 0.02; 			// 20 ms
-		anchorDestinationRequest = 0;
+		activePhasesCounter 		= 1;
+		syncListen 					= false;
+		syncListenReport 			= false;
+		numberOfBroadcastsCounter 	= 0;
+		minimumSeparation 			= 0.002;	// Separation time 2 ms for example, redefine if we want other
+		minimumDistanceFulfilled 	= false;
+		positionsSavedCounter 		= 0;
+		processingTime 				= 0.000870; // 870 ns MinMax Algorithm
+		isProcessing 				= false;
+		askForRequest 				= false;
+		requestPacket 				= false;
+		askFrequencyCounter 		= 0;
+		waitForAnchor 				= 0;
+		waitForRequestTime 			= 0.02; 	// 20 ms
+		anchorDestinationRequest 	= 0;
+
+		offsetPhasesCounter			= 0;
+		activePhasesCounter			= 0;
+		inactivePhasesCounter		= inactivePhases; // To start with an active period, with 0 it will be with an inactive period
+		offsetReportPhasesCounter	= 0;
+		reportPhasesCounter			= reportPhases; // The first period after the offset will be extra report period, if 0 then the last reportPhases period
+
 
 		// Start all the arrays to 0 and with the appropriate size reserved in memory
 		listRSSI = (RSSIs*)calloc(sizeof(RSSIs), numberOfAnchors);
@@ -45,8 +51,6 @@ void NodeAppLayer::initialize(int stage)
 		positionFIFO = (Coord*)calloc(sizeof(Coord), positionsToSave);
 
 		// Creation of the messages that will be scheduled to send packets of configure the node
-		configureFullPhase = new cMessage("configuring full phase", CONFIGURE_FULL_PHASE);
-		configureExtraReport = new cMessage("configuring extra report", CONFIGURE_EXTRA_REPORT);
 		sendReportWithCSMA = new cMessage("send report with CSMA", SEND_REPORT_WITH_CSMA);
 		sendExtraReportWithCSMA = new cMessage("send extra report with CSMA", SEND_REPORT_WITH_CSMA);
 		sendSyncTimerWithCSMA = new cMessage("send sync timer with CSMA", SEND_SYNC_TIMER_WITH_CSMA);
@@ -57,19 +61,6 @@ void NodeAppLayer::initialize(int stage)
 		node = cc->findNic(myNetwAddr);
 		node->moduleType = 2;
 	} else if (stage == 4) {
-		// Add the offset to the first active full phase
-		if (offsetPhases > 0) {
-			scheduleAt(simTime() + offsetPhases * fullPhaseTime, configureFullPhase);
-		} else {
-			scheduleAt(simTime(), configureFullPhase);
-		}
-
-		// Add the offset to the first extra report full phase, smallTime makes this process start a little bit after the Configure full phase to have all variables already set
-		if (offsetReportPhases > 0) {
-			scheduleAt(simTime() + offsetReportPhases * fullPhaseTime + smallTime, configureExtraReport);
-		} else {
-			scheduleAt(simTime() + smallTime, configureExtraReport);
-		}
 		//BORRAR
 		PUTEAR = new cMessage("PUTEAR", SEND_SYNC_TIMER_WITHOUT_CSMA);
 //		scheduleAt(2 * timeSyncPhase + timeReportPhase + timeVIPPhase, PUTEAR);
@@ -77,8 +68,6 @@ void NodeAppLayer::initialize(int stage)
 }
 
 NodeAppLayer::~NodeAppLayer() {
-	cancelAndDelete(configureFullPhase);
-	cancelAndDelete(configureExtraReport);
 	cancelAndDelete(sendReportWithCSMA);
 	cancelAndDelete(sendExtraReportWithCSMA);
 	cancelAndDelete(sendSyncTimerWithCSMA);
@@ -116,185 +105,6 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 {
 	switch(msg->getKind())
 	{
-	case NodeAppLayer::CONFIGURE_FULL_PHASE:
-		if (nodeConfig != NodeAppLayer::VIP_TRANSMIT) { // The Type 3 (VIP) doesn't read the sync packets, the rest of the types do
-			if (activePhases == 0) {
-				EV << "This node has no active phases, the only behaviour is through extra reports" << endl;
-			} else if (activePhases > activePhasesCounter) // If we are in an active phase, but not the last one
-			{
-				activePhase = true;
-				switch(InWhichPhaseAmI(fullPhaseTime, timeSyncPhase, timeReportPhase, timeVIPPhase, timeComSinkPhase))
-				{
-				case NodeAppLayer::SYNC_PHASE_1:
-					scheduleAt(simTime() + timeSyncPhase + timeReportPhase + timeVIPPhase, configureFullPhase); // Schedule this event for the beggining of the next sync phase
-					if (activePhasesCounter == 1) { // If we are in the first active phase
-						// Before we start reading RSSI again, we have to reset the previous values to get the new ones
-						listRSSI = (RSSIs*)calloc(sizeof(RSSIs), numberOfAnchors);
-					}
-					if (nodeConfig == NodeAppLayer::LISTEN_TRANSMIT_REPORT) { // I node is type 4
-						// Calculate the numberOfBroadcasts random times to transmit, with a minimum separation of minimumSeparation secs, remember that we leave a guard band at the end
-						createRandomBroadcastTimes(timeReportPhase - guardTimeReportPhase);
-						// Schedule of the First Random Broadcast transmission
-						scheduleAt(simTime() + timeSyncPhase + randomTransTimes[numberOfBroadcastsCounter], sendSyncTimerWithCSMA); // Program an event to send the broadcasts
-						numberOfBroadcastsCounter ++;
-					}
-					if (activePhasesCounter == 1 && offsetSyncPhases >= 1) {
-						syncListen = false; // Don't listen this sync phase
-					} else {
-						syncListen = true; // Activate to listen
-					}
-					break;
-				case NodeAppLayer::SYNC_PHASE_2:
-					scheduleAt(simTime() + timeSyncPhase + timeComSinkPhase, configureFullPhase);
-					if (activePhasesCounter == 1 && offsetSyncPhases >= 2) {
-						syncListen = false; // Don't listen this sync phase
-					} else {
-						syncListen = true; // Activate to listen
-					}
-					break;
-				case NodeAppLayer::SYNC_PHASE_3:
-					syncListen = true; // Activate to listen
-					activePhasesCounter ++;
-					scheduleAt(simTime() + timeSyncPhase + timeComSinkPhase, configureFullPhase);
-					// Here is no sense disabling listening like in the previous two phases, because if we disable 3 phases, it's like reducing an active phase
-					break;
-				default:
-					error("How can you be in other phase?");
-				}
-			}
-			else if (activePhases == activePhasesCounter) // When the last active phase or the first one if there is only one
-			{
-				switch(InWhichPhaseAmI(fullPhaseTime, timeSyncPhase, timeReportPhase, timeVIPPhase, timeComSinkPhase))
-				{
-				case NodeAppLayer::SYNC_PHASE_1:
-					activePhase = true;
-					syncListen = true;
-					scheduleAt(simTime() + timeSyncPhase + timeReportPhase + timeVIPPhase, configureFullPhase);
-					if (activePhases == 1) { // If there is only one active phase, this "else" will execute and not the "if" before
-						// Before we start reading RSSI again, we have to reset the previous values to get the new ones
-						listRSSI = (RSSIs*)calloc(sizeof(RSSIs), numberOfAnchors);
-					}
-					if (nodeConfig == NodeAppLayer::LISTEN_AND_REPORT) {
-						// Schedule of the Report transmission, note that we leave a guard band at the end
-						scheduleAt(simTime() + timeSyncPhase + uniform(0, timeReportPhase - guardTimeReportPhase, 0), sendReportWithCSMA);
-					} else if (nodeConfig == NodeAppLayer::LISTEN_TRANSMIT_REPORT) {
-						// Schedule of the Report transmission, note that we leave a guard band at the end
-						type4ReportTime = uniform(0, timeReportPhase - guardTimeReportPhase, 0);
-						scheduleAt(simTime() + timeSyncPhase + type4ReportTime, sendReportWithCSMA);
-						// Calculate the numberOfBroadcasts random times to transmit, with a minimum separation of minimumSeparation secs, remember that we leave a guard band at the end
-						// We have to leave also this minimum separation with the report just generated in type4ReportTime
-						createRandomBroadcastTimes(timeReportPhase - guardTimeReportPhase);
-						// Schedule of the First Random Broadcast transmission
-						scheduleAt(simTime() + timeSyncPhase + randomTransTimes[numberOfBroadcastsCounter], sendSyncTimerWithCSMA); // Program an event to send the broadcasts
-						numberOfBroadcastsCounter ++;
-					} else { // Must be the Type 2 because type 3 doesn't come into the big if
-						// Makes an event to calculate the position at start from next Report phase
-						scheduleAt(simTime() + timeSyncPhase, calculatePosition);
-					}
-					break;
-				case NodeAppLayer::SYNC_PHASE_2:
-					syncListen = false;
-					scheduleAt(simTime() + timeSyncPhase + timeComSinkPhase, configureFullPhase);
-					break;
-				case NodeAppLayer::SYNC_PHASE_3:
-					syncListen = false;
-					activePhasesCounter ++;
-					scheduleAt(simTime() + timeSyncPhase + timeComSinkPhase, configureFullPhase);
-					break;
-				default:
-					error("How can you be in other phase?");
-				}
-			}
-			else
-			{
-				activePhase = false;
-				syncListen = false;
-				activePhasesCounter = 1;
-				scheduleAt(simTime() + (inactivePhases * fullPhaseTime), configureFullPhase);
-			}
-		} else { // The Type 3 (VIP), has to send reports in Broadcast mode all the active periods
-			switch(InWhichPhaseAmI(fullPhaseTime, timeSyncPhase, timeReportPhase, timeVIPPhase, timeComSinkPhase))
-			{
-			case NodeAppLayer::SYNC_PHASE_1:
-				syncListen = false;
-				if (activePhases == 0) {
-					EV << "This node has no active phases, the only behaviour is through extra reports" << endl;
-				} else if (activePhases >= activePhasesCounter) { // All the active phases in MN type 3
-					activePhase = true;
-					scheduleAt(simTime() + fullPhaseTime, configureFullPhase); // Program an event on start of next active phase
-					// Calculate the numberOfBroadcasts random times to transmit, with a minimum separation of minimumSeparation secs, remember that we leave a guard band at the end
-					createRandomBroadcastTimes(timeVIPPhase - guardTimeVIPPhase);
-					// Schedule of the First Random Broadcast transmission
-					scheduleAt(simTime() + timeSyncPhase + timeReportPhase + randomTransTimes[numberOfBroadcastsCounter], sendSyncTimerWithCSMA); // Program an event to send the broadcasts
-					numberOfBroadcastsCounter ++;
-					activePhasesCounter ++;
-				} else { // All the inactive phases in MN type 3
-					activePhase = false;
-					scheduleAt(simTime() + (inactivePhases * fullPhaseTime), configureFullPhase); // Program an event on start of next active phase
-					activePhasesCounter = 1;
-				}
-				break;
-			default:
-				error("Mobile Node type 3 can't have an event of this type out of Sync Phase 1");
-			}
-		}
-		break;
-	case NodeAppLayer::CONFIGURE_EXTRA_REPORT:
-		if (!syncListenReport) {
-			syncListenReport = true; // To listen to the 1st sync phase to take the RSSI measurements to know your selected AN
-			scheduleAt(simTime() + timeSyncPhase - smallTime, configureExtraReport);
-			if (makeExtraReport) {
-				// Check if we are already reading RSSI or not, in case we are, we don't erase the old ones. It is also useful
-				// to know if we have to schedule an extra report or if we have already the normal one and we don't have to schedule
-				// a new one
-				if (!syncListen) { // Any node configuration in an inactive phase
-					// Before we start reading RSSI again, we have to reset the previous values to get the new ones
-					listRSSI = (RSSIs*)calloc(sizeof(RSSIs), numberOfAnchors);
-					// Schedule of the Extra Report transmission, note that we leave a guard band at the end
-					type4ReportTime = uniform(0, timeReportPhase - guardTimeReportPhase, 0);
-					scheduleAt(simTime() - smallTime + timeSyncPhase + type4ReportTime, sendExtraReportWithCSMA);
-				} else if ((nodeConfig == NodeAppLayer::LISTEN_AND_REPORT || nodeConfig == NodeAppLayer::LISTEN_TRANSMIT_REPORT) && (activePhases == activePhasesCounter)) {
-					// Do not schedule another extra report, we have already one in this full phase
-				} else { // In node configuration type 3 and 4 or in 1 and 2 but not the last active full phase
-					// Schedule of the Extra Report transmission, note that we leave a guard band at the end
-					type4ReportTime = uniform(0, timeReportPhase - guardTimeReportPhase, 0);
-					scheduleAt(simTime() - smallTime + timeSyncPhase + type4ReportTime, sendExtraReportWithCSMA);
-				}
-				// Here we activate the ASK Flag every askFrequency extra reports
-				askFrequencyCounter ++;
-				if (askFrequencyCounter == askFrequency) {
-					askFrequencyCounter = 0;
-					askForRequest = true; // Mark this flag for the report transmission that is already scheduled
-					// Schedule the Request for Information in the next full phase (period) at the beginning of Report Phase
-					scheduleAt(simTime() + fullPhaseTime + timeSyncPhase, waitForRequest);
-				} else if (askFrequencyCounter > askFrequency) {
-					askFrequencyCounter = 0; // We just put the counter to 0 but don't send any ask, this case happens when askFrequency = 0
-				}
-			}
-		} else {
-			if ((nodeConfig == NodeAppLayer::LISTEN_TRANSMIT_REPORT) && syncListen && makeExtraReport) { // If MN type = 4 in active report and we have to make an extra report in this phase
-				// Recalculate the numberOfBroadcasts random times to transmit, with a minimum separation of minimumSeparation secs, remember that we leave a guard band at the end
-				// We have to do this to take into account for the minimum separation the extra report just generated in type4ReportTime
-				createRandomBroadcastTimes(timeReportPhase - guardTimeReportPhase);
-				// Cancel the scheduled First Random Broadcast transmission and schedule it again with the new time
-				cancelEvent(sendSyncTimerWithCSMA);
-				numberOfBroadcastsCounter = 0;
-				scheduleAt(simTime() + randomTransTimes[numberOfBroadcastsCounter], sendSyncTimerWithCSMA); // Program an event to send the broadcasts
-				numberOfBroadcastsCounter ++;
-			}
-			if (nodeConfig == NodeAppLayer::VIP_TRANSMIT && makeExtraReport && activePhase) {
-				// If we schedule an extra report, with the type 3, we cancel the broadcasts in this full phase (period) to save battery
-				cancelEvent(sendSyncTimerWithCSMA);
-				numberOfBroadcastsCounter = 0;
-			}
-			syncListenReport = false;
-			if (reportPhases == 0) {
-				error ("The reportPhases variable must be bigger than 0");
-			} else {
-				scheduleAt(simTime() + reportPhases * fullPhaseTime - timeSyncPhase + smallTime, configureExtraReport);
-			}
-		}
-		break;
 	case NodeAppLayer::SEND_REPORT_WITH_CSMA:
 		if (!isProcessing) // If are still calculation the position in Mobile Node type 2
 			sendReport();
@@ -313,7 +123,9 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 		}
 		break;
 	case NodeAppLayer::CALCULATE_POSITION:
-		// Here we would calculate the position and store it in the FIFO, now we just save our real position
+		// -----------------------------------------------------------------------------------------------------
+		// - Here we would calculate the position and store it in the FIFO, now we just save our real position -
+		// -----------------------------------------------------------------------------------------------------
 		if (!isProcessing) {
 			insertElementInFIFO(node->pos);
 			isProcessing = true;
@@ -354,44 +166,6 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 //		}
 		break;
 	case BEGIN_PHASE:
-		switch (nextPhase)
-		{
-		case AppLayer::SYNC_PHASE_1:
-			nextPhase = AppLayer::REPORT_PHASE;
-			nextPhaseStartTime = simTime() + timeSyncPhase;
-			scheduleAt(nextPhaseStartTime, beginPhases);
-			break;
-		case AppLayer::REPORT_PHASE:
-			nextPhase = AppLayer::VIP_PHASE;
-			nextPhaseStartTime = simTime() + timeReportPhase;
-			scheduleAt(nextPhaseStartTime, beginPhases);
-			break;
-		case AppLayer::VIP_PHASE:
-			nextPhase = AppLayer::SYNC_PHASE_2;
-			nextPhaseStartTime = simTime() + timeVIPPhase;
-			scheduleAt(nextPhaseStartTime, beginPhases);
-			break;
-		case AppLayer::SYNC_PHASE_2:
-			nextPhase = AppLayer::COM_SINK_PHASE_1;
-			nextPhaseStartTime = simTime() + timeSyncPhase;
-			scheduleAt(nextPhaseStartTime, beginPhases);
-			break;
-		case AppLayer::COM_SINK_PHASE_1:
-			nextPhase = AppLayer::SYNC_PHASE_3;
-			nextPhaseStartTime = simTime() + timeComSinkPhase;
-			scheduleAt(nextPhaseStartTime, beginPhases);
-			break;
-		case AppLayer::SYNC_PHASE_3:
-			nextPhase = AppLayer::COM_SINK_PHASE_2;
-			nextPhaseStartTime = simTime() + timeSyncPhase;
-			scheduleAt(nextPhaseStartTime, beginPhases);
-			break;
-		case AppLayer::COM_SINK_PHASE_2:
-			nextPhase = AppLayer::SYNC_PHASE_1;
-			nextPhaseStartTime = simTime() + timeComSinkPhase;
-			scheduleAt(nextPhaseStartTime, beginPhases);
-			break;
-		}
 		// Empty the transmission Queue
 		if (!transfersQueue.empty()) {
 			EV << "Emptying the queue with " << transfersQueue.length() << " elements in phase change" << endl;
@@ -403,6 +177,314 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 			// --------------------------------------------------------------------------------------
 		} else {
 			EV << "App Transmission Queue empty in phase change." << endl;
+		}
+		switch (nextPhase)
+		{
+		case AppLayer::SYNC_PHASE_1:
+			phase = AppLayer::SYNC_PHASE_1;
+			nextPhase = AppLayer::REPORT_PHASE;
+			nextPhaseStartTime = simTime() + timeSyncPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			// Configuring the normal way of working for the active phases in the mobile nodes
+			if ((offsetPhasesCounter >= offsetPhases) && (inactivePhasesCounter	== inactivePhases) && (activePhases > 0)) { // Offset already reached and inactive phases done and active phases activated
+				activePhasesCounter++;
+				activePhase = true;
+				if ((activePhasesCounter == 1) && (activePhases > 1)) { // If we are in the first active phase and there are more than one consecutive phases
+					// Before we start reading RSSI again, we have to reset the previous values to get the new ones
+					listRSSI = (RSSIs*)calloc(sizeof(RSSIs), numberOfAnchors);
+					if (offsetSyncPhases >= 1) { // Check if there is an offset not to listen the first sync phase
+						syncListen = false; // Don't listen this sync phase
+					} else {
+						syncListen = true; // Activate to listen
+					}
+					switch(nodeConfig)
+					{
+					case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
+						syncListen = false; // Don't listen this sync phase
+						// Calculate the numberOfBroadcasts random times to transmit, with a minimum separation of minimumSeparation secs, remember that we leave a guard band at the end
+						createRandomBroadcastTimes(timeVIPPhase - guardTimeVIPPhase);
+						// Schedule of the First Random Broadcast transmission
+						scheduleAt(simTime() + timeSyncPhase + timeReportPhase + randomTransTimes[numberOfBroadcastsCounter], sendSyncTimerWithCSMA); // Program an event to send the broadcasts
+						numberOfBroadcastsCounter ++;
+						break;
+					case NodeAppLayer::LISTEN_TRANSMIT_REPORT: // Mobile Node type 4
+						// Calculate the numberOfBroadcasts random times to transmit, with a minimum separation of minimumSeparation secs, remember that we leave a guard band at the end
+						createRandomBroadcastTimes(timeReportPhase - guardTimeReportPhase);
+						// Schedule of the First Random Broadcast transmission
+						scheduleAt(simTime() + timeSyncPhase + randomTransTimes[numberOfBroadcastsCounter], sendSyncTimerWithCSMA); // Program an event to send the broadcasts
+						numberOfBroadcastsCounter ++;
+						break;
+					default:
+						EV << "Don't do anything" << endl;
+					}
+				} else if (activePhases > activePhasesCounter) { // If we are in an active phase, but not the last one
+					syncListen = true; // Activate to listen
+					switch(nodeConfig)
+					{
+					case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
+						syncListen = false; // Don't listen this sync phase
+						// Calculate the numberOfBroadcasts random times to transmit, with a minimum separation of minimumSeparation secs, remember that we leave a guard band at the end
+						createRandomBroadcastTimes(timeVIPPhase - guardTimeVIPPhase);
+						// Schedule of the First Random Broadcast transmission
+						scheduleAt(simTime() + timeSyncPhase + timeReportPhase + randomTransTimes[numberOfBroadcastsCounter], sendSyncTimerWithCSMA); // Program an event to send the broadcasts
+						numberOfBroadcastsCounter ++;
+						break;
+					case NodeAppLayer::LISTEN_TRANSMIT_REPORT: // Mobile Node type 4
+						// Calculate the numberOfBroadcasts random times to transmit, with a minimum separation of minimumSeparation secs, remember that we leave a guard band at the end
+						createRandomBroadcastTimes(timeReportPhase - guardTimeReportPhase);
+						// Schedule of the First Random Broadcast transmission
+						scheduleAt(simTime() + timeSyncPhase + randomTransTimes[numberOfBroadcastsCounter], sendSyncTimerWithCSMA); // Program an event to send the broadcasts
+						numberOfBroadcastsCounter ++;
+						break;
+					default:
+						EV << "Don't do anything" << endl;
+					}
+				} else { // We are in the last active phase
+					inactivePhasesCounter = 0; // Next full phase will be inactive if inactivePhases > 0
+					activePhasesCounter = 0;
+					if (activePhases == 1) { // If we have only one active phase, the first is the last one also
+						// Before we start reading RSSI again, we have to reset the previous values to get the new ones
+						listRSSI = (RSSIs*)calloc(sizeof(RSSIs), numberOfAnchors);
+					}
+					syncListen = true; // Activate to listen
+					switch(nodeConfig)
+					{
+					case NodeAppLayer::LISTEN_AND_REPORT: // Mobile Node type 1
+						// Schedule of the Report transmission, note that we leave a guard band at the end
+						scheduleAt(simTime() + timeSyncPhase + uniform(0, timeReportPhase - guardTimeReportPhase, 0), sendReportWithCSMA);
+						break;
+					case NodeAppLayer::LISTEN_AND_CALCULATE: // Mobile Node type 2
+						// Makes an event to calculate the position at start from next Report phase
+						scheduleAt(simTime() + timeSyncPhase, calculatePosition);
+						break;
+					case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
+						syncListen = false; // Don't listen this sync phase
+						// Calculate the numberOfBroadcasts random times to transmit, with a minimum separation of minimumSeparation secs, remember that we leave a guard band at the end
+						createRandomBroadcastTimes(timeVIPPhase - guardTimeVIPPhase);
+						// Schedule of the First Random Broadcast transmission
+						scheduleAt(simTime() + timeSyncPhase + timeReportPhase + randomTransTimes[numberOfBroadcastsCounter], sendSyncTimerWithCSMA); // Program an event to send the broadcasts
+						numberOfBroadcastsCounter ++;
+						break;
+					case NodeAppLayer::LISTEN_TRANSMIT_REPORT: // Mobile Node type 4
+						// Schedule of the Report transmission, note that we leave a guard band at the end
+						type4ReportTime = uniform(0, timeReportPhase - guardTimeReportPhase, 0);
+						scheduleAt(simTime() + timeSyncPhase + type4ReportTime, sendReportWithCSMA);
+						// Calculate the numberOfBroadcasts random times to transmit, with a minimum separation of minimumSeparation secs, remember that we leave a guard band at the end
+						// We have to leave also this minimum separation with the report just generated in type4ReportTime
+						createRandomBroadcastTimes(timeReportPhase - guardTimeReportPhase);
+						// Schedule of the First Random Broadcast transmission
+						scheduleAt(simTime() + timeSyncPhase + randomTransTimes[numberOfBroadcastsCounter], sendSyncTimerWithCSMA); // Program an event to send the broadcasts
+						numberOfBroadcastsCounter ++;
+						break;
+					}
+				}
+			} else if (offsetPhasesCounter < offsetPhases){ // Offset not reached, increase counter
+				offsetPhasesCounter++;
+				activePhase = false;
+				syncListen = false; // Don't listen this sync phase
+			} else if (activePhases == 0) {
+				EV << "This node has no active phases, the only behavior is through extra reports" << endl;
+				activePhase = false;
+				syncListen = false; // Don't listen this sync phase
+			} else { // Inactive phases
+				inactivePhasesCounter++;
+				activePhase = false;
+				syncListen = false; // Don't listen this sync phase
+			}
+			// Configuring the extra reports or reports depending on the mobile node type
+			if ((offsetReportPhasesCounter >= offsetReportPhases) && (reportPhasesCounter == reportPhases) && (reportPhases > 0)) { // Offset already reached
+				reportPhasesCounter = 1;
+				syncListenReport = true;
+				if (makeExtraReport) {
+					// Check if we are already reading RSSI or not, in case we are, we don't erase the old ones. It is also useful
+					// to know if we have to schedule an extra report or if we have already the normal one and we don't have to schedule
+					// a new one
+					if (!syncListen) { // Any node configuration not listening the first syncPhase
+						// Before we start reading RSSI again, we have to reset the previous values to get the new ones
+						listRSSI = (RSSIs*)calloc(sizeof(RSSIs), numberOfAnchors);
+						// Schedule of the Extra Report transmission, note that we leave a guard band at the end
+						type4ReportTime = uniform(0, timeReportPhase - guardTimeReportPhase, 0);
+						scheduleAt(simTime() + timeSyncPhase + type4ReportTime, sendExtraReportWithCSMA);
+					} else {
+						switch(nodeConfig)
+						{
+						case NodeAppLayer::LISTEN_AND_REPORT: // Mobile Node type 1
+							if (activePhases == activePhasesCounter) { // If we are in type 1 and 4 and in the last active phase we have already a report
+								// Do not schedule another extra report, we have already one in this full phase
+							} else { // In any other full phase (period)
+								// Schedule of the Extra Report transmission, note that we leave a guard band at the end
+								type4ReportTime = uniform(0, timeReportPhase - guardTimeReportPhase, 0);
+								scheduleAt(simTime() + timeSyncPhase + type4ReportTime, sendExtraReportWithCSMA);
+							}
+							break;
+						case NodeAppLayer::LISTEN_AND_CALCULATE: // Mobile Node type 2
+							// Schedule of the Extra Report transmission, note that we leave a guard band at the end
+							type4ReportTime = uniform(0, timeReportPhase - guardTimeReportPhase, 0);
+							scheduleAt(simTime() + timeSyncPhase + type4ReportTime, sendExtraReportWithCSMA);
+							break;
+						case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
+							// Schedule of the Extra Report transmission, note that we leave a guard band at the end
+							type4ReportTime = uniform(0, timeReportPhase - guardTimeReportPhase, 0);
+							scheduleAt(simTime() + timeSyncPhase + type4ReportTime, sendExtraReportWithCSMA);
+							if (activePhase) {
+								// If we are in an active phase, we cancel the broadcasts in this full phase (period) to save battery
+								cancelEvent(sendSyncTimerWithCSMA);
+								numberOfBroadcastsCounter = 0;
+							}
+							break;
+						case NodeAppLayer::LISTEN_TRANSMIT_REPORT: // Mobile Node type 4
+							if (activePhases == activePhasesCounter) { // If we are in type 1 and 4 and in the last active phase we have already a report
+								// Do not schedule another extra report, we have already one in this full phase
+							} else { // In any other full phase (period)
+								// Schedule of the Extra Report transmission, note that we leave a guard band at the end
+								type4ReportTime = uniform(0, timeReportPhase - guardTimeReportPhase, 0);
+								scheduleAt(simTime() + timeSyncPhase + type4ReportTime, sendExtraReportWithCSMA);
+								// Recalculate the numberOfBroadcasts random times to transmit, with a minimum separation of minimumSeparation secs, remember that we leave a guard band at the end
+								// We have to do this to take into account for the minimum separation the extra report just generated in type4ReportTime
+								createRandomBroadcastTimes(timeReportPhase - guardTimeReportPhase);
+								// Cancel the scheduled First Random Broadcast transmission and schedule it again with the new time
+								cancelEvent(sendSyncTimerWithCSMA);
+								numberOfBroadcastsCounter = 0;
+								scheduleAt(simTime() + randomTransTimes[numberOfBroadcastsCounter], sendSyncTimerWithCSMA); // Program an event to send the broadcasts
+								numberOfBroadcastsCounter ++;
+							}
+							break;
+						}
+					}
+					// Here we activate the ASK Flag every askFrequency extra reports
+					askFrequencyCounter ++;
+					if (askFrequencyCounter == askFrequency) {
+						askFrequencyCounter = 0;
+						askForRequest = true; // Mark this flag for the report transmission that is already scheduled
+						// Schedule the Request for Information in the next full phase (period) at the beginning of Report Phase
+						scheduleAt(simTime() + fullPhaseTime + timeSyncPhase, waitForRequest);
+					} else if (askFrequencyCounter > askFrequency) {
+						askFrequencyCounter = 0; // We just put the counter to 0 but don't send any ask, this case happens when askFrequency = 0
+					}
+				}
+			} else if (offsetReportPhasesCounter < offsetReportPhases){ // Offset not reached, increase counter
+				offsetReportPhasesCounter++;
+				syncListenReport = false;
+			} else if (reportPhases == 0) { // Wrong configuration
+				error ("The reportPhases variable must be bigger than 0");
+				syncListenReport = false;
+			} else { // Inactive phases
+				reportPhasesCounter++;
+				syncListenReport = false;
+			}
+			break;
+		case AppLayer::REPORT_PHASE:
+			phase = AppLayer::REPORT_PHASE;
+			nextPhase = AppLayer::VIP_PHASE;
+			nextPhaseStartTime = simTime() + timeReportPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			if (syncListenReport) {
+				syncListenReport = false;
+			}
+			break;
+		case AppLayer::VIP_PHASE:
+			phase = AppLayer::VIP_PHASE;
+			nextPhase = AppLayer::SYNC_PHASE_2;
+			nextPhaseStartTime = simTime() + timeVIPPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		case AppLayer::SYNC_PHASE_2:
+			phase = AppLayer::SYNC_PHASE_2;
+			nextPhase = AppLayer::COM_SINK_PHASE_1;
+			nextPhaseStartTime = simTime() + timeSyncPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			// Configuring the normal way of working for the active phases in the mobile nodes
+			if (activePhase) {
+				if ((activePhasesCounter == 1) && (activePhases > 1)) { // If we are in the first active phase and there are more than one consecutive phases
+					if (offsetSyncPhases >= 2) { // Check if there is an offset not to listen the second sync phase
+						syncListen = false; // Don't listen this sync phase
+					} else {
+						syncListen = true; // Activate to listen
+					}
+					switch(nodeConfig)
+					{
+					case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
+						syncListen = false; // Don't listen this sync phase
+						break;
+					default:
+						EV << "Don't do anything" << endl;
+					}
+				} else if (activePhases > activePhasesCounter) { // If we are in an active phase, but not the last one
+					syncListen = true; // Activate to listen
+					switch(nodeConfig)
+					{
+					case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
+						syncListen = false; // Don't listen this sync phase
+						break;
+					default:
+						EV << "Don't do anything" << endl;
+					}
+				} else { // We are in the last active phase
+					syncListen = false; // Don't listen this sync phase
+					switch(nodeConfig)
+					{
+					case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
+						syncListen = false; // Don't listen this sync phase
+						break;
+					default:
+						EV << "Don't do anything" << endl;
+					}
+				}
+			}
+			break;
+		case AppLayer::COM_SINK_PHASE_1:
+			phase = AppLayer::COM_SINK_PHASE_1;
+			nextPhase = AppLayer::SYNC_PHASE_3;
+			nextPhaseStartTime = simTime() + timeComSinkPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		case AppLayer::SYNC_PHASE_3:
+			phase = AppLayer::SYNC_PHASE_3;
+			nextPhase = AppLayer::COM_SINK_PHASE_2;
+			nextPhaseStartTime = simTime() + timeSyncPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			// Configuring the normal way of working for the active phases in the mobile nodes
+			if (activePhase) {
+				if ((activePhasesCounter == 1) && (activePhases > 1)) { // If we are in the first active phase and there are more than one consecutive phases
+					// Here it is no sense disabling listening like in the previous two phases, because if we disable 3 phases, it's like reducing an active phase
+					syncListen = true; // Activate to listen
+					switch(nodeConfig)
+					{
+					case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
+						syncListen = false; // Don't listen this sync phase
+						break;
+					default:
+						EV << "Don't do anything" << endl;
+					}
+				} else if (activePhases > activePhasesCounter) { // If we are in an active phase, but not the last one
+					syncListen = true; // Activate to listen
+					switch(nodeConfig)
+					{
+					case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
+						syncListen = false; // Don't listen this sync phase
+						break;
+					default:
+						EV << "Don't do anything" << endl;
+					}
+				} else { // We are in the last active phase
+					syncListen = false; // Don't listen this sync phase
+					switch(nodeConfig)
+					{
+					case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
+						syncListen = false; // Don't listen this sync phase
+						break;
+					default:
+						EV << "Don't do anything" << endl;
+					}
+				}
+			}
+			break;
+		case AppLayer::COM_SINK_PHASE_2:
+			phase = AppLayer::COM_SINK_PHASE_2;
+			nextPhase = AppLayer::SYNC_PHASE_1;
+			nextPhaseStartTime = simTime() + timeComSinkPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
 		}
 		break;
 	default:
@@ -676,13 +758,14 @@ void NodeAppLayer::sendReport()
 			EV << "Selected Anchor for ASK Report with MAC Addr: " << anchorDestinationRequest << endl;
 			requestPacket = true;
 			askForRequest = false;
+			EV << "Dentro" << endl;
 		} else if (requestPacket) {
 			pkt->setRequestPacket(true); // Set Request Flag = true
 			pkt->setDestAddr(anchorDestinationRequest); // Redefine Dest Addr
 			pkt->setRealDestAddr(anchorDestinationRequest); // Redefine Real Dest Addr
 			EV << "Selected Anchor for Request Report with MAC Addr: " << anchorDestinationRequest << endl;
 			requestPacket = false;
-		}
+			EV << "Dentro2" << endl;		}
 
 		EV << "Send Report to Anchor with Netw Addr " << pkt->getDestAddr() << ", with end destination Netw Addr " << pkt->getRealDestAddr() << endl;
 
@@ -771,7 +854,7 @@ void NodeAppLayer::createRandomBroadcastTimes(simtime_t maxTime)
 					minimumDistanceFulfilled = false;
 				}
 			}
-			if ((nodeConfig == NodeAppLayer::LISTEN_TRANSMIT_REPORT) && (syncListenReport || (activePhases == activePhasesCounter))) {
+			if ((nodeConfig == NodeAppLayer::LISTEN_TRANSMIT_REPORT) && (syncListenReport || ((activePhases == activePhasesCounter) && (activePhases > 0)))) {
 			// If MN is type 4 and there is a report or extra report in this phase,
 			// check minimum distance with just generated broadcast random time
 				simtime_t diff = randomTransTimes[i] - type4ReportTime;

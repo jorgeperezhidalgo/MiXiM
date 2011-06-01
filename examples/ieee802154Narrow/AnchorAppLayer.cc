@@ -27,27 +27,13 @@ void AnchorAppLayer::initialize(int stage)
 		anchor->moduleType = 1;
 	// We have to wait till stage 4 to make this because till stage 3 the slot configuration is not done
 	} else if (stage == 4) {
-		// Schedule the first queue processing at the start of the Com Sink 1
+		// Necessary variables for the queue initialization
 		checkQueue = new cMessage("transmit queue elements", CHECK_QUEUE);
-		startTimeComSink1 = simTime() + timeSyncPhase + timeReportPhase + timeVIPPhase + timeSyncPhase;
-		scheduleAt(startTimeComSink1 , checkQueue);
-		queueElementCounter = -1;
+		queueElementCounter = 0;
 		maxQueueElements = 30;
 
 		// Broadcast message, slotted or not is without CSMA, we wait the random time in the Appl Layer
 		delayTimer = new cMessage("sync-delay-timer", SEND_SYNC_TIMER_WITHOUT_CSMA);
-
-		// If we execute some full phase
-		if (phaseRepetitionNumber != 0 && syncInSlot) // If sync phase slotted
-		{
-			nextSyncSend = simTime();
-			scheduleAt(nextSyncSend + (anchor->transmisionSlot[scheduledSlot] * syncPacketTime), delayTimer);
-			scheduledSlot++;
-		}
-		else if (phaseRepetitionNumber != 0) // If sync phase with random transmissions
-		{
-			scheduleAt(simTime() + uniform(0, syncFirstMaxRandomTime, 0), delayTimer);
-		}
 	}
 }
 
@@ -86,100 +72,92 @@ void AnchorAppLayer::handleSelfMsg(cMessage *msg)
 	switch(msg->getKind())
 	{
 	case SEND_SYNC_TIMER_WITHOUT_CSMA:
-		assert(msg == delayTimer);
-
-		sendBroadcast();
-
+		sendBroadcast(); // Send the broadcast
 		// If we still have full phases to do
-		if (phaseRepetitionNumber != 0 && syncInSlot) // Slotted mode
+		if (syncInSlot) // Slotted mode
 		{
-			// If an Anchor has more than an slot per slot period (reuse os slots), then first we assign all the slots
-			// and when finish we enter this "if" to calculate the first time of the next slot period
-			if (scheduledSlot >= anchor->numSlots)
-			{
+			scheduledSlot++;
+			if (scheduledSlot < anchor->numSlots) { // If an Anchor has more than one slot per slot period (reuse of slots), first we assign all the slots
+				scheduleAt(nextPhaseStart + (anchor->transmisionSlot[scheduledSlot] * syncPacketTime), delayTimer);
+				EV << "Time for next Sync Packet " << nextPhaseStart + (anchor->transmisionSlot[scheduledSlot] * syncPacketTime) << endl;
+			} else { // Calculate the first time of the next slot period
 				scheduledSlot = 0; // Reset of the scheduled slots in this slot period (when more than one slot per Anchor)
-				syncPacketsPerSyncPhaseCounter++; // Increments the mini sync phases covered from a total of syncPacketsPerSyncPhase
-				nextPhaseStart = nextPhaseStart + (timeSyncPhase / syncPacketsPerSyncPhase); // Here we add the time of a mini sync phase (another slot period)
-				if (syncPacketsPerSyncPhaseCounter > syncPacketsPerSyncPhase) // If we reached all the slot periods (mini sync phase) from a sync phase, we add the time between syncphases also (Report time, Com Sink time...)
-				{
+				if (syncPacketsPerSyncPhaseCounter < syncPacketsPerSyncPhase) {
+					syncPacketsPerSyncPhaseCounter++; // Increments the mini sync phases covered from a total of syncPacketsPerSyncPhase
+					nextPhaseStart = nextPhaseStart + (timeSyncPhase / syncPacketsPerSyncPhase); // Here we add the time of a mini sync phase (another slot period)
+					scheduleAt(nextPhaseStart + (anchor->transmisionSlot[scheduledSlot] * syncPacketTime), delayTimer);
+					EV << "Time for next Sync Packet " << nextPhaseStart + (anchor->transmisionSlot[scheduledSlot] * syncPacketTime) << endl;
+				} else { // If we reached all the slot periods (mini sync phase) from a sync phase, don't schedule any more, in next sync phase all will start again
 					syncPacketsPerSyncPhaseCounter = 1;
-					switch (syncPhaseNumber)
-					{
-					case SYNC_PHASE_1:
-						syncPhaseNumber = SYNC_PHASE_2;
-						nextPhaseStart = nextPhaseStart + timeReportPhase + timeVIPPhase;
-						break;
-					case SYNC_PHASE_2:
-						syncPhaseNumber = SYNC_PHASE_3;
-						nextPhaseStart = nextPhaseStart + timeComSinkPhase;
-						break;
-					case SYNC_PHASE_3:
-						syncPhaseNumber = SYNC_PHASE_1;
-						nextPhaseStart = nextPhaseStart + timeComSinkPhase;
-						phaseRepetitionNumber--;
-						break;
-					default:
-						syncPhaseNumber = SYNC_PHASE_1;
-					}
 				}
 			}
-			scheduleAt(nextPhaseStart + (anchor->transmisionSlot[scheduledSlot] * syncPacketTime), delayTimer);
-			scheduledSlot++;
-			EV << "Time for next Sync Packet " << nextPhaseStart + (anchor->transmisionSlot[scheduledSlot] * syncPacketTime) << endl;
 		}
 		else
 		{
-
+			// ---------------------------------------------------------------------------
+			// - Here we would manage the sync packets when they are not in slotted mode -
+			// ---------------------------------------------------------------------------
 		}
 		break;
 	case CHECK_QUEUE:
-		// If we didn't transmit any element of the queue is the moment to calculate all the random transmission times
-		if (queueElementCounter == -1) {
-			if (packetsQueue.length() > 0) { // Only if the Queue has elements we do calculate all the intermediate times
-				stepTimeComSink1 = (timeComSinkPhase - guardTimeComSinkPhase) / packetsQueue.length();
-				randomQueueTime = (simtime_t*)calloc(sizeof(simtime_t), packetsQueue.length());
-				for (int i = 0; i < packetsQueue.length(); i++) {
-					randomQueueTime[i] = startTimeComSink1 + (i * stepTimeComSink1) + uniform(0, stepTimeComSink1, 0);
-				}
-			}
-			startTimeComSink1 = simTime() + fullPhaseTime; // Calculate now the start of the next Com Sink 1 phase
-		} else {
+		if (packetsQueue.length() > 0) {
 			cMessage * msg = (cMessage *)packetsQueue.pop();
-			EV << "Sending packet from the Queue" << endl;
+			EV << "Sending packet from the Queue to Anchor with addr. " << static_cast<ApplPkt *>(msg)->getDestAddr() << endl;
 			transfersQueue.insert(msg->dup()); // Make a copy of the sent packet till the MAC says it's ok or to retransmit it when something fails
 			sendDown(msg);
-		}
-		// Calculates the next time this selfmessage will be scheduled, in this fullphase (still elements in queue) or in the next one
-		if (packetsQueue.length() == 0) {
-			queueElementCounter = -1;
-			EV << "Queue empty, checking again at: " << startTimeComSink1 << " s" << endl;
-			scheduleAt(startTimeComSink1 , checkQueue);
-		} else {
-			queueElementCounter ++;
-			EV << "Still " << packetsQueue.length() << " elements in the Queue." << endl;
-			EV << "Next queue random transmission at : " << randomQueueTime[queueElementCounter] << " s" << endl;
-			scheduleAt(randomQueueTime[queueElementCounter], checkQueue);
+			if (packetsQueue.length() > 0) { // We have to check again if the queue has still elements after taking the element previously
+				// Schedule the next queue element in the next random time
+				queueElementCounter++;
+				EV << "Still " << packetsQueue.length() << " elements in the Queue." << endl;
+				EV << "Random Transmission number " << queueElementCounter + 1 << " at : " << randomQueueTime[queueElementCounter] << " s" << endl;
+				scheduleAt(randomQueueTime[queueElementCounter], checkQueue);
+			}
 		}
 		break;
 	case BEGIN_PHASE:
+		// Empty the transmission Queue
+		if (!transfersQueue.empty()) {
+			EV << "Emptying the queue with " << transfersQueue.length() << " elements in phase change" << endl;
+			nbPacketDroppedNoTimeApp = nbPacketDroppedNoTimeApp + transfersQueue.length();
+			transfersQueue.clear();
+			// --------------------------------------------------------------------------------------
+			// - If we don't want to clear the queue and lose the packets, --------------------------
+			// - we could somehow here leave the rest of the queue for the next full phase (period) -
+			// --------------------------------------------------------------------------------------
+		} else {
+			EV << "App Transmission Queue empty in phase change." << endl;
+		}
 		switch (nextPhase)
 		{
 		case AppLayer::SYNC_PHASE_1:
+			phase = AppLayer::SYNC_PHASE_1;
 			nextPhase = AppLayer::REPORT_PHASE;
 			nextPhaseStartTime = simTime() + timeSyncPhase;
 			scheduleAt(nextPhaseStartTime, beginPhases);
+			// Schedule the sync packets. If we execute some full phase (-1 not limited full phases)
+			if (phaseRepetitionNumber != 0 && syncInSlot) { // If sync phase slotted
+				nextPhaseStart = simTime();
+				scheduleAt(nextPhaseStart + (anchor->transmisionSlot[scheduledSlot] * syncPacketTime), delayTimer);
+				EV << "Time for next Sync Packet " << nextPhaseStart + (anchor->transmisionSlot[scheduledSlot] * syncPacketTime) << endl;
+				scheduledSlot++;
+			} else if (phaseRepetitionNumber != 0) { // If sync phase with random transmissions
+				scheduleAt(simTime() + uniform(0, syncFirstMaxRandomTime, 0), delayTimer);
+			}
 			break;
 		case AppLayer::REPORT_PHASE:
+			phase = AppLayer::REPORT_PHASE;
 			nextPhase = AppLayer::VIP_PHASE;
 			nextPhaseStartTime = simTime() + timeReportPhase;
 			scheduleAt(nextPhaseStartTime, beginPhases);
 			break;
 		case AppLayer::VIP_PHASE:
+			phase = AppLayer::VIP_PHASE;
 			nextPhase = AppLayer::SYNC_PHASE_2;
 			nextPhaseStartTime = simTime() + timeVIPPhase;
 			scheduleAt(nextPhaseStartTime, beginPhases);
 			break;
 		case AppLayer::SYNC_PHASE_2:
+			phase = AppLayer::SYNC_PHASE_2;
 			nextPhase = AppLayer::COM_SINK_PHASE_1;
 			nextPhaseStartTime = simTime() + timeSyncPhase;
 			scheduleAt(nextPhaseStartTime, beginPhases);
@@ -204,34 +182,63 @@ void AnchorAppLayer::handleSelfMsg(cMessage *msg)
 				}
 			}
 			broadcastCounter = (int*)calloc(sizeof(int), numberOfNodes); // Reset the counter of broadcast a AN received from Mobile Nodes
+			// Schedule the sync packets. If we execute some full phase (-1 not limited full phases)
+			if (phaseRepetitionNumber != 0 && syncInSlot) { // If sync phase slotted
+				nextPhaseStart = simTime();
+				scheduleAt(nextPhaseStart + (anchor->transmisionSlot[scheduledSlot] * syncPacketTime), delayTimer);
+				EV << "Time for next Sync Packet " << nextPhaseStart + (anchor->transmisionSlot[scheduledSlot] * syncPacketTime) << endl;
+				scheduledSlot++;
+			} else if (phaseRepetitionNumber != 0) { // If sync phase with random transmissions
+				scheduleAt(simTime() + uniform(0, syncFirstMaxRandomTime, 0), delayTimer);
+			}
 			break;
 		case AppLayer::COM_SINK_PHASE_1:
+			phase = AppLayer::COM_SINK_PHASE_1;
 			nextPhase = AppLayer::SYNC_PHASE_3;
 			nextPhaseStartTime = simTime() + timeComSinkPhase;
 			scheduleAt(nextPhaseStartTime, beginPhases);
+			// At the beginning of the Com Sink 1 the Anchor checks its queue to transmit the elements and calculate all the random transmission times
+			if (packetsQueue.length() > 0) { // Only if the Queue has elements we do calculate all the intermediate times
+				stepTimeComSink1 = (timeComSinkPhase - guardTimeComSinkPhase) / packetsQueue.length();
+				randomQueueTime = (simtime_t*)calloc(sizeof(simtime_t), packetsQueue.length());
+				EV << "Transmitting the " << packetsQueue.length() << " elements of the queue in the following moments." << endl;
+				for (int i = 0; i < packetsQueue.length(); i++) {
+					randomQueueTime[i] = simTime() + (i * stepTimeComSink1) + uniform(0, stepTimeComSink1, 0);
+					EV << "Time " << i << ": " << randomQueueTime[i] << endl;
+				}
+				queueElementCounter = 0; // Reset the index to know which random time from vector to use
+				EV << "Still " << packetsQueue.length() << " elements in the Queue." << endl;
+				EV << "Random Transmission number " << queueElementCounter + 1 << " at : " << randomQueueTime[queueElementCounter] << " s" << endl;
+				scheduleAt(randomQueueTime[queueElementCounter], checkQueue);
+			} else {
+				EV << "Queue empty, Anchor has nothing to communicate this full phase (period)." << endl;
+			}
+
 			break;
 		case AppLayer::SYNC_PHASE_3:
+			phase = AppLayer::SYNC_PHASE_3;
 			nextPhase = AppLayer::COM_SINK_PHASE_2;
 			nextPhaseStartTime = simTime() + timeSyncPhase;
 			scheduleAt(nextPhaseStartTime, beginPhases);
+			// Schedule the sync packets. If we execute some full phase (-1 not limited full phases)
+			if (phaseRepetitionNumber != 0 && syncInSlot) { // If sync phase slotted
+				nextPhaseStart = simTime();
+				scheduleAt(nextPhaseStart + (anchor->transmisionSlot[scheduledSlot] * syncPacketTime), delayTimer);
+				EV << "Time for next Sync Packet " << nextPhaseStart + (anchor->transmisionSlot[scheduledSlot] * syncPacketTime) << endl;
+				scheduledSlot++;
+			} else if (phaseRepetitionNumber != 0) { // If sync phase with random transmissions
+				scheduleAt(simTime() + uniform(0, syncFirstMaxRandomTime, 0), delayTimer);
+			}
+			if (phaseRepetitionNumber > 0) {
+				phaseRepetitionNumber--; // If the number of full phases is limited, decrease one as we just finished one
+			}
 			break;
 		case AppLayer::COM_SINK_PHASE_2:
+			phase = AppLayer::COM_SINK_PHASE_2;
 			nextPhase = AppLayer::SYNC_PHASE_1;
 			nextPhaseStartTime = simTime() + timeComSinkPhase;
 			scheduleAt(nextPhaseStartTime, beginPhases);
 			break;
-		}
-		// Empty the transmission Queue
-		if (!transfersQueue.empty()) {
-			EV << "Emptying the queue with " << transfersQueue.length() << " elements in phase change" << endl;
-			nbPacketDroppedNoTimeApp = nbPacketDroppedNoTimeApp + transfersQueue.length();
-			transfersQueue.clear();
-			// --------------------------------------------------------------------------------------
-			// - If we don't want to clear the queue and lose the packets, --------------------------
-			// - we could somehow here leave the rest of the queue for the next full phase (period) -
-			// --------------------------------------------------------------------------------------
-		} else {
-			EV << "App Transmission Queue empty in phase change." << endl;
 		}
 		break;
 	default:
@@ -555,6 +562,7 @@ void AnchorAppLayer::sendBroadcast()
 	pkt->setRetransmisionCounterACK(0);	// Reset the retransmission counter ACK
 	pkt->setCSMA(false);
 
+	EV << "Inserting Broadcast Packet in Transmission Queue" << endl;
 	transfersQueue.insert(pkt->dup()); // Make a copy of the sent packet till the MAC says it's ok or to retransmit it when something fails
 	sendDown(pkt);
 }

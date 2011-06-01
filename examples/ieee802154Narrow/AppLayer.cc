@@ -61,8 +61,8 @@ void AppLayer::initialize(int stage)
 		timeReportPhase = (fullPhaseTime - (2 * timeComSinkPhase) - (3 * timeSyncPhase)) * (1 - phase2VIPPercentage);
 
 		beginPhases = new cMessage("next-phase",AppLayer::BEGIN_PHASE);
-		nextPhase = AppLayer::REPORT_PHASE;
-		nextPhaseStartTime = simTime() + timeSyncPhase - smallTime;
+		nextPhase = AppLayer::SYNC_PHASE_1;
+		nextPhaseStartTime = simTime();
 		scheduleAt(nextPhaseStartTime, beginPhases);
 	}
 }

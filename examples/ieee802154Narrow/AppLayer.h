@@ -28,8 +28,6 @@ public:
 		REPORT_WITH_CSMA,				// Report from any host with CSMA enabled
 		SEND_REPORT_WITHOUT_CSMA,		// Used to schedule the next message
 		REPORT_WITHOUT_CSMA,			// Report from any host with CSMA disabled
-		CONFIGURE_FULL_PHASE,			// Event at start from every full phase (period) to organize all the necesary events during it
-		CONFIGURE_EXTRA_REPORT,			// Event to schedule the extra reports for all the hosts when they are needed
 		CALCULATE_POSITION,				// Event to simulate the processing time of the Mobile Node type 2 when it calculates its position
 		CHECK_QUEUE,					// Event to check the transmission queues from Anchors (Com Sink 1) and Computer (Com Sink 2)
 		WAITING_REQUEST,				// Event to simulate the waiting time since we send the request till we receive the answer from the Anchor
@@ -106,7 +104,9 @@ protected:
 
 	cQueue transfersQueue;				// FIFO to store the packets that we sent until we receive a confirmation from the MAC that they were sent or until we receive a drop and then try again
 	cMessage * beginPhases;				// Event to drop all the elements in the queue at the beginning from every phase
-	PhaseType nextPhase;					// To know in which phase are we
+	PhaseType phase;					// To know which phase we are in
+	PhaseType nextPhase;				// To know which phase is the next
+
 
 public:
 

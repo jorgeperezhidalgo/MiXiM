@@ -8,7 +8,6 @@ class ComputerAppLayer : public AppLayer
 protected:
 
 	cQueue packetsQueue;			// FIFO to store the packets we receive in Com Sink 1 to send them back in Com Sink 2
-	simtime_t startTimeComSink2;	// Variable to store the time start of Com Sink 2 to schedule new queue processing
 	simtime_t *randomQueueTime;		// Vector of random times to transmit the queue along the Com Sink 2
 	simtime_t stepTimeComSink2;		// Step time in which we divide the Com Sink 2 Phase - The guard time. We divide it in so many parts like elements in the queue
 	int queueElementCounter;		// Variable to know how many queue elements have we already transmitted, therefore to calculate all the random transmitting times when = 0 or knowing which randomQueueTime is the next to use

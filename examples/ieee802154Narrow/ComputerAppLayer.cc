@@ -167,18 +167,16 @@ void ComputerAppLayer::initialize(int stage)
 			}
 		}
 	} else if (stage == 4) {
-		// Justs print the time on the screen to see them when we launch the simulation
+		// Just prints the time on the screen to see them when we launch the simulation
 		EV << "Number of Slots: " << numTotalSlots << endl;
 		EV << "T Sync: " << timeSyncPhase << endl;
 		EV << "T Report: " << timeReportPhase << endl;
 		EV << "T VIP: " << timeVIPPhase << endl;
 		EV << "T Com_Sink: " << timeComSinkPhase << endl;
 
-		// Schedule the first queue processing at the start of the Com Sink 2
+		// Necessary variables for the queue initialization
 		checkQueue = new cMessage("transmit queue elements", CHECK_QUEUE);
-		startTimeComSink2 = simTime() + timeSyncPhase + timeReportPhase + timeVIPPhase + timeSyncPhase + timeComSinkPhase + timeSyncPhase;
-		scheduleAt(startTimeComSink2 , checkQueue);
-		queueElementCounter = -1;
+		queueElementCounter = 0;
 		maxQueueElements = 200;
 	}
 }
@@ -214,83 +212,21 @@ void ComputerAppLayer::handleSelfMsg(cMessage *msg)
 	switch(msg->getKind())
 	{
 	case CHECK_QUEUE:
-		// If we didn't transmit any element of the queue is the moment to calculate all the random transmission times
-		if (queueElementCounter == -1) {
-			if (packetsQueue.length() > 0) { // Only if the Queue has elements we do calculate all the intermediate times
-				stepTimeComSink2 = (timeComSinkPhase - guardTimeComSinkPhase) / packetsQueue.length();
-				randomQueueTime = (simtime_t*)calloc(sizeof(simtime_t), packetsQueue.length());
-				for (int i = 0; i < packetsQueue.length(); i++) {
-					randomQueueTime[i] = startTimeComSink2 + (i * stepTimeComSink2) + uniform(0, stepTimeComSink2, 0);
-					EV << "Tiempo " << i << ": " << randomQueueTime[i] << endl;
-				}
-			}
-			startTimeComSink2 = simTime() + fullPhaseTime; // Calculate now the start of the next Com Sink 2 phase
-		} else {
+		if (packetsQueue.length() > 0) {
 			cMessage * msg = (cMessage *)packetsQueue.pop();
-			EV << "Sending packet from the Queue" << endl;
-			// Prior to send the message, we check that we are still in the Com Sink 2 Phase
-			switch(InWhichPhaseAmI(fullPhaseTime, timeSyncPhase, timeReportPhase, timeVIPPhase, timeComSinkPhase))
-			{
-			case AppLayer::COM_SINK_PHASE_2: // In Computer case, it only transmits in this phase
-				transfersQueue.insert(msg->dup()); // Make a copy of the sent packet till the MAC says it's ok or to retransmit it when something fails
-				sendDown(msg);
-				break;
-			default: // If we are in any of the other phases, we don't retransmit
-				nbPacketDroppedNoTimeApp++;
-				delete msg;
+			EV << "Sending packet from the Queue to Anchor with addr. " << static_cast<ApplPkt *>(msg)->getDestAddr() << endl;
+			transfersQueue.insert(msg->dup()); // Make a copy of the sent packet till the MAC says it's ok or to retransmit it when something fails
+			sendDown(msg);
+			if (packetsQueue.length() > 0) { // We have to check again if the queue has still elements after taking the element previously
+				// Schedule the next queue element in the next random time
+				queueElementCounter++;
+				EV << "Still " << packetsQueue.length() << " elements in the Queue." << endl;
+				EV << "Random Transmission number " << queueElementCounter + 1 << " at : " << randomQueueTime[queueElementCounter] << " s" << endl;
+				scheduleAt(randomQueueTime[queueElementCounter], checkQueue);
 			}
-		}
-		// Calculates the next time this selfmessage will be scheduled, in this fullphase (still elements in queue) or in the next one
-		if (packetsQueue.length() == 0) {
-			queueElementCounter = -1;
-			EV << "Queue empty, checking again at: " << startTimeComSink2 << " s" << endl;
-			scheduleAt(startTimeComSink2 , checkQueue);
-		} else {
-			queueElementCounter ++;
-			EV << "Still " << packetsQueue.length() << " elements in the Queue." << endl;
-			EV << "Next queue random transmission at : " << randomQueueTime[queueElementCounter] << " s" << queueElementCounter << endl;
-			scheduleAt(randomQueueTime[queueElementCounter], checkQueue);
 		}
 		break;
 	case BEGIN_PHASE:
-		switch (nextPhase)
-		{
-		case AppLayer::SYNC_PHASE_1:
-			nextPhase = AppLayer::REPORT_PHASE;
-			nextPhaseStartTime = simTime() + timeSyncPhase;
-			scheduleAt(nextPhaseStartTime, beginPhases);
-			break;
-		case AppLayer::REPORT_PHASE:
-			nextPhase = AppLayer::VIP_PHASE;
-			nextPhaseStartTime = simTime() + timeReportPhase;
-			scheduleAt(nextPhaseStartTime, beginPhases);
-			break;
-		case AppLayer::VIP_PHASE:
-			nextPhase = AppLayer::SYNC_PHASE_2;
-			nextPhaseStartTime = simTime() + timeVIPPhase;
-			scheduleAt(nextPhaseStartTime, beginPhases);
-			break;
-		case AppLayer::SYNC_PHASE_2:
-			nextPhase = AppLayer::COM_SINK_PHASE_1;
-			nextPhaseStartTime = simTime() + timeSyncPhase;
-			scheduleAt(nextPhaseStartTime, beginPhases);
-			break;
-		case AppLayer::COM_SINK_PHASE_1:
-			nextPhase = AppLayer::SYNC_PHASE_3;
-			nextPhaseStartTime = simTime() + timeComSinkPhase;
-			scheduleAt(nextPhaseStartTime, beginPhases);
-			break;
-		case AppLayer::SYNC_PHASE_3:
-			nextPhase = AppLayer::COM_SINK_PHASE_2;
-			nextPhaseStartTime = simTime() + timeSyncPhase;
-			scheduleAt(nextPhaseStartTime, beginPhases);
-			break;
-		case AppLayer::COM_SINK_PHASE_2:
-			nextPhase = AppLayer::SYNC_PHASE_1;
-			nextPhaseStartTime = simTime() + timeComSinkPhase;
-			scheduleAt(nextPhaseStartTime, beginPhases);
-			break;
-		}
 		// Empty the transmission Queue
 		if (!transfersQueue.empty()) {
 			EV << "Emptying the queue with " << transfersQueue.length() << " elements in phase change" << endl;
@@ -302,6 +238,68 @@ void ComputerAppLayer::handleSelfMsg(cMessage *msg)
 			// --------------------------------------------------------------------------------------
 		} else {
 			EV << "App Transmission Queue empty in phase change." << endl;
+		}
+		// Change the phase and prepare the data for the new phase
+		switch (nextPhase)
+		{
+		case AppLayer::SYNC_PHASE_1:
+			phase = AppLayer::SYNC_PHASE_1;
+			nextPhase = AppLayer::REPORT_PHASE;
+			nextPhaseStartTime = simTime() + timeSyncPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		case AppLayer::REPORT_PHASE:
+			phase = AppLayer::REPORT_PHASE;
+			nextPhase = AppLayer::VIP_PHASE;
+			nextPhaseStartTime = simTime() + timeReportPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		case AppLayer::VIP_PHASE:
+			phase = AppLayer::VIP_PHASE;
+			nextPhase = AppLayer::SYNC_PHASE_2;
+			nextPhaseStartTime = simTime() + timeVIPPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		case AppLayer::SYNC_PHASE_2:
+			phase = AppLayer::SYNC_PHASE_2;
+			nextPhase = AppLayer::COM_SINK_PHASE_1;
+			nextPhaseStartTime = simTime() + timeSyncPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		case AppLayer::COM_SINK_PHASE_1:
+			phase = AppLayer::COM_SINK_PHASE_1;
+			nextPhase = AppLayer::SYNC_PHASE_3;
+			nextPhaseStartTime = simTime() + timeComSinkPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		case AppLayer::SYNC_PHASE_3:
+			phase = AppLayer::SYNC_PHASE_3;
+			nextPhase = AppLayer::COM_SINK_PHASE_2;
+			nextPhaseStartTime = simTime() + timeSyncPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			break;
+		case AppLayer::COM_SINK_PHASE_2:
+			phase = AppLayer::COM_SINK_PHASE_2;
+			nextPhase = AppLayer::SYNC_PHASE_1;
+			nextPhaseStartTime = simTime() + timeComSinkPhase;
+			scheduleAt(nextPhaseStartTime, beginPhases);
+			// At the beginning of the Com Sink 2 the Computer checks its queue to transmit the elements and calculate all the random transmission times
+			if (packetsQueue.length() > 0) { // Only if the Queue has elements we do calculate all the intermediate times
+				stepTimeComSink2 = (timeComSinkPhase - guardTimeComSinkPhase) / packetsQueue.length();
+				randomQueueTime = (simtime_t*)calloc(sizeof(simtime_t), packetsQueue.length());
+				EV << "Transmitting the " << packetsQueue.length() << " elements of the queue in the following moments." << endl;
+				for (int i = 0; i < packetsQueue.length(); i++) {
+					randomQueueTime[i] = simTime() + (i * stepTimeComSink2) + uniform(0, stepTimeComSink2, 0);
+					EV << "Time " << i << ": " << randomQueueTime[i] << endl;
+				}
+				queueElementCounter = 0; // Reset the index to know which random time from vector to use
+				EV << "Still " << packetsQueue.length() << " elements in the Queue." << endl;
+				EV << "Random Transmission number " << queueElementCounter + 1 << " at : " << randomQueueTime[queueElementCounter] << " s" << endl;
+				scheduleAt(randomQueueTime[queueElementCounter], checkQueue);
+			} else {
+				EV << "Queue empty, computer has nothing to communicate this full phase (period)." << endl;
+			}
+			break;
 		}
 		break;
 	default:
