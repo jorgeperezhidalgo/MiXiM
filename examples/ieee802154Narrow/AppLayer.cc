@@ -66,26 +66,3 @@ void AppLayer::initialize(int stage)
 		scheduleAt(nextPhaseStartTime, beginPhases);
 	}
 }
-
-AppLayer::PhaseType AppLayer::InWhichPhaseAmI(simtime_t fullPhaseTime, simtime_t timeSyncPhase, simtime_t timeReportPhase, simtime_t timeVIPPhase, simtime_t timeComSinkPhase)
-{
-	// All the times are in seconds
-	double timeNow = simTime().dbl() + smallTime.dbl();
-
-	double phasePoint = fmod(timeNow, fullPhaseTime.dbl());
-
-	if (phasePoint < timeSyncPhase.dbl())
-		return AppLayer::SYNC_PHASE_1;
-	else if (phasePoint < (timeSyncPhase.dbl() + timeReportPhase.dbl()))
-		return AppLayer::REPORT_PHASE;
-	else if (phasePoint < (timeSyncPhase.dbl() + timeReportPhase.dbl() + timeVIPPhase.dbl()))
-		return AppLayer::VIP_PHASE;
-	else if (phasePoint < (timeSyncPhase.dbl() + timeReportPhase.dbl() + timeVIPPhase.dbl() + timeSyncPhase.dbl()))
-		return AppLayer::SYNC_PHASE_2;
-	else if (phasePoint < (timeSyncPhase.dbl() + timeReportPhase.dbl() + timeVIPPhase.dbl() + timeSyncPhase.dbl() + timeComSinkPhase.dbl()))
-		return AppLayer::COM_SINK_PHASE_1;
-	else if (phasePoint < (timeSyncPhase.dbl() + timeReportPhase.dbl() + timeVIPPhase.dbl() + timeSyncPhase.dbl() + timeComSinkPhase.dbl() + timeSyncPhase.dbl()))
-		return AppLayer::SYNC_PHASE_3;
-	else
-		return AppLayer::COM_SINK_PHASE_2;
-}

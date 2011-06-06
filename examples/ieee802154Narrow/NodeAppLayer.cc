@@ -20,12 +20,15 @@ void NodeAppLayer::initialize(int stage)
 		numberOfBroadcasts = par("NumberOfBroadcasts");
 		positionsToSave = par("positionsToSave");
 		centralized = par("centralized");
+		timeSleepToRX = getParentModule()->getSubmodule("nic")->getSubmodule("phy")->par("timeSleepToRX");
+		timeRXToSleep = getParentModule()->getSubmodule("nic")->getSubmodule("phy")->par("timeRXToSleep");
 
 		// Variable initialization, we could change this into parameters if necesary
-		activePhasesCounter 		= 1;
 		syncListen 					= false;
 		syncListenReport 			= false;
 		numberOfBroadcastsCounter 	= 0;
+		sleepTimesCounter			= 0;
+		wakeUpTimesCounter			= 0;
 		minimumSeparation 			= 0.002;	// Separation time 2 ms for example, redefine if we want other
 		minimumDistanceFulfilled 	= false;
 		positionsSavedCounter 		= 0;
@@ -49,6 +52,10 @@ void NodeAppLayer::initialize(int stage)
 		listRSSI = (RSSIs*)calloc(sizeof(RSSIs), numberOfAnchors);
 		randomTransTimes = (simtime_t*)calloc(sizeof(simtime_t), numberOfBroadcasts);
 		positionFIFO = (Coord*)calloc(sizeof(Coord), positionsToSave);
+		listSleepTimes = (simtime_t*)calloc(sizeof(simtime_t), 100); // Maximum of 100 times, more than enough
+		listWakeUpTimes = (simtime_t*)calloc(sizeof(simtime_t), 100); // Maximum of 100 times, more than enough
+		wakeUpTransmitting = (bool*)calloc(sizeof(bool), 100); // Maximum of 100 times, more than enough
+
 
 		// Creation of the messages that will be scheduled to send packets of configure the node
 		sendReportWithCSMA = new cMessage("send report with CSMA", SEND_REPORT_WITH_CSMA);
@@ -56,6 +63,15 @@ void NodeAppLayer::initialize(int stage)
 		sendSyncTimerWithCSMA = new cMessage("send sync timer with CSMA", SEND_SYNC_TIMER_WITH_CSMA);
 		calculatePosition = new cMessage("calculate position", CALCULATE_POSITION);
 		waitForRequest = new cMessage("waiting for request",WAITING_REQUEST);
+		wakeUp = new cMessage("waking up node",WAKE_UP);
+		sleep = new cMessage("sleeping the node",SLEEP);
+
+
+    	// get handler to phy layer
+        phy = FindModule<MacToPhyInterface*>::findSubModule(getParentModule());
+
+        // get handler to energy module
+    	energy = static_cast<EnergyConsumption*>(getParentModule()->getSubmodule("energy"));
 	} else if (stage == 1) {
 		// Assign the type of host to 2 (mobile node)
 		node = cc->findNic(myNetwAddr);
@@ -63,7 +79,8 @@ void NodeAppLayer::initialize(int stage)
 	} else if (stage == 4) {
 		//BORRAR
 		PUTEAR = new cMessage("PUTEAR", SEND_SYNC_TIMER_WITHOUT_CSMA);
-//		scheduleAt(2 * timeSyncPhase + timeReportPhase + timeVIPPhase, PUTEAR);
+//		scheduleAt(timeSyncPhase + fullPhaseTime, PUTEAR);
+//		goToWakeUp(timeSyncPhase + fullPhaseTime - timeSleepToRX, true);
 	}
 }
 
@@ -74,6 +91,8 @@ NodeAppLayer::~NodeAppLayer() {
 	cancelAndDelete(calculatePosition);
 	cancelAndDelete(waitForRequest);
 	cancelAndDelete(beginPhases);
+	cancelAndDelete(wakeUp);
+	cancelAndDelete(sleep);
 	//BORRAR
 	cancelAndDelete(PUTEAR);
 	for(cQueue::Iterator iter(transfersQueue, 1); !iter.end(); iter++) {
@@ -105,18 +124,66 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 {
 	switch(msg->getKind())
 	{
+	case NodeAppLayer::SLEEP:
+		EV << "Changing PHY state to Sleep" << endl;
+		phy->setRadioState(Radio::SLEEP);
+		energy->updateStateStatus(false, EnergyConsumption::NUM_MAC_STATES, Radio::SLEEP);
+		// Erase this time element
+		sleepTimesCounter--;
+		for (int i = 1; i <= sleepTimesCounter; i++) { // Remove the first element (the smaller)
+			listSleepTimes[i-1] = listSleepTimes[i];
+		}
+		// Schedule next time element
+		if (sleepTimesCounter > 0) {
+			scheduleAt(listSleepTimes[0], sleep);
+		}
+		break;
+	case NodeAppLayer::WAKE_UP:
+		if (phy->getRadioState() == Radio::SLEEP) {
+			EV << "Changing PHY state to RX" << endl;
+			phy->setRadioState(Radio::RX);
+			energy->updateStateStatus(wakeUpTransmitting[0], EnergyConsumption::NUM_MAC_STATES, Radio::RX);
+		} else {
+			EV << "No need to change PHY state to RX, its already woken up" << endl;
+//			energy->updateStateStatus(wakeUpTransmitting[0], EnergyConsumption::NUM_MAC_STATES, Radio::RX);
+		}
+		// Erase this time element
+		wakeUpTimesCounter--;
+		for (int i = 1; i <= wakeUpTimesCounter; i++) { // Remove the first element (the smaller)
+			listWakeUpTimes[i-1] = listWakeUpTimes[i];
+			wakeUpTransmitting[i-1] = wakeUpTransmitting[i];
+		}
+		// Schedule next time element
+		if (wakeUpTimesCounter > 0) {
+			scheduleAt(listWakeUpTimes[0], wakeUp);
+		}
+		break;
 	case NodeAppLayer::SEND_REPORT_WITH_CSMA:
-		if (!isProcessing) // If are still calculation the position in Mobile Node type 2
+		if (!isProcessing) {
 			sendReport();
-		else
-			scheduleAt(endProcessingTime + uniform(0, timeReportPhase - processingTime - guardTimeReportPhase, 0), sendExtraReportWithCSMA);
+		} else { // If are still calculation the position in Mobile Node type 2
+			timeToSend = endProcessingTime + uniform(0, timeReportPhase - processingTime - guardTimeReportPhase, 0);
+			scheduleAt(timeToSend, sendExtraReportWithCSMA);
+			// Wake Up the node timeSleepToRX time before
+			goToWakeUp(timeToSend - timeSleepToRX, true);
+			// Go to sleep now if the time to the next report bigger than transition times
+			if (timeToSend >= (simTime() + timeSleepToRX + timeRXToSleep)) {
+				goToSleep(simTime());
+			} else { // If we don't go to sleep is because another event is comming
+				EV << "Don't sleeping as another sending or event is coming soon" << endl;
+				energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
+			}
+		}
 		break;
 	case NodeAppLayer::SEND_SYNC_TIMER_WITH_CSMA:
 		sendBroadcast();
 		if (numberOfBroadcastsCounter < numberOfBroadcasts) {
 			// Schedule the next random broadcast, we have to subtract first the previous random time to be at the begining of the phase
 			// and then add the new random time (relative to the start of VIP phase or Report Phase for type 3 and 4)
-			scheduleAt(simTime() - randomTransTimes[numberOfBroadcastsCounter - 1] + randomTransTimes[numberOfBroadcastsCounter], sendSyncTimerWithCSMA);
+			timeToSend = simTime() - randomTransTimes[numberOfBroadcastsCounter - 1] + randomTransTimes[numberOfBroadcastsCounter];
+			scheduleAt(timeToSend, sendSyncTimerWithCSMA);
+			// Wake Up the node timeSleepToRX time before
+			goToWakeUp(timeToSend - timeSleepToRX, true);
 			numberOfBroadcastsCounter ++;
 		} else {
 			numberOfBroadcastsCounter = 0;
@@ -133,6 +200,7 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 			scheduleAt(endProcessingTime, calculatePosition);
 		} else {
 			isProcessing = false;
+			energy->updateCalculatingTime(processingTime);
 		}
 		break;
 	case NodeAppLayer::WAITING_REQUEST:
@@ -145,13 +213,58 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 				EV << "No need to schedule an extra report as this phase has already one report or extra report." << endl;
 			} else {
 				EV << "Scheduling extra report for the Request from node addr " << myNetwAddr << " to anchor addr " << anchorDestinationRequest << endl;
-				scheduleAt(simTime() + uniform(0, timeReportPhase - guardTimeReportPhase, 0), sendExtraReportWithCSMA);
+				timeToSend = simTime() + (timeSyncPhase / 2) + uniform(0, timeReportPhase - guardTimeReportPhase, 0);
+				scheduleAt(timeToSend, sendExtraReportWithCSMA);
+				// Wake Up the node timeSleepToRX time before
+				goToWakeUp(timeToSend - timeSleepToRX, true);
+			}
+			// When the Mobile Node is type 4 and the phase it sends a request, it doesn't send the broadcast if it was an active phase,
+			// This is because the sending from this broadcasts will interfere the waiting time, it is also useful to take out some traffic
+			// when the request packet is sent, as this packet is really important to arrive due to the configurations. It makes also the design easier
+			if ((nodeConfig == NodeAppLayer::LISTEN_TRANSMIT_REPORT) && (activePhase)) {
+				// If we are in an active phase, we cancel the broadcasts in this full phase (period) to save battery
+				timeToSend = sendSyncTimerWithCSMA->getArrivalTime();
+				cancelEvent(sendSyncTimerWithCSMA);
+				numberOfBroadcastsCounter = 0;
+				// But we have to cancel also the waking up before this broadcast
+				for (int i = 0; i < wakeUpTimesCounter; i++) { // Recover the array
+					if (listWakeUpTimes[i] == timeToSend - timeSleepToRX) {
+						// If we found the element, we erase the element moving all the other elements one position to the front
+						for (int j = i+1; j < wakeUpTimesCounter; j++) {
+							listWakeUpTimes[j-1] = listWakeUpTimes[j];
+							wakeUpTransmitting[j-1] = wakeUpTransmitting[j];
+						}
+						wakeUpTimesCounter--;
+						if (wakeUp->isScheduled()) { // If the event is already scheduled, cancel it to reschedule the one that occurs sooner
+							cancelEvent(wakeUp);
+						}
+						scheduleAt(listWakeUpTimes[0], wakeUp);
+					}
+				}
 			}
 		} else {
 			EV << "Waiting time from an answer from Anchor addr " << anchorDestinationRequest << " finished." <<endl;
 			waitForAnchor = 0;
 			anchorDestinationRequest = 0;
 			nbRequestWihoutAnswer++;
+			if (transfersQueue.isEmpty()) { // If the queue is empty, if not the node cannot sleep
+				// Sleep the node if the following conditions fulfill
+				canSleep = true; // Activate the sleep variable, we will make it false if some condition is not fulfilled
+				// Check if there is a broadcast scheduled sooner than timeSleepToRX + timeRXToSleep
+				if (sendSyncTimerWithCSMA->isScheduled()) {
+					timeToSend = sendSyncTimerWithCSMA->getArrivalTime();
+					if (timeToSend < (simTime() + timeSleepToRX + timeRXToSleep)) {
+						canSleep = false;
+					}
+				}
+				if (canSleep) { // If after all the conditions it is true, we sleep the node
+					goToSleep(simTime());
+				} else { // If we don't go to sleep is because another event is comming
+					EV << "Don't sleeping as another sending or event is coming soon" << endl;
+					energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
+				}
+			}
+
 		}
 		break;
 	case NodeAppLayer::SEND_SYNC_TIMER_WITHOUT_CSMA:
@@ -190,10 +303,12 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 				activePhasesCounter++;
 				activePhase = true;
 				if ((activePhasesCounter == 1) && (activePhases > 1)) { // If we are in the first active phase and there are more than one consecutive phases
+					EV << "Configuring the node for the Sync Phase 1 in " << activePhasesCounter << " active phase from " << activePhases << endl;
 					// Before we start reading RSSI again, we have to reset the previous values to get the new ones
 					listRSSI = (RSSIs*)calloc(sizeof(RSSIs), numberOfAnchors);
 					if (offsetSyncPhases >= 1) { // Check if there is an offset not to listen the first sync phase
 						syncListen = false; // Don't listen this sync phase
+						goToSleep(simTime());
 					} else {
 						syncListen = true; // Activate to listen
 					}
@@ -201,47 +316,69 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 					{
 					case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
 						syncListen = false; // Don't listen this sync phase
+						goToSleep(simTime());
 						// Calculate the numberOfBroadcasts random times to transmit, with a minimum separation of minimumSeparation secs, remember that we leave a guard band at the end
 						createRandomBroadcastTimes(timeVIPPhase - guardTimeVIPPhase);
+						for (int i = 0; i < numberOfBroadcasts; i++)
+							EV << "Broadcast random time " << i + 1 << " : " << simTime() + timeSyncPhase + timeReportPhase +randomTransTimes[i] << endl;
 						// Schedule of the First Random Broadcast transmission
-						scheduleAt(simTime() + timeSyncPhase + timeReportPhase + randomTransTimes[numberOfBroadcastsCounter], sendSyncTimerWithCSMA); // Program an event to send the broadcasts
+						timeToSend = simTime() + timeSyncPhase + timeReportPhase + randomTransTimes[numberOfBroadcastsCounter];
+						scheduleAt(timeToSend, sendSyncTimerWithCSMA); // Program an event to send the broadcasts
+						// Wake Up the node timeSleepToRX time before
+						goToWakeUp(timeToSend - timeSleepToRX, true);
 						numberOfBroadcastsCounter ++;
 						break;
 					case NodeAppLayer::LISTEN_TRANSMIT_REPORT: // Mobile Node type 4
 						// Calculate the numberOfBroadcasts random times to transmit, with a minimum separation of minimumSeparation secs, remember that we leave a guard band at the end
 						createRandomBroadcastTimes(timeReportPhase - guardTimeReportPhase);
+						for (int i = 0; i < numberOfBroadcasts; i++)
+							EV << "Broadcast random time " << i + 1 << " : " << simTime() + timeSyncPhase + randomTransTimes[i] << endl;
 						// Schedule of the First Random Broadcast transmission
-						scheduleAt(simTime() + timeSyncPhase + randomTransTimes[numberOfBroadcastsCounter], sendSyncTimerWithCSMA); // Program an event to send the broadcasts
+						timeToSend = simTime() + timeSyncPhase + randomTransTimes[numberOfBroadcastsCounter];
+						scheduleAt(timeToSend, sendSyncTimerWithCSMA); // Program an event to send the broadcasts
+						// Wake Up the node timeSleepToRX time before
+						goToWakeUp(timeToSend - timeSleepToRX, true);
 						numberOfBroadcastsCounter ++;
 						break;
 					default:
 						EV << "Don't do anything" << endl;
 					}
 				} else if (activePhases > activePhasesCounter) { // If we are in an active phase, but not the last one
+					EV << "Configuring the node for the Sync Phase 1 in " << activePhasesCounter << " active phase from " << activePhases << endl;
 					syncListen = true; // Activate to listen
 					switch(nodeConfig)
 					{
 					case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
 						syncListen = false; // Don't listen this sync phase
+						goToSleep(simTime());
 						// Calculate the numberOfBroadcasts random times to transmit, with a minimum separation of minimumSeparation secs, remember that we leave a guard band at the end
 						createRandomBroadcastTimes(timeVIPPhase - guardTimeVIPPhase);
+						for (int i = 0; i < numberOfBroadcasts; i++)
+							EV << "Broadcast random time " << i + 1 << " : " << simTime() + timeSyncPhase + timeReportPhase + randomTransTimes[i] << endl;
 						// Schedule of the First Random Broadcast transmission
-						scheduleAt(simTime() + timeSyncPhase + timeReportPhase + randomTransTimes[numberOfBroadcastsCounter], sendSyncTimerWithCSMA); // Program an event to send the broadcasts
+						timeToSend = simTime() + timeSyncPhase + timeReportPhase + randomTransTimes[numberOfBroadcastsCounter];
+						scheduleAt(timeToSend, sendSyncTimerWithCSMA); // Program an event to send the broadcasts
+						// Wake Up the node timeSleepToRX time before
+						goToWakeUp(timeToSend - timeSleepToRX, true);
 						numberOfBroadcastsCounter ++;
 						break;
 					case NodeAppLayer::LISTEN_TRANSMIT_REPORT: // Mobile Node type 4
 						// Calculate the numberOfBroadcasts random times to transmit, with a minimum separation of minimumSeparation secs, remember that we leave a guard band at the end
 						createRandomBroadcastTimes(timeReportPhase - guardTimeReportPhase);
+						for (int i = 0; i < numberOfBroadcasts; i++)
+							EV << "Broadcast random time " << i + 1 << " : " << simTime() + timeSyncPhase + randomTransTimes[i] << endl;
 						// Schedule of the First Random Broadcast transmission
-						scheduleAt(simTime() + timeSyncPhase + randomTransTimes[numberOfBroadcastsCounter], sendSyncTimerWithCSMA); // Program an event to send the broadcasts
+						timeToSend = simTime() + timeSyncPhase + randomTransTimes[numberOfBroadcastsCounter];
+						scheduleAt(timeToSend, sendSyncTimerWithCSMA); // Program an event to send the broadcasts
+						// Wake Up the node timeSleepToRX time before
+						goToWakeUp(timeToSend - timeSleepToRX, true);
 						numberOfBroadcastsCounter ++;
 						break;
 					default:
 						EV << "Don't do anything" << endl;
 					}
 				} else { // We are in the last active phase
-					inactivePhasesCounter = 0; // Next full phase will be inactive if inactivePhases > 0
-					activePhasesCounter = 0;
+					EV << "Configuring the node for the Sync Phase 1 in " << activePhasesCounter << " active phase from " << activePhases << endl;
 					if (activePhases == 1) { // If we have only one active phase, the first is the last one also
 						// Before we start reading RSSI again, we have to reset the previous values to get the new ones
 						listRSSI = (RSSIs*)calloc(sizeof(RSSIs), numberOfAnchors);
@@ -251,7 +388,10 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 					{
 					case NodeAppLayer::LISTEN_AND_REPORT: // Mobile Node type 1
 						// Schedule of the Report transmission, note that we leave a guard band at the end
-						scheduleAt(simTime() + timeSyncPhase + uniform(0, timeReportPhase - guardTimeReportPhase, 0), sendReportWithCSMA);
+						timeToSend = simTime() + timeSyncPhase + uniform(0, timeReportPhase - guardTimeReportPhase, 0);
+						scheduleAt(timeToSend, sendReportWithCSMA);
+						// Wake Up the node timeSleepToRX time before
+						goToWakeUp(timeToSend - timeSleepToRX, true);
 						break;
 					case NodeAppLayer::LISTEN_AND_CALCULATE: // Mobile Node type 2
 						// Makes an event to calculate the position at start from next Report phase
@@ -259,21 +399,34 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 						break;
 					case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
 						syncListen = false; // Don't listen this sync phase
+						goToSleep(simTime());
 						// Calculate the numberOfBroadcasts random times to transmit, with a minimum separation of minimumSeparation secs, remember that we leave a guard band at the end
 						createRandomBroadcastTimes(timeVIPPhase - guardTimeVIPPhase);
+						for (int i = 0; i < numberOfBroadcasts; i++)
+							EV << "Broadcast random time " << i + 1 << " : " << simTime() + timeSyncPhase + timeReportPhase + randomTransTimes[i] << endl;
 						// Schedule of the First Random Broadcast transmission
-						scheduleAt(simTime() + timeSyncPhase + timeReportPhase + randomTransTimes[numberOfBroadcastsCounter], sendSyncTimerWithCSMA); // Program an event to send the broadcasts
+						timeToSend = simTime() + timeSyncPhase + timeReportPhase + randomTransTimes[numberOfBroadcastsCounter];
+						scheduleAt(timeToSend, sendSyncTimerWithCSMA); // Program an event to send the broadcasts
+						// Wake Up the node timeSleepToRX time before
+						goToWakeUp(timeToSend - timeSleepToRX, true);
 						numberOfBroadcastsCounter ++;
 						break;
 					case NodeAppLayer::LISTEN_TRANSMIT_REPORT: // Mobile Node type 4
 						// Schedule of the Report transmission, note that we leave a guard band at the end
 						type4ReportTime = uniform(0, timeReportPhase - guardTimeReportPhase, 0);
 						scheduleAt(simTime() + timeSyncPhase + type4ReportTime, sendReportWithCSMA);
+						// Wake Up the node timeSleepToRX time before
+						goToWakeUp(simTime() + timeSyncPhase + type4ReportTime - timeSleepToRX, true);
 						// Calculate the numberOfBroadcasts random times to transmit, with a minimum separation of minimumSeparation secs, remember that we leave a guard band at the end
 						// We have to leave also this minimum separation with the report just generated in type4ReportTime
 						createRandomBroadcastTimes(timeReportPhase - guardTimeReportPhase);
+						for (int i = 0; i < numberOfBroadcasts; i++)
+							EV << "Broadcast random time " << i + 1 << " : " << simTime() + timeSyncPhase + randomTransTimes[i] << endl;
 						// Schedule of the First Random Broadcast transmission
-						scheduleAt(simTime() + timeSyncPhase + randomTransTimes[numberOfBroadcastsCounter], sendSyncTimerWithCSMA); // Program an event to send the broadcasts
+						timeToSend = simTime() + timeSyncPhase + randomTransTimes[numberOfBroadcastsCounter];
+						scheduleAt(timeToSend, sendSyncTimerWithCSMA); // Program an event to send the broadcasts
+						// Wake Up the node timeSleepToRX time before
+						goToWakeUp(timeToSend - timeSleepToRX, true);
 						numberOfBroadcastsCounter ++;
 						break;
 					}
@@ -282,19 +435,41 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 				offsetPhasesCounter++;
 				activePhase = false;
 				syncListen = false; // Don't listen this sync phase
+				goToSleep(simTime());
+				EV << "Offset phase " << offsetPhasesCounter << " from " << offsetPhases << endl;
 			} else if (activePhases == 0) {
 				EV << "This node has no active phases, the only behavior is through extra reports" << endl;
 				activePhase = false;
 				syncListen = false; // Don't listen this sync phase
+				goToSleep(simTime());
 			} else { // Inactive phases
 				inactivePhasesCounter++;
 				activePhase = false;
 				syncListen = false; // Don't listen this sync phase
+				goToSleep(simTime());
+				EV << "Inactive phase " << inactivePhasesCounter << " from " << inactivePhases << endl;
 			}
 			// Configuring the extra reports or reports depending on the mobile node type
 			if ((offsetReportPhasesCounter >= offsetReportPhases) && (reportPhasesCounter == reportPhases) && (reportPhases > 0)) { // Offset already reached
 				reportPhasesCounter = 1;
 				syncListenReport = true;
+				// If the node was configured to sleep previously, undo it as it has to listen this sync phase
+				if (syncListen == false) {
+					// If the event is already scheduled, cancel it to reschedule the new one
+					if (sleep->isScheduled()) {
+						cancelEvent(sleep);
+					}
+					// Erase this time element
+					sleepTimesCounter--;
+					for (int i = 1; i <= sleepTimesCounter; i++) { // Remove the first element (the smaller)
+						listSleepTimes[i-1] = listSleepTimes[i];
+					}
+					// Schedule next time element
+					if (sleepTimesCounter > 0) {
+						scheduleAt(listSleepTimes[0], sleep);
+					}
+				}
+
 				if (makeExtraReport) {
 					// Check if we are already reading RSSI or not, in case we are, we don't erase the old ones. It is also useful
 					// to know if we have to schedule an extra report or if we have already the normal one and we don't have to schedule
@@ -302,62 +477,103 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 					if (!syncListen) { // Any node configuration not listening the first syncPhase
 						// Before we start reading RSSI again, we have to reset the previous values to get the new ones
 						listRSSI = (RSSIs*)calloc(sizeof(RSSIs), numberOfAnchors);
+					}
+					switch(nodeConfig)
+					{
+					case NodeAppLayer::LISTEN_AND_REPORT: // Mobile Node type 1
+						if (activePhases == activePhasesCounter) { // If we are in type 1 and 4 and in the last active phase we have already a report
+							// Do not schedule another extra report, we have already one in this full phase
+						} else { // In any other full phase (period)
+							// Schedule of the Extra Report transmission, note that we leave a guard band at the end
+							type4ReportTime = uniform(0, timeReportPhase - guardTimeReportPhase, 0);
+							scheduleAt(simTime() + timeSyncPhase + type4ReportTime, sendExtraReportWithCSMA);
+							// Wake Up the node timeSleepToRX time before
+							goToWakeUp(simTime() + timeSyncPhase + type4ReportTime - timeSleepToRX, true);
+						}
+						break;
+					case NodeAppLayer::LISTEN_AND_CALCULATE: // Mobile Node type 2
 						// Schedule of the Extra Report transmission, note that we leave a guard band at the end
 						type4ReportTime = uniform(0, timeReportPhase - guardTimeReportPhase, 0);
 						scheduleAt(simTime() + timeSyncPhase + type4ReportTime, sendExtraReportWithCSMA);
-					} else {
-						switch(nodeConfig)
-						{
-						case NodeAppLayer::LISTEN_AND_REPORT: // Mobile Node type 1
-							if (activePhases == activePhasesCounter) { // If we are in type 1 and 4 and in the last active phase we have already a report
-								// Do not schedule another extra report, we have already one in this full phase
-							} else { // In any other full phase (period)
-								// Schedule of the Extra Report transmission, note that we leave a guard band at the end
-								type4ReportTime = uniform(0, timeReportPhase - guardTimeReportPhase, 0);
-								scheduleAt(simTime() + timeSyncPhase + type4ReportTime, sendExtraReportWithCSMA);
+						// Wake Up the node timeSleepToRX time before
+						goToWakeUp(simTime() + timeSyncPhase + type4ReportTime - timeSleepToRX, true);
+						break;
+					case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
+						// Schedule of the Extra Report transmission, note that we leave a guard band at the end
+						type4ReportTime = uniform(0, timeReportPhase - guardTimeReportPhase, 0);
+						scheduleAt(simTime() + timeSyncPhase + type4ReportTime, sendExtraReportWithCSMA);
+						// Wake Up the node timeSleepToRX time before
+						goToWakeUp(simTime() + timeSyncPhase + type4ReportTime - timeSleepToRX, true);
+						if (activePhase) {
+							// If we are in an active phase, we cancel the broadcasts in this full phase (period) to save battery
+							timeToSend = sendSyncTimerWithCSMA->getArrivalTime();
+							cancelEvent(sendSyncTimerWithCSMA);
+							numberOfBroadcastsCounter = 0;
+							// But we have to cancel also the waking up before this broadcast
+							for (int i = 0; i < wakeUpTimesCounter; i++) { // Recover the array
+								if (listWakeUpTimes[i] == timeToSend - timeSleepToRX) {
+									// If we found the element, we erase the element moving all the other elements one position to the front
+									for (int j = i+1; j < wakeUpTimesCounter; j++) {
+										listWakeUpTimes[j-1] = listWakeUpTimes[j];
+										wakeUpTransmitting[j-1] = wakeUpTransmitting[j];
+									}
+									wakeUpTimesCounter--;
+									if (wakeUp->isScheduled()) { // If the event is already scheduled, cancel it to reschedule the one that occurs sooner
+										cancelEvent(wakeUp);
+									}
+									scheduleAt(listWakeUpTimes[0], wakeUp);
+								}
 							}
-							break;
-						case NodeAppLayer::LISTEN_AND_CALCULATE: // Mobile Node type 2
-							// Schedule of the Extra Report transmission, note that we leave a guard band at the end
-							type4ReportTime = uniform(0, timeReportPhase - guardTimeReportPhase, 0);
-							scheduleAt(simTime() + timeSyncPhase + type4ReportTime, sendExtraReportWithCSMA);
-							break;
-						case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
-							// Schedule of the Extra Report transmission, note that we leave a guard band at the end
-							type4ReportTime = uniform(0, timeReportPhase - guardTimeReportPhase, 0);
-							scheduleAt(simTime() + timeSyncPhase + type4ReportTime, sendExtraReportWithCSMA);
-							if (activePhase) {
-								// If we are in an active phase, we cancel the broadcasts in this full phase (period) to save battery
-								cancelEvent(sendSyncTimerWithCSMA);
-								numberOfBroadcastsCounter = 0;
-							}
-							break;
-						case NodeAppLayer::LISTEN_TRANSMIT_REPORT: // Mobile Node type 4
-							if (activePhases == activePhasesCounter) { // If we are in type 1 and 4 and in the last active phase we have already a report
-								// Do not schedule another extra report, we have already one in this full phase
-							} else { // In any other full phase (period)
-								// Schedule of the Extra Report transmission, note that we leave a guard band at the end
-								type4ReportTime = uniform(0, timeReportPhase - guardTimeReportPhase, 0);
-								scheduleAt(simTime() + timeSyncPhase + type4ReportTime, sendExtraReportWithCSMA);
-								// Recalculate the numberOfBroadcasts random times to transmit, with a minimum separation of minimumSeparation secs, remember that we leave a guard band at the end
-								// We have to do this to take into account for the minimum separation the extra report just generated in type4ReportTime
-								createRandomBroadcastTimes(timeReportPhase - guardTimeReportPhase);
-								// Cancel the scheduled First Random Broadcast transmission and schedule it again with the new time
-								cancelEvent(sendSyncTimerWithCSMA);
-								numberOfBroadcastsCounter = 0;
-								scheduleAt(simTime() + randomTransTimes[numberOfBroadcastsCounter], sendSyncTimerWithCSMA); // Program an event to send the broadcasts
-								numberOfBroadcastsCounter ++;
-							}
-							break;
 						}
+						break;
+					case NodeAppLayer::LISTEN_TRANSMIT_REPORT: // Mobile Node type 4
+						if (activePhases == activePhasesCounter) { // If we are in type 4 and in the last active phase we have already a report
+							// Do not schedule another extra report, we have already one in this full phase
+						} else { // In any other full phase (period)
+							// Schedule of the Extra Report transmission, note that we leave a guard band at the end
+							type4ReportTime = uniform(0, timeReportPhase - guardTimeReportPhase, 0);
+							scheduleAt(simTime() + timeSyncPhase + type4ReportTime, sendExtraReportWithCSMA);
+							// Wake Up the node timeSleepToRX time before
+							goToWakeUp(simTime() + timeSyncPhase + type4ReportTime - timeSleepToRX, true);
+							// Recalculate the numberOfBroadcasts random times to transmit, with a minimum separation of minimumSeparation secs, remember that we leave a guard band at the end
+							// We have to do this to take into account for the minimum separation the extra report just generated in type4ReportTime
+							createRandomBroadcastTimes(timeReportPhase - guardTimeReportPhase);
+							for (int i = 0; i < numberOfBroadcasts; i++)
+								EV << "Broadcast random time " << i + 1 << " : " << simTime() + timeSyncPhase + randomTransTimes[i] << endl;
+							// Cancel the scheduled First Random Broadcast transmission and schedule it again with the new time
+							timeToSend = sendSyncTimerWithCSMA->getArrivalTime();
+							cancelEvent(sendSyncTimerWithCSMA);
+							// But we have to cancel also the waking up before this broadcast
+							for (int i = 0; i < wakeUpTimesCounter; i++) { // Recover the array
+								if (listWakeUpTimes[i] == timeToSend - timeSleepToRX) {
+									// If we found the element, we erase the element moving all the other elements one position to the front
+									for (int j = i+1; j < wakeUpTimesCounter; j++) {
+										listWakeUpTimes[j-1] = listWakeUpTimes[j];
+										wakeUpTransmitting[j-1] = wakeUpTransmitting[j];
+									}
+									wakeUpTimesCounter--;
+									if (wakeUp->isScheduled()) { // If the event is already scheduled, cancel it to reschedule the one that occurs sooner
+										cancelEvent(wakeUp);
+									}
+									scheduleAt(listWakeUpTimes[0], wakeUp);
+								}
+							}
+							numberOfBroadcastsCounter = 0;
+							timeToSend = simTime() + timeSyncPhase + randomTransTimes[numberOfBroadcastsCounter];
+							scheduleAt(timeToSend, sendSyncTimerWithCSMA); // Program an event to send the broadcasts
+							// Wake Up the node timeSleepToRX time before
+							goToWakeUp(timeToSend - timeSleepToRX, true);
+							numberOfBroadcastsCounter ++;
+						}
+						break;
 					}
 					// Here we activate the ASK Flag every askFrequency extra reports
 					askFrequencyCounter ++;
 					if (askFrequencyCounter == askFrequency) {
 						askFrequencyCounter = 0;
 						askForRequest = true; // Mark this flag for the report transmission that is already scheduled
-						// Schedule the Request for Information in the next full phase (period) at the beginning of Report Phase
-						scheduleAt(simTime() + fullPhaseTime + timeSyncPhase, waitForRequest);
+						// Schedule the Request for Information in the next full phase (period) at the middle of 1st sync phase (to have all the parameters already configured, and also time to wake up the node)
+						scheduleAt(simTime() + fullPhaseTime + (timeSyncPhase / 2), waitForRequest);
 					} else if (askFrequencyCounter > askFrequency) {
 						askFrequencyCounter = 0; // We just put the counter to 0 but don't send any ask, this case happens when askFrequency = 0
 					}
@@ -378,6 +594,35 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 			nextPhase = AppLayer::VIP_PHASE;
 			nextPhaseStartTime = simTime() + timeReportPhase;
 			scheduleAt(nextPhaseStartTime, beginPhases);
+			// Sleep the node if the first and already scheduled broadcast is transmitted after timeSleepToRX + timeRXToSleep
+			canSleep = true; // Activate the sleep variable, we will make it false if some condition is not fulfilled
+			// Check if there is a broadcast scheduled sooner than timeSleepToRX + timeRXToSleep
+			if (sendSyncTimerWithCSMA->isScheduled()) {
+				timeToSend = sendSyncTimerWithCSMA->getArrivalTime();
+				if (timeToSend < (simTime() + timeSleepToRX + timeRXToSleep)) {
+					canSleep = false;
+				}
+			}
+			// Check if there is a report scheduled sooner than timeSleepToRX + timeRXToSleep
+			if (sendReportWithCSMA->isScheduled()) {
+				timeToSend = sendReportWithCSMA->getArrivalTime();
+				if (timeToSend < (simTime() + timeSleepToRX + timeRXToSleep)) {
+					canSleep = false;
+				}
+			}
+			// Check if there is an extra report scheduled sooner than timeSleepToRX + timeRXToSleep
+			if (sendExtraReportWithCSMA->isScheduled()) {
+				timeToSend = sendExtraReportWithCSMA->getArrivalTime();
+				if (timeToSend < (simTime() + timeSleepToRX + timeRXToSleep)) {
+					canSleep = false;
+				}
+			}
+			if (canSleep) { // If after all the conditions it is true, we sleep the node
+				goToSleep(simTime());
+			} else { // If we don't go to sleep is because another event is comming
+				EV << "Don't sleeping as another sending or event is coming soon" << endl;
+				energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
+			}
 			if (syncListenReport) {
 				syncListenReport = false;
 			}
@@ -387,6 +632,38 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 			nextPhase = AppLayer::SYNC_PHASE_2;
 			nextPhaseStartTime = simTime() + timeVIPPhase;
 			scheduleAt(nextPhaseStartTime, beginPhases);
+			// Sleep the node if the following conditions fulfill
+			canSleep = true; // Activate the sleep variable, we will make it false if some condition is not fulfilled
+			// Check if there is a broadcast scheduled sooner than timeSleepToRX + timeRXToSleep
+			if (sendSyncTimerWithCSMA->isScheduled()) {
+				timeToSend = sendSyncTimerWithCSMA->getArrivalTime();
+				if (timeToSend < (simTime() + timeSleepToRX + timeRXToSleep)) {
+					canSleep = false;
+				}
+			}
+			if (canSleep) { // If after all the conditions it is true, we sleep the node
+				goToSleep(simTime());
+			} else { // If we don't go to sleep is because another event is comming
+				EV << "Don't sleeping as another sending or event is coming soon" << endl;
+				energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
+			}
+			// Wake up node for next sync phase 2 if necessary, wake it up timeSleepToRX sec. before
+			// If we are in an active phase
+			if (activePhase) {
+				if ((activePhasesCounter == 1) && (activePhases > 1)) { // If we are in the first active phase and there are more than one consecutive phases
+					if (offsetSyncPhases < 2) { // If there is no offset in sync phases for the first active phase
+						if (nodeConfig != NodeAppLayer::VIP_TRANSMIT) {
+							goToWakeUp(nextPhaseStartTime - timeSleepToRX, false);
+						}
+					}
+				} else if ((activePhases > activePhasesCounter)) { // If we are in an active phase, but not the last one
+					if (nodeConfig != NodeAppLayer::VIP_TRANSMIT) {
+						goToWakeUp(nextPhaseStartTime - timeSleepToRX, false);
+					}
+				} else { // We are in the last active phase
+					// Don't wake the node up
+				}
+			}
 			break;
 		case AppLayer::SYNC_PHASE_2:
 			phase = AppLayer::SYNC_PHASE_2;
@@ -396,8 +673,10 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 			// Configuring the normal way of working for the active phases in the mobile nodes
 			if (activePhase) {
 				if ((activePhasesCounter == 1) && (activePhases > 1)) { // If we are in the first active phase and there are more than one consecutive phases
+					EV << "Configuring the node for the Sync Phase 2 in " << activePhasesCounter << " active phase from " << activePhases << endl;
 					if (offsetSyncPhases >= 2) { // Check if there is an offset not to listen the second sync phase
 						syncListen = false; // Don't listen this sync phase
+						goToSleep(simTime());
 					} else {
 						syncListen = true; // Activate to listen
 					}
@@ -405,31 +684,32 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 					{
 					case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
 						syncListen = false; // Don't listen this sync phase
+						goToSleep(simTime());
 						break;
 					default:
 						EV << "Don't do anything" << endl;
 					}
 				} else if (activePhases > activePhasesCounter) { // If we are in an active phase, but not the last one
+					EV << "Configuring the node for the Sync Phase 2 in " << activePhasesCounter << " active phase from " << activePhases << endl;
 					syncListen = true; // Activate to listen
 					switch(nodeConfig)
 					{
 					case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
 						syncListen = false; // Don't listen this sync phase
+						goToSleep(simTime());
 						break;
 					default:
 						EV << "Don't do anything" << endl;
 					}
 				} else { // We are in the last active phase
+					EV << "Configuring the node for the Sync Phase 2 in " << activePhasesCounter << " active phase from " << activePhases << endl;
 					syncListen = false; // Don't listen this sync phase
-					switch(nodeConfig)
-					{
-					case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
-						syncListen = false; // Don't listen this sync phase
-						break;
-					default:
-						EV << "Don't do anything" << endl;
-					}
+					goToSleep(simTime());
 				}
+			} else {
+				EV << "Inactive phase " << inactivePhasesCounter << " from " << inactivePhases << endl;
+				syncListen = false; // Don't listen this sync phase
+				goToSleep(simTime());
 			}
 			break;
 		case AppLayer::COM_SINK_PHASE_1:
@@ -437,6 +717,22 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 			nextPhase = AppLayer::SYNC_PHASE_3;
 			nextPhaseStartTime = simTime() + timeComSinkPhase;
 			scheduleAt(nextPhaseStartTime, beginPhases);
+			goToSleep(simTime());
+			// Wake up node for next sync phase 3 if necessary, wake it up timeSleepToRX sec. before
+			// If we are in an active phase
+			if (activePhase) {
+				if ((activePhasesCounter == 1) && (activePhases > 1)) { // If we are in the first active phase and there are more than one consecutive phases
+					if (nodeConfig != NodeAppLayer::VIP_TRANSMIT) {
+						goToWakeUp(nextPhaseStartTime - timeSleepToRX, false);
+					}
+				} else if ((activePhases > activePhasesCounter)) { // If we are in an active phase, but not the last one
+					if (nodeConfig != NodeAppLayer::VIP_TRANSMIT) {
+						goToWakeUp(nextPhaseStartTime - timeSleepToRX, false);
+					}
+				} else { // We are in the last active phase
+					// Don't wake the node up
+				}
+			}
 			break;
 		case AppLayer::SYNC_PHASE_3:
 			phase = AppLayer::SYNC_PHASE_3;
@@ -446,37 +742,43 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 			// Configuring the normal way of working for the active phases in the mobile nodes
 			if (activePhase) {
 				if ((activePhasesCounter == 1) && (activePhases > 1)) { // If we are in the first active phase and there are more than one consecutive phases
+					EV << "Configuring the node for the Sync Phase 3 in " << activePhasesCounter << " active phase from " << activePhases << endl;
 					// Here it is no sense disabling listening like in the previous two phases, because if we disable 3 phases, it's like reducing an active phase
 					syncListen = true; // Activate to listen
 					switch(nodeConfig)
 					{
 					case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
 						syncListen = false; // Don't listen this sync phase
+						goToSleep(simTime());
 						break;
 					default:
 						EV << "Don't do anything" << endl;
 					}
 				} else if (activePhases > activePhasesCounter) { // If we are in an active phase, but not the last one
+					EV << "Configuring the node for the Sync Phase 3 in " << activePhasesCounter << " active phase from " << activePhases << endl;
 					syncListen = true; // Activate to listen
 					switch(nodeConfig)
 					{
 					case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
 						syncListen = false; // Don't listen this sync phase
+						goToSleep(simTime());
 						break;
 					default:
 						EV << "Don't do anything" << endl;
 					}
 				} else { // We are in the last active phase
+					EV << "Configuring the node for the Sync Phase 3 in " << activePhasesCounter << " active phase from " << activePhases << endl;
 					syncListen = false; // Don't listen this sync phase
-					switch(nodeConfig)
-					{
-					case NodeAppLayer::VIP_TRANSMIT: // Mobile Node type 3
-						syncListen = false; // Don't listen this sync phase
-						break;
-					default:
-						EV << "Don't do anything" << endl;
-					}
+					goToSleep(simTime());
 				}
+				if (activePhasesCounter >= activePhases) {
+					inactivePhasesCounter = 0; // Next full phase will be inactive if inactivePhases > 0
+					activePhasesCounter = 0;
+				}
+			} else {
+				EV << "Inactive phase " << inactivePhasesCounter << " from " << inactivePhases << endl;
+				syncListen = false; // Don't listen this sync phase
+				goToSleep(simTime());
 			}
 			break;
 		case AppLayer::COM_SINK_PHASE_2:
@@ -484,6 +786,26 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 			nextPhase = AppLayer::SYNC_PHASE_1;
 			nextPhaseStartTime = simTime() + timeComSinkPhase;
 			scheduleAt(nextPhaseStartTime, beginPhases);
+			goToSleep(simTime());
+			// Wake up node for next sync phase 1 if necessary, wake it up timeSleepToRX sec. before
+			// If there is an extra report in next full phase (period)
+			if ((offsetReportPhasesCounter >= offsetReportPhases) && (reportPhasesCounter == reportPhases) && (reportPhases > 0)) {
+				goToWakeUp(nextPhaseStartTime - timeSleepToRX, false);
+			}
+			// If next full phase (period) will be an active phase
+			if ((offsetPhasesCounter >= offsetPhases) && (inactivePhasesCounter	== inactivePhases) && (activePhases > 0)) {
+				if (((activePhasesCounter + 1) == 1) && (activePhases > 1)) { // If we are in the first active phase and there are more than one consecutive phases
+					if (offsetSyncPhases < 1) { // If there is no offset in sync phases for the first active phase
+						if (nodeConfig != NodeAppLayer::VIP_TRANSMIT) {
+							goToWakeUp(nextPhaseStartTime - timeSleepToRX, false);
+						}
+					}
+				} else {
+					if (nodeConfig != NodeAppLayer::VIP_TRANSMIT) {
+						goToWakeUp(nextPhaseStartTime - timeSleepToRX, false);
+					}
+				}
+			}
 			break;
 		}
 		break;
@@ -510,7 +832,7 @@ void NodeAppLayer::handleLowerMsg(cMessage *msg)
 	host = cc->findNic(pkt->getSrcAddr());
 
 	// Filter first according to the phase we are in
-	switch(InWhichPhaseAmI(fullPhaseTime, timeSyncPhase, timeReportPhase, timeVIPPhase, timeComSinkPhase))
+	switch(phase)
 	{
 	case AppLayer::SYNC_PHASE_1:
 	case AppLayer::SYNC_PHASE_2:
@@ -614,21 +936,48 @@ void NodeAppLayer::handleLowerControl(cMessage *msg)
 		if (pkt->getRetransmisionCounterBO() < maxRetransDroppedBackOff) {
 			pkt->setRetransmisionCounterBO(pkt->getRetransmisionCounterBO() + 1);
 			EV << " retransmission number " << pkt->getRetransmisionCounterBO() << " of " << maxRetransDroppedBackOff;
-			// In case the packet transmission failed, we have to check before retransmission that we are still in the transmission phase
-			switch(InWhichPhaseAmI(fullPhaseTime, timeSyncPhase, timeReportPhase, timeVIPPhase, timeComSinkPhase))
-			{
-			case AppLayer::REPORT_PHASE: // In Mobile Node case, it only transmits on the Report or VIP phases
-			case AppLayer::VIP_PHASE:
-				transfersQueue.insert(pkt->dup()); // Make a copy of the sent packet till the MAC says it's ok or to retransmit it when something fails
-				sendDown(pkt);
-				break;
-			default: // If we are in any of the other phases, we don't retransmit
-				nbPacketDroppedNoTimeApp++;
-				delete pkt;
-			}
+			transfersQueue.insert(pkt->dup()); // Make a copy of the sent packet till the MAC says it's ok or to retransmit it when something fails
+			sendDown(pkt);
 		} else { // We reached the maximum number of retransmissions
 			EV << " maximum number of retransmission reached, dropping the packet in App Layer.";
 			nbErasedPacketsBackOffMax++;
+			if (transfersQueue.isEmpty()) { // If the queue is empty, if not the node cannot sleep
+				// Sleep the node if the following conditions fulfill
+				canSleep = true; // Activate the sleep variable, we will make it false if some condition is not fulfilled
+				// Check if there is a broadcast scheduled sooner than timeSleepToRX + timeRXToSleep
+				if (sendSyncTimerWithCSMA->isScheduled()) {
+					timeToSend = sendSyncTimerWithCSMA->getArrivalTime();
+					if (timeToSend < (simTime() + timeSleepToRX + timeRXToSleep)) {
+						canSleep = false;
+					}
+				}
+				// Check if there is a report scheduled sooner than timeSleepToRX + timeRXToSleep
+				if (sendReportWithCSMA->isScheduled()) {
+					timeToSend = sendReportWithCSMA->getArrivalTime();
+					if (timeToSend < (simTime() + timeSleepToRX + timeRXToSleep)) {
+						canSleep = false;
+					}
+				}
+				// Check if there is an extra report scheduled sooner than timeSleepToRX + timeRXToSleep
+				if (sendExtraReportWithCSMA->isScheduled()) {
+					timeToSend = sendExtraReportWithCSMA->getArrivalTime();
+					if (timeToSend < (simTime() + timeSleepToRX + timeRXToSleep)) {
+						canSleep = false;
+					}
+				}
+				// Check if the begin of the sync phase 2 after VIP phase is too close to go to sleep
+				if (phase == AppLayer::VIP_PHASE) {
+					if (nextPhaseStartTime < (simTime() + timeSleepToRX + timeRXToSleep)) {
+						canSleep = false;
+					}
+				}
+				if (canSleep) { // If after all the conditions it is true, we sleep the node
+					goToSleep(simTime());
+				} else { // If we don't go to sleep is because another event is comming
+					EV << "Don't sleeping as another sending or event is coming soon" << endl;
+					energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
+				}
+			}
 			delete pkt;
 		}
 		EV << endl;
@@ -642,21 +991,48 @@ void NodeAppLayer::handleLowerControl(cMessage *msg)
 		if (pkt->getRetransmisionCounterACK() < maxRetransDroppedReportMN) {
 			pkt->setRetransmisionCounterACK(pkt->getRetransmisionCounterACK() + 1);
 			EV << " retransmission number " << pkt->getRetransmisionCounterACK() << " of " << maxRetransDroppedReportMN;
-			// In case the packet transmission failed, we have to check before retransmission that we are still in the transmission phase
-			switch(InWhichPhaseAmI(fullPhaseTime, timeSyncPhase, timeReportPhase, timeVIPPhase, timeComSinkPhase))
-			{
-			case AppLayer::REPORT_PHASE: // In Mobile Node case, it only transmits on the Report or VIP phases
-			case AppLayer::VIP_PHASE:
-				transfersQueue.insert(pkt->dup()); // Make a copy of the sent packet till the MAC says it's ok or to retransmit it when something fails
-				sendDown(pkt);
-				break;
-			default: // If we are in any of the other phases, we don't retransmit
-				nbPacketDroppedNoTimeApp++;
-				delete pkt;
-			}
+			transfersQueue.insert(pkt->dup()); // Make a copy of the sent packet till the MAC says it's ok or to retransmit it when something fails
+			sendDown(pkt);
 		} else { // We reached the maximum number of retransmissions
 			EV << " maximum number of retransmission reached, dropping the packet in App Layer.";
 			nbErasedPacketsNoACKMax++;
+			if (transfersQueue.isEmpty()) { // If the queue is empty, if not the node cannot sleep
+				// Sleep the node if the following conditions fulfill
+				canSleep = true; // Activate the sleep variable, we will make it false if some condition is not fulfilled
+				// Check if there is a broadcast scheduled sooner than timeSleepToRX + timeRXToSleep
+				if (sendSyncTimerWithCSMA->isScheduled()) {
+					timeToSend = sendSyncTimerWithCSMA->getArrivalTime();
+					if (timeToSend < (simTime() + timeSleepToRX + timeRXToSleep)) {
+						canSleep = false;
+					}
+				}
+				// Check if there is a report scheduled sooner than timeSleepToRX + timeRXToSleep
+				if (sendReportWithCSMA->isScheduled()) {
+					timeToSend = sendReportWithCSMA->getArrivalTime();
+					if (timeToSend < (simTime() + timeSleepToRX + timeRXToSleep)) {
+						canSleep = false;
+					}
+				}
+				// Check if there is an extra report scheduled sooner than timeSleepToRX + timeRXToSleep
+				if (sendExtraReportWithCSMA->isScheduled()) {
+					timeToSend = sendExtraReportWithCSMA->getArrivalTime();
+					if (timeToSend < (simTime() + timeSleepToRX + timeRXToSleep)) {
+						canSleep = false;
+					}
+				}
+				// Check if the begin of the sync phase 2 after VIP phase is too close to go to sleep
+				if (phase == AppLayer::VIP_PHASE) {
+					if (nextPhaseStartTime < (simTime() + timeSleepToRX + timeRXToSleep)) {
+						canSleep = false;
+					}
+				}
+				if (canSleep) { // If after all the conditions it is true, we sleep the node
+					goToSleep(simTime());
+				} else { // If we don't go to sleep is because another event is comming
+					EV << "Don't sleeping as another sending or event is coming soon" << endl;
+					energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
+				}
+			}
 			delete pkt;
 		}
 		EV << endl;
@@ -674,6 +1050,43 @@ void NodeAppLayer::handleLowerControl(cMessage *msg)
 		pkt = check_and_cast<ApplPkt*>((cMessage *)transfersQueue.pop());
 		EV << "The Broadcast packet was successfully transmitted into the air" << endl;
 		nbBroadcastPacketsSent++;
+		if (transfersQueue.isEmpty()) { // If the queue is empty, if not the node cannot sleep
+			// Sleep the node if the following conditions fulfill
+			canSleep = true; // Activate the sleep variable, we will make it false if some condition is not fulfilled
+			// Check if there is a broadcast scheduled sooner than timeSleepToRX + timeRXToSleep
+			if (sendSyncTimerWithCSMA->isScheduled()) {
+				timeToSend = sendSyncTimerWithCSMA->getArrivalTime();
+				if (timeToSend < (simTime() + timeSleepToRX + timeRXToSleep)) {
+					canSleep = false;
+				}
+			}
+			// Check if there is a report scheduled sooner than timeSleepToRX + timeRXToSleep
+			if (sendReportWithCSMA->isScheduled()) {
+				timeToSend = sendReportWithCSMA->getArrivalTime();
+				if (timeToSend < (simTime() + timeSleepToRX + timeRXToSleep)) {
+					canSleep = false;
+				}
+			}
+			// Check if there is an extra report scheduled sooner than timeSleepToRX + timeRXToSleep
+			if (sendExtraReportWithCSMA->isScheduled()) {
+				timeToSend = sendExtraReportWithCSMA->getArrivalTime();
+				if (timeToSend < (simTime() + timeSleepToRX + timeRXToSleep)) {
+					canSleep = false;
+				}
+			}
+			// Check if the begin of the sync phase 2 after VIP phase is too close to go to sleep
+			if (phase == AppLayer::VIP_PHASE) {
+				if (nextPhaseStartTime < (simTime() + timeSleepToRX + timeRXToSleep)) {
+					canSleep = false;
+				}
+			}
+			if (canSleep) { // If after all the conditions it is true, we sleep the node
+				goToSleep(simTime());
+			} else { // If we don't go to sleep is because another event is comming
+				EV << "Don't sleeping as another sending or event is coming soon" << endl;
+				energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
+			}
+		}
 		delete pkt;
 		break;
 	case BaseMacLayer::TX_OVER:
@@ -686,8 +1099,46 @@ void NodeAppLayer::handleLowerControl(cMessage *msg)
 			waitForAnchor = pkt->getDestAddr(); // Assign the variable the MAC addr of the destination AN, to detect when a packet comes from this and cancel the timing
 			scheduleAt(simTime() + waitForRequestTime, waitForRequest);
 			EV << "The Packet was a Request, so it starts Waiting for Request Timer (" << waitForRequestTime << "s), to wait for Request answer from AN addr " << pkt->getDestAddr() << endl;
+		} else { // We try to sleep the node only if this report is not a request
+			if (transfersQueue.isEmpty()) { // If the queue is empty, if not the node cannot sleep
+				// Sleep the node if the following conditions fulfill
+				canSleep = true; // Activate the sleep variable, we will make it false if some condition is not fulfilled
+				// Check if there is a broadcast scheduled sooner than timeSleepToRX + timeRXToSleep
+				if (sendSyncTimerWithCSMA->isScheduled()) {
+					timeToSend = sendSyncTimerWithCSMA->getArrivalTime();
+					if (timeToSend < (simTime() + timeSleepToRX + timeRXToSleep)) {
+						canSleep = false;
+					}
+				}
+				if (canSleep) { // If after all the conditions it is true, we sleep the node
+					goToSleep(simTime());
+				} else { // If we don't go to sleep is because another event is comming
+					EV << "Don't sleeping as another sending or event is coming soon" << endl;
+					energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
+				}
+			}
 		}
 		delete pkt;
+		break;
+	case BaseMacLayer::ACK_SENT:
+		// When the mobile node receives a Report from the Selected Anchor, it answers with an ACK and in that moment we sleep the node if the conditions are satisfied
+		if (transfersQueue.isEmpty()) { // If the queue is empty, if not the node cannot sleep
+			// Sleep the node if the following conditions fulfill
+			canSleep = true; // Activate the sleep variable, we will make it false if some condition is not fulfilled
+			// Check if there is a broadcast scheduled sooner than timeSleepToRX + timeRXToSleep
+			if (sendSyncTimerWithCSMA->isScheduled()) {
+				timeToSend = sendSyncTimerWithCSMA->getArrivalTime();
+				if (timeToSend < (simTime() + timeSleepToRX + timeRXToSleep)) {
+					canSleep = false;
+				}
+			}
+			if (canSleep) { // If after all the conditions it is true, we sleep the node
+				goToSleep(simTime());
+			} else { // If we don't go to sleep is because another event is comming
+				EV << "Don't sleeping as another sending or event is coming soon" << endl;
+				energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
+			}
+		}
 		break;
 	}
 	delete msg;
@@ -768,20 +1219,12 @@ void NodeAppLayer::sendReport()
 			EV << "Dentro2" << endl;		}
 
 		EV << "Send Report to Anchor with Netw Addr " << pkt->getDestAddr() << ", with end destination Netw Addr " << pkt->getRealDestAddr() << endl;
+		transfersQueue.insert(pkt->dup()); // Make a copy of the sent packet till the MAC says it's ok or to retransmit it when something fails
+		sendDown(pkt);
 
-		// Before we transmit the Report, we have to check if we are still in Report phase
-		switch(InWhichPhaseAmI(fullPhaseTime, timeSyncPhase, timeReportPhase, timeVIPPhase, timeComSinkPhase))
-		{
-		case AppLayer::REPORT_PHASE: // Any Report from any Mobile Node type, will be transmitted in Report Phase
-			transfersQueue.insert(pkt->dup()); // Make a copy of the sent packet till the MAC says it's ok or to retransmit it when something fails
-			sendDown(pkt);
-			break;
-		default: // If we are in any of the other phases, we don't transmit the report
-			nbPacketDroppedNoTimeApp++;
-			delete pkt;
-		}
-    } else { // We didn't have any RSSI value or old selected Anchor
+	} else { // We didn't have any RSSI value or old selected Anchor
     	EV << "Report not sent as there was no RSSI values to obtain the selected Anchor" << endl;
+    	delete pkt;
     }
 }
 
@@ -869,22 +1312,81 @@ void NodeAppLayer::createRandomBroadcastTimes(simtime_t maxTime)
 	orderVectorMinToMax(randomTransTimes, numberOfBroadcasts);
 }
 
-void NodeAppLayer::orderVectorMinToMax(simtime_t* randomTransTimes, int numberOfBroadcasts)
+void NodeAppLayer::orderVectorMinToMax(simtime_t* times, int counter)
 {
-	int i,j;
-
-	for (i = 0; i < numberOfBroadcasts; i++)
+	for (int i = 0; i < counter; i++)
 	{
-		for (j = 0; j < i; j++)
+		for (int j = 0; j < i; j++)
 		{
-			if (randomTransTimes[i] < randomTransTimes[j])
+			if (times[i] < times[j])
 			{
-				simtime_t temp = randomTransTimes[i];
-				randomTransTimes[i] = randomTransTimes[j];
-				randomTransTimes[j] = temp;
+				simtime_t temp = times[i];
+				times[i] = times[j];
+				times[j] = temp;
 			}
 		}
 	}
-	for (i = 0; i < numberOfBroadcasts; i++)
-		EV << "Broadcast random time " << i + 1 << " : " << randomTransTimes[i] << endl;
+}
+
+void NodeAppLayer::orderVectorMinToMax(simtime_t* times, bool* transmitting, int counter)
+{
+	for (int i = 0; i < counter; i++)
+	{
+		for (int j = 0; j < i; j++)
+		{
+			if (times[i] < times[j])
+			{
+				simtime_t temp = times[i];
+				bool temp2 = transmitting[i];
+				times[i] = times[j];
+				transmitting[i] = transmitting[j];
+				times[j] = temp;
+				transmitting[j] = temp2;
+			}
+		}
+	}
+}
+
+void NodeAppLayer::goToSleep(simtime_t time)
+{
+	if (!findElement(listSleepTimes, time, sleepTimesCounter)) {
+		// Schedule the node to sleep
+		listSleepTimes[sleepTimesCounter] = time;
+		sleepTimesCounter++;
+		orderVectorMinToMax(listSleepTimes, sleepTimesCounter);
+		if (sleep->isScheduled()) { // If the event is already scheduled, cancel it to reschedule the one that occurs sooner
+			cancelEvent(sleep);
+		}
+		scheduleAt(listSleepTimes[0], sleep);
+	}
+}
+
+void NodeAppLayer::goToWakeUp(simtime_t time, bool transmitting)
+{
+	if (time >= simTime()) { // Not to schedule events in the past
+		if (!findElement(listWakeUpTimes, time, wakeUpTimesCounter)) {
+			EV << "Wake up in " << time << " s"<< endl;
+			// Schedule the node to wake up
+			listWakeUpTimes[wakeUpTimesCounter] = time;
+			wakeUpTransmitting[wakeUpTimesCounter] = transmitting;
+			wakeUpTimesCounter++;
+			orderVectorMinToMax(listWakeUpTimes, wakeUpTransmitting, wakeUpTimesCounter);
+			if (wakeUp->isScheduled()) { // If the event is already scheduled, cancel it to reschedule the one that occurs sooner
+				cancelEvent(wakeUp);
+			}
+			scheduleAt(listWakeUpTimes[0], wakeUp);
+		}
+	} else if (phy->getRadioState() == Radio::SLEEP) { // If we are still sleeping and should have woken up before present, means we shouldn't be sleeping
+		error ("The node was sleeping when it should have wait awake");
+	}
+}
+
+bool NodeAppLayer::findElement(simtime_t* times, simtime_t time, int counter)
+{
+	bool found = false;
+	for (int i = 0; i < counter; i++) {
+		if (times[i] == time)
+			found = true;
+	}
+	return found;
 }

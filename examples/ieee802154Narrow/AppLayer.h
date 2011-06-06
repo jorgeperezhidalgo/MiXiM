@@ -31,7 +31,9 @@ public:
 		CALCULATE_POSITION,				// Event to simulate the processing time of the Mobile Node type 2 when it calculates its position
 		CHECK_QUEUE,					// Event to check the transmission queues from Anchors (Com Sink 1) and Computer (Com Sink 2)
 		WAITING_REQUEST,				// Event to simulate the waiting time since we send the request till we receive the answer from the Anchor
-		BEGIN_PHASE						// Event to be executed at the beginning of every phase
+		BEGIN_PHASE,					// Event to be executed at the beginning of every phase
+		WAKE_UP,						// Event to wake up the node timeSleepToRX before activity
+		SLEEP							// Event to sleep the node
 	};
 
 	enum PhaseType{						// Phases of the Full Phase or Period
@@ -113,19 +115,6 @@ public:
 	virtual void initialize(int stage);
 	virtual int numInitStages() const {return 5;}
 
-protected:
-
-	/* Function to return in which sub-phase from the full phase we are:
-			1 -> 1st SyncPhase
-			2 -> Report Phase
-			3 -> VIP Phase
-			4 -> 2nd SyncPhase
-			5 -> 1st ComSink
-			6 -> 3rd SyncPhase
-			7 -> 2nd ComSink
-	   In a future this value must be taken when it synchronizes with the AN
-	   The values go in seconds */
-	PhaseType InWhichPhaseAmI(simtime_t fullPhaseTime, simtime_t timeSyncPhase, simtime_t timeReportPhase, simtime_t timeVIPPhase, simtime_t timeComSinkPhase);
 };
 
 #endif

@@ -177,7 +177,7 @@ void AnchorAppLayer::handleSelfMsg(cMessage *msg)
 					} else {
 						EV << "Queue full, discarding packet" << endl;
 						nbPacketDroppedAppQueueFull++;
-						delete msg;
+						delete pkt;
 					}
 				}
 			}
@@ -264,7 +264,7 @@ void AnchorAppLayer::handleLowerMsg(cMessage *msg)
 	host = cc->findNic(pkt->getSrcAddr());
 
 	// Filter first according to the phase we are in
-	switch(InWhichPhaseAmI(fullPhaseTime, timeSyncPhase, timeReportPhase, timeVIPPhase, timeComSinkPhase))
+	switch(phase)
 	{
 	case AppLayer::SYNC_PHASE_1:
 	case AppLayer::SYNC_PHASE_2:
@@ -473,19 +473,8 @@ void AnchorAppLayer::handleLowerControl(cMessage *msg)
 		if (pkt->getRetransmisionCounterBO() < maxRetransDroppedBackOff) {
 			pkt->setRetransmisionCounterBO(pkt->getRetransmisionCounterBO() + 1);
 			EV << " retransmission number " << pkt->getRetransmisionCounterBO() << " of " << maxRetransDroppedBackOff;
-			// In case the packet transmission failed, we have to check before retransmission that we are still in the transmission phase
-			switch(InWhichPhaseAmI(fullPhaseTime, timeSyncPhase, timeReportPhase, timeVIPPhase, timeComSinkPhase))
-			{
-			case AppLayer::SYNC_PHASE_1: // In Broadcast case in an Anchor, any of the 3 Sync Phases
-			case AppLayer::SYNC_PHASE_2:
-			case AppLayer::SYNC_PHASE_3:
-				transfersQueue.insert(pkt->dup()); // Make a copy of the sent packet till the MAC says it's ok or to retransmit it when something fails
-				sendDown(pkt);
-				break;
-			default: // If we are in any of the other phases, we don't retransmit
-				nbPacketDroppedNoTimeApp++;
-				delete pkt;
-			}
+			transfersQueue.insert(pkt->dup()); // Make a copy of the sent packet till the MAC says it's ok or to retransmit it when something fails
+			sendDown(pkt);
 		} else { // We reached the maximum number of retransmissions
 			EV << " maximum number of retransmission reached, dropping the packet in App Layer.";
 			nbErasedPacketsBackOffMax++;
@@ -502,19 +491,8 @@ void AnchorAppLayer::handleLowerControl(cMessage *msg)
 		if (pkt->getRetransmisionCounterACK() < maxRetransDroppedReportAN) {
 			pkt->setRetransmisionCounterACK(pkt->getRetransmisionCounterACK() + 1);
 			EV << " retransmission number " << pkt->getRetransmisionCounterACK() << " of " << maxRetransDroppedReportAN;
-			// In case the packet transmission failed, we have to check before retransmission that we are still in the transmission phase
-			switch(InWhichPhaseAmI(fullPhaseTime, timeSyncPhase, timeReportPhase, timeVIPPhase, timeComSinkPhase))
-			{
-			case AppLayer::SYNC_PHASE_1: // In Broadcast case in an Anchor, any of the 3 Sync Phases
-			case AppLayer::SYNC_PHASE_2:
-			case AppLayer::SYNC_PHASE_3:
-				transfersQueue.insert(pkt->dup()); // Make a copy of the sent packet till the MAC says it's ok or to retransmit it when something fails
-				sendDown(pkt);
-				break;
-			default: // If we are in any of the other phases, we don't retransmit
-				nbPacketDroppedNoTimeApp++;
-				delete pkt;
-				}
+			transfersQueue.insert(pkt->dup()); // Make a copy of the sent packet till the MAC says it's ok or to retransmit it when something fails
+			sendDown(pkt);
 		} else { // We reached the maximum number of retransmissions
 			EV << " maximum number of retransmission reached, dropping the packet in App Layer.";
 			nbErasedPacketsNoACKMax++;
@@ -543,6 +521,9 @@ void AnchorAppLayer::handleLowerControl(cMessage *msg)
 		EV << "Message correctly transmitted, received the ACK." << endl;
 		nbReportsWithACK++;
 		delete pkt;
+		break;
+	case BaseMacLayer::ACK_SENT:
+		EV << "ACK correctly sent" << endl;
 		break;
 	}
 	delete msg;

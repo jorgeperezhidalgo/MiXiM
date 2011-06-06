@@ -126,6 +126,13 @@ void csma::initialize(int stage) {
             opp_error("TranmitterPower can't be bigger than pMax in ConnectionManager! "
             		  "Please adjust your omnetpp.ini file accordingly.");
 
+    	// Assign the type of host to 3 (computer)
+		node = cc->findNic(getParentModule()->getId());
+
+		if (node->moduleType == 2) { // Only for Mobile Nodes
+	    	energy = static_cast<EnergyConsumption*>(getParentModule()->getParentModule()->getSubmodule("energy"));
+		}
+
 		EV << "queueLength = " << queueLength
 		<< " bitrate = " << bitrate
 		<< " backoff method = " << par("backoffMethod").stringValue() << endl;
@@ -239,6 +246,9 @@ void csma::updateStatusIdle(t_mac_event event, cMessage *msg) {
 				startTimer(TIMER_BACKOFF);
 				if (backoffTimer->isScheduled()) {
 					updateMacState(BACKOFF_2);
+					if (node->moduleType == 2) { // Only for Mobile Nodes
+						energy->updateStateStatus(true, macState, Radio::RX);
+					}
 					macQueue.push_back(static_cast<MacPkt *> (msg));
 				} else {
 					manageQueue();
@@ -252,10 +262,13 @@ void csma::updateStatusIdle(t_mac_event event, cMessage *msg) {
 				NB = macMaxCSMABackoffs; // if csma deactivated we drop the packet directly
 				scheduleAt(simTime() + sifs, backoffTimer);
 				updateMacState(BACKOFF_2);
+				if (node->moduleType == 2) {
+					energy->updateStateStatus(true, macState, Radio::RX);
+				}
 				macQueue.push_back(static_cast<MacPkt *> (msg));
-				// -------------------------------------------------------------------------------------------------------------
-				// - Here we could have also the same security as just above but we just use this type in Sync Slotted Packets -
-				// -------------------------------------------------------------------------------------------------------------
+				// -----------------------------------------------------------------------------------------------------------------------------------------------------
+				// - Here we could have also the same security to see if we have time before end phase as just above but we just use this type in Sync Slotted Packets -
+				// -----------------------------------------------------------------------------------------------------------------------------------------------------
 			}
 		} else {
 			// queue is full, message has to be deleted
@@ -275,6 +288,9 @@ void csma::updateStatusIdle(t_mac_event event, cMessage *msg) {
 		if(useMACAcks) {
 			phy->setRadioState(Radio::TX);
 			updateMacState(WAITSIFS_6);
+			if (node->moduleType == 2) { // Only for Mobile Nodes
+				energy->updateStateStatus(true, macState, Radio::TX);
+			}
 			startTimer(TIMER_SIFS);
 		}
 		break;
@@ -287,6 +303,9 @@ void csma::updateStatusIdle(t_mac_event event, cMessage *msg) {
 		if(useMACAcks) {
 			phy->setRadioState(Radio::TX);
 			updateMacState(WAITSIFS_6);
+			if (node->moduleType == 2) { // Only for Mobile Nodes
+				energy->updateStateStatus(true, macState, Radio::TX);
+			}
 			startTimer(TIMER_SIFS);
 		}
 		break;
@@ -310,6 +329,9 @@ void csma::updateStatusBackoff(t_mac_event event, cMessage *msg) {
 		updateMacState(CCA_3);
 		EV<< "Radio Status: " << phy->getRadioState()<<endl;
 		phy->setRadioState(Radio::RX);
+		if (node->moduleType == 2) { // Only for Mobile Nodes
+			energy->updateStateStatus(true, macState, Radio::RX);
+		}
 		break;
 	case EV_DUPLICATE_RECEIVED:
 		// suspend current transmission attempt,
@@ -322,6 +344,9 @@ void csma::updateStatusBackoff(t_mac_event event, cMessage *msg) {
 			cancelEvent(backoffTimer);
 			phy->setRadioState(Radio::TX);
 			updateMacState(WAITSIFS_6);
+			if (node->moduleType == 2) { // Only for Mobile Nodes
+				energy->updateStateStatus(true, macState, Radio::TX);
+			}
 			startTimer(TIMER_SIFS);
 		} else {
 			EV << "Nothing to do.";
@@ -342,6 +367,9 @@ void csma::updateStatusBackoff(t_mac_event event, cMessage *msg) {
 
 			phy->setRadioState(Radio::TX);
 			updateMacState(WAITSIFS_6);
+			if (node->moduleType == 2) { // Only for Mobile Nodes
+				energy->updateStateStatus(true, macState, Radio::TX);
+			}
 			startTimer(TIMER_SIFS);
 		} else {
 			EV << "sending frame up and resuming normal operation.";
@@ -379,8 +407,12 @@ void csma::updateStatusCCA(t_mac_event event, cMessage *msg) {
 			EV << "(3) FSM State CCA_3, EV_TIMER_CCA, [Channel Idle]: -> TRANSMITFRAME_4." << endl;
 			updateMacState(TRANSMITFRAME_4);
 			phy->setRadioState(Radio::TX);
+			if (node->moduleType == 2) { // Only for Mobile Nodes
+//				scheduleAt(simTime() + aTurnaroundTime, energyAfterCCA);
+				energy->updateStateStatus(true, macState, Radio::TX);
+			}
 			MacPkt * mac = check_and_cast<MacPkt *>(macQueue.front()->dup());
-			attachSignal(mac, simTime()+aTurnaroundTime);
+			attachSignal(mac, simTime() + aTurnaroundTime);
 			//sendDown(msg);
 			// give time for the radio to be in Tx state before transmitting
 			sendDelayed(mac, aTurnaroundTime, lowerGateOut);
@@ -411,6 +443,9 @@ void csma::updateStatusCCA(t_mac_event event, cMessage *msg) {
 				startTimer(TIMER_BACKOFF);
 				if (backoffTimer->isScheduled()) {
 					updateMacState(BACKOFF_2);
+					if (node->moduleType == 2) { // Only for Mobile Nodes
+						energy->updateStateStatus(true, macState, Radio::RX);
+					}
 				} else {
 					cMessage *mac = macQueue.front();
 					macQueue.pop_front();
@@ -434,6 +469,9 @@ void csma::updateStatusCCA(t_mac_event event, cMessage *msg) {
 
 			phy->setRadioState(Radio::TX);
 			updateMacState(WAITSIFS_6);
+			if (node->moduleType == 2) { // Only for Mobile Nodes
+				energy->updateStateStatus(true, macState, Radio::TX);
+			}
 			startTimer(TIMER_SIFS);
 		} else {
 			EV << " Nothing to do." << endl;
@@ -453,6 +491,9 @@ void csma::updateStatusCCA(t_mac_event event, cMessage *msg) {
 			cancelEvent(ccaTimer);
 			phy->setRadioState(Radio::TX);
 			updateMacState(WAITSIFS_6);
+			if (node->moduleType == 2) { // Only for Mobile Nodes
+				energy->updateStateStatus(true, macState, Radio::TX);
+			}
 			startTimer(TIMER_SIFS);
 		} else {
 			EV << " Nothing to do." << endl;
@@ -475,7 +516,6 @@ void csma::updateStatusTransmitFrame(t_mac_event event, cMessage *msg) {
 	if (event == EV_FRAME_TRANSMITTED) {
 		//    delete msg;
 		MacPkt * packet = macQueue.front();
-		phy->setRadioState(Radio::RX);
 
 		bool expectAck = useMACAcks;
 		if (packet->getDestAddr() != L2BROADCAST) {
@@ -492,10 +532,17 @@ void csma::updateStatusTransmitFrame(t_mac_event event, cMessage *msg) {
 		if(expectAck) {
 			EV << "RadioSetupRx -> WAITACK." << endl;
 			updateMacState(WAITACK_5);
+			phy->setRadioState(Radio::RX);
+			if (node->moduleType == 2) { // Only for Mobile Nodes
+				energy->updateStateStatus(false, macState, Radio::RX);
+			}
 			startTimer(TIMER_RX_ACK);
 		} else {
 			EV << ": RadioSetupRx, manageQueue..." << endl;
 			macQueue.pop_front();
+			if (node->moduleType != 2) { // The mobile node changes this state in the App Layer after ControlDown ACK
+				phy->setRadioState(Radio::RX);
+			}
 			packet->setName("SYNC SENT");
 			packet->setKind(SYNC_SENT);
 			sendControlUp(packet);
@@ -571,6 +618,9 @@ void csma::updateStatusSIFS(t_mac_event event, cMessage *msg) {
 		EV<< "(17) FSM State WAITSIFS_6, EV_TIMER_SIFS:"
 		<< " sendAck -> TRANSMITACK." << endl;
 		updateMacState(TRANSMITACK_7);
+		if (node->moduleType == 2) { // Only for Mobile Nodes
+			energy->updateStateStatus(true, macState, Radio::TX);
+		}
 		attachSignal(ackMessage, simTime());
 		sendDown(ackMessage);
 		nbTxAcks++;
@@ -585,6 +635,9 @@ void csma::updateStatusSIFS(t_mac_event event, cMessage *msg) {
 		startTimer(TIMER_BACKOFF);
 		if (backoffTimer->isScheduled()) {
 			updateMacState(BACKOFF_2);
+			if (node->moduleType == 2) { // Only for Mobile Nodes
+				energy->updateStateStatus(true, macState, Radio::RX);
+			}
 		} else {
 			cMessage *mac = macQueue.front();
 			macQueue.pop_front();
@@ -610,9 +663,13 @@ void csma::updateStatusTransmitAck(t_mac_event event, cMessage *msg) {
 	if (event == EV_FRAME_TRANSMITTED) {
 		EV<< "(19) FSM State TRANSMITACK_7, EV_FRAME_TRANSMITTED:"
 		<< " ->manageQueue." << endl;
-		phy->setRadioState(Radio::RX);
+		if (node->moduleType != 2) { // The mobile node changes this state in the App Layer after ControlDown ACK
+			phy->setRadioState(Radio::RX);
+		}
 		//		delete msg;
 		manageQueue();
+		// Notify the App layer that we already sent and ACK to confirm the received report
+		sendControlUp(new cMessage("ACK SENT", ACK_SENT));
 	} else {
 		fsmError(event, msg);
 	}
@@ -695,6 +752,9 @@ void csma::manageQueue() {
 		}
 		if (backoffTimer->isScheduled()) {
 			updateMacState(BACKOFF_2);
+			if (node->moduleType == 2) { // Only for Mobile Nodes
+				energy->updateStateStatus(true, macState, Radio::RX);
+			}
 		} else {
 			cMessage *mac = macQueue.front();
 			macQueue.pop_front();
@@ -724,7 +784,7 @@ void csma::fsmError(t_mac_event event, cMessage *msg) {
 void csma::startTimer(t_mac_timer timer) {
 	if (timer == TIMER_BACKOFF) {
 		simtime_t temp = scheduleBackoff();
-		if ((temp.dbl() + timeFromBackOffToTX.dbl()) < nextPhaseStartTime.dbl()) {
+		if ((temp + timeFromBackOffToTX) < nextPhaseStartTime) {
 			scheduleAt(temp, backoffTimer);
 		}
 	} else if (timer == TIMER_CCA) {
@@ -746,9 +806,9 @@ void csma::startTimer(t_mac_timer timer) {
 	}
 }
 
-double csma::scheduleBackoff() {
+simtime_t csma::scheduleBackoff() {
 
-	double backoffTime;
+	simtime_t backoffTime;
 
 	switch(backoffMethod) {
 	case EXPONENTIAL:
@@ -756,25 +816,25 @@ double csma::scheduleBackoff() {
 		int BE = std::min(macMinBE + NB, macMaxBE);
 		double d = std::pow((double) 2, (int) BE);
 		int v = (int) d - 1;
-		int r = intuniform(1, v, 0);
-		backoffTime = r * aUnitBackoffPeriod.dbl();
+		int r = intuniform(0, v, 0);
+		backoffTime = r * aUnitBackoffPeriod;
 
 		EV<< "(startTimer) backoffTimer value=" << backoffTime
 		<< " (BE=" << BE << ", 2^BE-1= " << v << "r="
-		<< r << ")" << endl;
+		<< r << ")" << " + SIFS (" << sifs << ") = " << backoffTime + sifs << endl;
 		break;
 	}
 	case LINEAR:
 	{
 		int slots = intuniform(1, initialCW + NB, 0);
-		backoffTime = slots * aUnitBackoffPeriod.dbl();
+		backoffTime = slots * aUnitBackoffPeriod;
 		EV<< "(startTimer) backoffTimer value=" << backoffTime << endl;
 		break;
 	}
 	case CONSTANT:
 	{
 		int slots = intuniform(1, initialCW, 0);
-		backoffTime = slots * aUnitBackoffPeriod.dbl();
+		backoffTime = slots * aUnitBackoffPeriod;
 		EV<< "(startTimer) backoffTimer value=" << backoffTime << endl;
 		break;
 	}
@@ -783,9 +843,10 @@ double csma::scheduleBackoff() {
 	}
 
 	nbBackoffs = nbBackoffs + 1;
-	backoffValues = backoffValues + backoffTime;
+	backoffValues = backoffValues + backoffTime.dbl();
 
-	return backoffTime + simTime().dbl();
+	// We add here sifs as offset because when BackOff is 0 we need to leave this time, so we increase this time for all backoffs as a state change
+	return backoffTime + simTime() + sifs;
 }
 
 /*
@@ -954,7 +1015,7 @@ void csma::handleLowerControl(cMessage *msg) {
 	} else if (msg->getKind() == BaseDecider::PACKET_DROPPED) {
 		EV<< "control message: PACKED DROPPED" << endl;
 	} else if (msg->getKind() == MacToPhyInterface::RADIO_SWITCHING_OVER) {
-		EV<< "control message: RADIO_SWITCHING_OVER" << endl;
+		EV<< "control message: RADIO_SWITCHING_OVER to: " << phy->getRadioState() << endl;
 	} else {
 		EV << "Invalid control message type (type=NOTHING) : name="
 		<< msg->getName() << " modulesrc="

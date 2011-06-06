@@ -64,6 +64,8 @@ public:
 		PACKET_DROPPED_BACKOFF,
 		// If the queue is full
 		QUEUE_FULL,
+		// When the ACK was sent
+		ACK_SENT,
 	};
 protected:
 

@@ -37,6 +37,7 @@
 #include <DroppedPacket.h>
 #include <MacPkt_m.h>
 
+#include <EnergyConsumption.h>
 
 
 /**
@@ -56,7 +57,6 @@
 class  csma : public BaseMacLayer
 {
   public:
-
 
 	~csma();
 
@@ -116,7 +116,9 @@ class  csma : public BaseMacLayer
         TRANSMITFRAME_4,
         WAITACK_5,
         WAITSIFS_6,
-        TRANSMITACK_7
+        TRANSMITACK_7,
+		// Just to count the number of states
+		NUM_MAC_STATES
 
     };
 
@@ -151,7 +153,8 @@ class  csma : public BaseMacLayer
       EV_TIMER_SIFS,                       // 17
       EV_BROADCAST_RECEIVED, 		   // 23, 24
       EV_TIMER_CCA,
-      EV_BEGIN_PHASE
+      EV_BEGIN_PHASE,
+      EV_ENERGY_AFTER_CCA
     };
 
     /** @brief Types for frames sent by the CSMA.*/
@@ -288,6 +291,7 @@ class  csma : public BaseMacLayer
 	double phase2VIPPercentage;			// Percentage of the time Phase Report + Phase VIP that the Phase VIP takes
 
 	NicEntry* computer;					// Pointer to the NIC of the computer to take general data over the configurations
+	NicEntry* node;						// Pointer to the NIC of this node
 
 	enum PhaseType{						// Phases of the Full Phase or Period
 		SYNC_PHASE_1 = 1,
@@ -299,10 +303,12 @@ class  csma : public BaseMacLayer
 		COM_SINK_PHASE_2
 	};
 
-	PhaseType nextPhase;					// To know in which phase are we
+	PhaseType nextPhase;				// To know in which phase are we
 	cMessage * beginPhases;				// Event to drop all the elements in the queue at the beginning from every phase
 
 	BaseConnectionManager* cc;			// Pointer to the Propagation Model module
+
+	EnergyConsumption* energy;			// Pointer to the Energy module
 
 protected:
 	// FSM functions
@@ -323,7 +329,7 @@ protected:
 	void manageMissingAck(t_mac_event event, cMessage *msg);
 	void startTimer(t_mac_timer timer);
 
-	virtual double scheduleBackoff();
+	virtual simtime_t scheduleBackoff();
 
 	virtual cPacket *decapsMsg(MacPkt * macPkt);
 	MacPkt * ackMessage;

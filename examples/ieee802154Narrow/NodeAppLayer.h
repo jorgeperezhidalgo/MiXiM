@@ -3,6 +3,8 @@
 
 #include "AppLayer.h"
 
+#include <EnergyConsumption.h>
+
 class NodeAppLayer : public AppLayer
 {
 public:
@@ -63,21 +65,40 @@ protected:
 	simtime_t endProcessingTime;		// End of this time, used to schedule an event to indicate that we already can send packets
 	simtime_t waitForRequestTime;		// Maximum time we wait till we get the answer from AN to our request
 
+	simtime_t timeSleepToRX;			// Time needed in transceiver to go from Sleep state to Receive state
+	simtime_t timeRXToSleep;			// Time needed in transceiver to go from Receive state to Sleep state
+	simtime_t timeToSend;				// Temporal time to use in schedule and wakeUp
+	bool canSleep;						// When there are several conditions to sleep, we can use this variable
+
 	bool centralized; 					// In Type 1, who calculates the position? True = Computer, False = AN Selected
 
 	RSSIs* listRSSI;					// Vector where we save all the RSSI values read from the sync packets in sync phase
 	int indiceRSSI;						// Used to get the index of the AN or computer where we get the RSSI from to use it as index for the previous vector (computer = numberOfAnchors)
+
+	simtime_t* listSleepTimes;			// List with all the next sleep moments
+	int sleepTimesCounter;				// Counter to know how many times do we still have
+
+	simtime_t* listWakeUpTimes;			// List with all the next wake up moments
+	int wakeUpTimesCounter;				// Counter to know how many times do we still have
+	bool* wakeUpTransmitting;			// List to control if listWakeUpTimes wake up is to transmit or to receive
 
 	cMessage *sendReportWithCSMA;		// Send Report message
 	cMessage *sendExtraReportWithCSMA;	// Send Extra report message
 	cMessage *sendSyncTimerWithCSMA;	// Broadcast messages for Type 3 and 4
 	cMessage *calculatePosition;		// Calculate Node Position
 	cMessage *waitForRequest;			// Waiting for Request Answer
+	cMessage *wakeUp;					// To wake up the transceiver some time before transmission
+	cMessage *sleep;					// To sleep the transceiver
 
 	//BORRAR CUANDO ESTÉ TODO PROBADO
 	cMessage *PUTEAR;
 
 	NicEntry* node;						// Pointer to the NIC of this anchor to access some NIC variables
+
+	/** @brief Handler to the physical layer.*/
+	MacToPhyInterface* phy;
+
+	EnergyConsumption* energy;			// Pointer to the Energy module
 
 public:
 	virtual ~NodeAppLayer();
@@ -123,7 +144,13 @@ protected:
 
 	// Operations to create and order our random transmission times vector for the broadcasts in type 3 and 4
 	void createRandomBroadcastTimes(simtime_t maxTime);
-	void orderVectorMinToMax(simtime_t* randomTransTimes, int numberOfBroadcasts);
+	void orderVectorMinToMax(simtime_t* times, int counter);
+	void orderVectorMinToMax(simtime_t* times, bool* transmitting, int counter);
+	bool findElement(simtime_t* times, simtime_t time, int counter);
+
+	// Functions to sleep and wake up the node, just not to repeat code all the time
+	void goToSleep(simtime_t time);
+	void goToWakeUp(simtime_t time, bool transmitting);
 };
 
 #endif

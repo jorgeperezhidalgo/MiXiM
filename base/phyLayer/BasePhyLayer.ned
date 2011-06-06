@@ -29,7 +29,7 @@ simple BasePhyLayer
 
         double timeSleepToRX = default(0) @unit(s);
         double timeSleepToTX = default(0) @unit(s);
-
+        
         int initialRadioState = default(0); //state the radio is initially in
         
         double radioMinAtt = default(1.0); //radios gain factor (attenuation) while receiving

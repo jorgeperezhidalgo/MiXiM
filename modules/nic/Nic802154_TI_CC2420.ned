@@ -63,12 +63,13 @@ module Nic802154_TI_CC2420 like INic
                 headerLength = 48 bit; // ieee 802.15.4                
                 thermalNoise = -110 dBm;
                 // From TI CC1100 datasheet rev. C
-                timeSleepToRX = 0.001792 s;
-                timeSleepToTX = 0.001792 s;
-                timeRXToTX = 0.000192 s;
-                timeTXToRX = 0.000192 s;
-                timeRXToSleep = 0.001792 s;
-                timeTXToSleep = 0.001792 s;
+                timeSleepToRX 	= 0.00188 s;
+                timeSleepToTX 	= 0.00208 s;
+                timeRXToTX 		= 0.000192 s;
+                timeRXToSleep 	= 0.00094 s;
+                timeTXToRX 		= 0.000192 s;
+                timeTXToSleep 	= 0.00094 s;
+                
                 // power consumption from boards
 //                sleepPower = 0.0000000693 W; // 0.021 microA * 3.3 V
 //                rxPower = 0.06204 W;   // 18.8 mA * 3.3 V

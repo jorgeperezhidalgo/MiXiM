@@ -37,8 +37,8 @@ void NodeNetLayer::handleLowerMsg(cMessage* msg)
 	EV << "Tipo: " << pkt->getKind() << endl;
 	EV << "Nombre: " << pkt->getName() << endl;
 	EV << "CSMA: " << pkt->getCSMA() << endl;
-	EV << "Ask Report?" << pkt->getAskForRequest() << endl;
-	EV << "Request Packet?" << pkt->getRequestPacket() << endl;
+	EV << "Ask Report: " << pkt->getAskForRequest() << endl;
+	EV << "Request Packet: " << pkt->getRequestPacket() << endl;
     sendUp(pkt);
 }
 

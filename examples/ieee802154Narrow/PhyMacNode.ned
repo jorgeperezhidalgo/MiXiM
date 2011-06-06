@@ -5,6 +5,7 @@ import org.mixim.modules.mobility.LinearMobility;
 import org.mixim.base.modules.BaseUtility;
 import org.mixim.base.modules.BaseArp;
 import org.mixim.base.modules.BaseMobility;
+import org.mixim.modules.energy.EnergyConsumption;
 import org.mixim.modules.power.battery.SimpleBattery;
 import org.mixim.modules.power.battery.BatteryStats;
 
@@ -20,6 +21,9 @@ module PhyMacNode
         input radioIn;
 
     submodules:
+        energy: EnergyConsumption {
+            @display("p=294,81;i=block/plug");
+        }
         batteryStats: BatteryStats {
             @display("p=239,206;i=block/circle");
         }
