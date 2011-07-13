@@ -34,6 +34,8 @@ tests*
 !*.mat
 !*.fig
 !.gitignore
+!*.tex
+!*.eps
 
 examples/ieee802154Narrow/NetworkStackTrafficGen.cc
 examples/ieee802154Narrow/NetworkStackTrafficGen.h
@@ -41,4 +43,4 @@ examples/ieee802154Narrow/NetworkStackTrafficGen.ned
 examples/ieee802154Narrow/PhyMacHost.ned
 examples/ieee802154Narrow/ieee802154Narrow
 examples/ieee802154Narrow/core
-
+doc*

@@ -1,0 +1,122 @@
+\chapter{DESARROLLO HARDWARE}
+El desarrollo del hardware ha pasado por varias etapas. Debido a la complejidad del sistema final algunas de ellas han sido desarrollos previos. Estos desarrollos consisten en placas de desarrollo y evaluación propiamente dichas.\par
+En este capítulo podemos encontrar dos secciones. La sección \ref{sec:hard1} se refiere a los sistemas de desarrollo implementados. En la sección \ref{sec:hard2} veremos el diseño y desarrollo de la aplicación final.\\
+\section{\bfseries DESARROLLOS PREVIOS}\label{sec:hard1}
+Los desarrollos previos han sido de gran utilidad para probar componentes, fijar las directivas de diseño, y testear las distintas etapas del desarrollo de la aplicación final.\\
+\subsection[PLACA DE COMUNICACIONES CON PIC16F876]{PLACA DE COMUNICACIONES CON\\ PIC16F876}\label{subsec:16F}
+\dosfig{fotos/placadesa.eps}{fotos/placadesa.eps}{Placa de comunicaciones con PIC16F876}{16F876}
+El primer desarrollo que se llevó a cabo fue una placa de prueba de comunicaciones por puerto serie e interfaz humana. Los requisitos para esta placa son:\par
+   --Alimentación a 5 VDC
+\\ --Puerto de control para LCD --Liquid Crystal Display-- de 2 líneas y 16 ca\-rac\-teres por línea.
+\\ --Puerto de control para teclado hexadecimal matricial 4x4.
+\\ --Puerto de comunicación RS232.
+\\ --Puerto de comunicación UART --Universal Asynchronous Receiver Transmi\-tter--
+\\ --Puerto de conexión para el ICD2.
+\par
+El objetivo de este diseño es probar los principales componentes de comunicacion. También se ha utilizado para testear posteriores desarrollos. Podemos ver el diagrama de conexiones y la placa construida en la figura \ref{16F876}\par
+\nota{esquema de cajas agenda}
+El dispositivo LCD nos permite la comunicación con el usuario mediante texto, es decir, lo usaremos como dispositivo de interfaz humana. El LCD se encargará de mostrar los mensajes correspondientes a los estados del proceso. El control de la pantalla LCD se realiza mediante tres líneas de control y un bus de ocho bits de comunicación. Se ha optado por esta comunicación debido a la necesidad de disminuir el tiempo invertido en cada evento, por lo que el uso de cuatro bits  ralentizaría el sistema. La codificación de los caracteres alfanuméricos y de puntuación es ASCII --American Standard Code for Information Interchange--. No obstante se pueden agregar nuevos caracteres.\par
+El teclado hexadecimal matricial se utilizará como entrada de datos por parte del usuario. Un dispositivo para poder seleccionar el modo de funcionamiento y moverse por los menus es estrictamente necesario en un autómata. Se ha elegido un teclado hexadecimal para poder ingresar números en base decimal de forma cómoda, de manera que la configuración de coordenadas por teclado se simplifica para el usuario.\par
+Para controlar el teclado matricial se utiliza un codificador de 16 teclas para teclados matriciales. Gracias a este circuito integrado evitamos tener que estar sondeando las 16 teclas con el microcontrolador, en lugar de ello, leemos el bus de salida de 4 bits del codificador cuando se activa el bit de tecla pulsada, de modo que optimizamos el tiempo necesario para atender a los eventos de teclado, como ya hemos mencionado antes el tiempo es un factor importante. El tiempo mínimo para aceptar una pulsación y el tiempo de reposo entre una pulsación y otra es configurable mediante la conexión de dos condensadores externos formando dos redes RC de temporización,una para cada tiempo.\par
+El módulo RS232 es el encargado de convertir las señales de niveles TTL\\ --Transistor-Transistor Logic-- 5V  del módulo UART del microcontrolador para que cumplan las especificaciones RS232-C. De este modo se puede conectar cualquier dispositivo periférico que disponga de puerto serie RS232, más conocido como puerto COM. Para realizar esta tarea utilizamos un MAX232. Es un circuito integrado que se encarga de ajustar los niveles de voltaje y negar el valor lógico de la señal, convirtiendo la linea de transmisión, en ambos sentidos, de TTL a RS232.\par
+El módulo de comunicación UART forma parte de la arquitectura del microcontrolador y se maneja desde los registros internos del mismo. Mediante este módulo podemos comunicarnos directamente con el puerto DUART --Dual UART-- del módulo GPS.\par
+A traves del ICD 2 se controla la placa, de forma que toda la información de estado del microcontrolador es descargada al ordenador cada vez que se realiza una pausa en la ejecución o se produce un reset. Gracias a esto hemos podido realizar el diseño de software en un tiempo razonable.\par
+El PIC16F876 es un microcontrolador de la marca Microchip Technology Inc. Las caracteristicas del microcontrolador más relevantes para ese diseño son la memoria FLASH de programa, el módulo AUSART --Addressable Universal Synchronous Asynchronous Receiver Transmitter-- y los 22 pines I/O que se ajustan perfectamente a las necesidades de la placa.\\
+\subsection{PLACA DE ALIMENTACIÓN Y CONTROL DE MOTORES}
+\dosfig{fotos/placabat1.eps}{fotos/placabat1.eps}{Placa de alimentación y control de motores}{motbat1}
+Con este desarrollo se ha probado el sistema de alimentación y la gestion de motores. Los requisitos a cumplir por este desarrollo son:\par
+   --Alimentación a 12 VDC.
+\\ --Salida de alimentación regulada de 5 VDC.
+\\ --Salida de alimentación regulada de 9 VDC.
+\\ --Puerto de conexion para motores.
+\\ --Puerto de entrada de control de motores.
+\par
+El objetivo de este diseño es obtener, a partir de la alimentación de la batería de 12 VDC, la tensión de alimentación para la circuitería, los motores y los sensores. Además de controlar mediante señales de 5 VDC la activación y dirección de los motores.\par
+La alimentación regulada de 5 VDC se obtiene mediante un regulador de voltaje LM7805 que proporciona 5 voltios estables con alimentación de entrada de hasta 24 voltios.\par
+La alimentación regulada de 9 VDC se obtiene, a su vez, mediante un regulador de voltaje LM7809 que realiza la misma tarea que el LM7805 pero con salida estable de 9 voltios.\par
+Los motores van conectados a un L293B. Este circuito integrado es un driver de cuatro canales controlado por logica TTL. Nos permite alimentar los motores con 12 VDC mediante señales de control TTL 5 VDC. Dichas señales son las que tendremos disponibles en el bus de control de motores.\par
+El diagrama de conexiones correspondiente, así como el montaje realizado se puede ver en la figura \ref{motbat1}.\\
+
+\section{\bfseries DESARROLLOS FINALES}\label{sec:hard2}
+Los desarrollos de hardware finales están intimamente relacionados con el desarrollo software y el funcionamiento de la aplicación completa. En esta sección describiremos únicamente la estructura hardware de cada una de las placas de circuito impreso que componen la electrónica del robot, así como la estructura y montaje del cuerpo del \bott .\\
+\subsection{PLACA DE BATERÍAS Y MOTORES FINAL}
+\dosfig{fotos/placabat2.eps}{fotos/placabat2.eps}{Placa de alimentación y control de motores}{batmot2}
+En la figura \ref{batmot2}\ podemos apreciar las variaciones introducidas. Dados los resultados obtenidos con la placa de pruebas de baterías y motores se ha optado por separar la alimentación de los motores de la del sistema de control ante la alta sensibilidad de éste frente a las caídas de tensión producidas por el cambio de estado de los motores de DC --Direct Current--.\\ El aislamiento se ha llevado a cabo mediante relés que resulta la opción más segura. De todas formas se ha mantenido abierta la opción de conectar los motores y la circuitería a la misma batería teniendo que cambiar unicamente los selectores de la placa.\par
+En cuanto a la alimentación del sistema de control se utiliza también un LM7805 para obtener la alimentación de 5 VDC. La señal de alimentación de 9 VDC no es requerida para el sistema desarrollado pero se ha implementado previendo futuras ampliaciones que lo necesiten.\par
+El sistema de control de motores se ha implementado mediante un L293B al igual que en la placa de pruebas. La mejora introducida en la placa final es básicamente la posibilidad de aislamiento de motores mediante relés y el LED --Light Emiting Diode-- de indicación de encendido.\\
+\subsection{PLACA DE EXPANSIÓN PARA EL GPS}
+
+El módulo GPS LASSEN LP funciona a 3.3 VDC y sus puertos de comunicaciones son de 3.3 VDC por lo que es necesario adaptar dichas señales para trabajar en conjunto con el microcontrolador que funciona a 5 VDC. También es necesario mantener un voltaje de backup para conseguir arranques más rapidos, debido a que mantiene los datos de la memoria volatil del GPS. Los objetivos que debe cumplir este desarrollo son:\par
+\dosfig{fotos/placaGPS.eps}{fotos/placaGPS.eps}{Placa de expansión para el GPS}{expgps}
+\par
+   --Alimentación a 5 VDC.
+\\ --Alimentación de 3.3 VDC a partir de 5 VDC para el GPS.
+\\ --Conversores de nivel 5 a 3.3 VDC para las entradas del GPS.
+\\ --Conversores de nivel 3.3 a 5 VDC para las salidas del GPS.
+\\ --Puerto de comunicaciones TTL 5 VDC.
+\\ --Puerto de comunicaciones RS232.
+\par
+En la figura \ref{expgps} vemos el diagrama y resultado final de la placa de expansión para el GPS.\par
+Para diseñar la placa se ha seguido la configuración de conexionado de los puertos que aparece en las especificaciones técnicas de la placa de ampliación que distribuye Trimble para sus módulos GPS. De este modo la placa realizada es compatible con los programas distribuidos por Trimble para el manejo del GPS mediante el ordenador. Los niveles del puerto RS232 se obtienen con un MAX232.\par
+Para los conversores de nivel se ha utilizado un doble inversor mediante transistores. La utilización de transistores nos permite trabajar con una tasa de transmisión de datos elevada sin que la información se vea afectada por el conversor de nivel. El transistor utilizado es el C547B de Philips.\par
+La obtención de 3.3 VDC a partir de 5 VDC se lleva a cabo mediante un regulador LM317. También se puede alimentar el GPS a traves del puerto de conexión de la placa en el que encontramos la línea de 3.3 VDC. La utilización de la línea de voltaje de 3.3 VDC obtenidos mediante el LM317 de la placa para alimentar otros circuitos no es aconsejable debido a la sensibilidad del GPS a variaciones de la alimentación.\\
+\subsection[PLACA DE CONTROL DEL \emph{BOT} CON PIC18F6520]{PLACA DE CONTROL DEL \emph{BOT} CON \\PIC18F6520}
+\dosfig{fotos/placacontrol.eps}{fotos/placacontrol.eps}{Placa de control del \bott\ con PIC18F6520}{18F6520}
+\par
+El desarrollo hardware principal del guía robótico es la placa de control implementada con el microcontrolador PIC 18F6520, cuyo diagraqma y montaje observamos e la figura \ref{18F6520}. Los requisitos que debe cumplir este desarrollo son especialmente importantes porque son los que van a determinar las capacidades, tanto implementadas como futuras ampliaciones, que posea el \bott. Son los siguientes:\par
+   --Alimentación a 5 VDC y 12 VDC.
+\\ --Zócalo especialmente diseñado para el PIC 18F6520.
+\\ --2 Puertos de comunicaciones RS232.
+\\ --Puerto de conexión para la placa de baterías y motores.
+\\ --Puerto de conexión para la placa de expansión del GPS.
+\\ --Radioenlace de datos.
+\\ --Puertos de conexión para el sistema sensorial de contacto.
+\\ --Puertos de conexion para el sistema sensorial por ultrasonidos.
+\\ --Generador de señal de reloj a 40MHz.
+\\ --Puerto de conexión para ICD 2.
+\\ --Puerto de control para LCD de 2 líneas y 16 caracteres por línea.
+\\ --Puerto de control para teclado hexadecimal matricial 4x4.
+\\ --Puerto de expansión con posibilidad de utilizar bus I2C.
+\\ --LED's de control de estado.
+\par
+La principal directiva de diseño de la placa de control ha sido utilizar al máximo la potencia de trabajo del microcontrolador, dejando abierto el ma\-yor abanico de posibilidades. Otra directiva de diseño ha sido garantizar la capacidad de expansión, el desarrollo implementado permite la conexión de otros desarrollos mediante bus I2C, o bien conectar la placa de control a un PC portatil por puerto serie, todo ello sin necesidad de modificar el hardware actual.\par
+El microcontrolador viene en formato SMD --Surface Mount Device-- para mayor integración. Sin embargo, en el desarrollo realizado se utiliza un zócalo especialmente diseñado para pinchar el microcontrolador, de modo que se puede sustituir sin necesidad de soldador. A su vez ha sido necesario diseñar una pequeña placa que separe los pines de forma que se adapte a la forma del zócalo, a la cual va soldado el PIC. Esta opción nos permitirá cambiar de microcontrolador, si fuera necesario para aumentar la potencia de proceso, modificando simplemente el diseño de la placa adaptadora. El detalle del zócalo se puede ver en la figura \ref{zocalo}.\nota{foto del zocalo}\par
+\unafig{fotos/zocalo.eps}{Montaje del microcontrolador.}{zocalo}\par
+El sistema de interfaz humana está formado por la patalla LCD y el teclado matricial. El modelo de pantalla utilizado es WM-C1602M. El teclado es una matriz 4x4 controlada con un codificador de teclado MM74C922. En conjunto permiten interactuar al usuario con el robot.\nota{foto de teclado y pantalla}\par
+Los puertos RS232 van conectados a los módulos USART del microcontrolador mediante un único chip MAX232. Conforman el punto de expansión más interesante debido a que el puerto serie es un sistema de comunicación muy utilizado. Brinda la posibilidad de conectar un PC portatil o un PC embebido. También podemos encontrar sensores de alta precisión que se controlan mediante conexión RS232. A su vez, se puede conectar receptores GPS que también disponen de dicho sistema de comunicación.\par
+El sistema sensorial de contacto consiste en un grupo de bumpers distribuidos alrededor del \bott , gracias al cual evitamos empujar obstáculos que se escapen al sistema sensorial por ultrasonidos. El sistema soporta hasta ocho bumpers con señalización positiva. Esto último se debe a que utilizamos una suma lógica para comprobar la presencia de eventos en todos los bumpers a la vez.\par
+El sistema sensorial por ultrasonidos está compuesto por dos módulos sensores de movimiento que activan un relé cuando detectan algún móvil. Requieren alimentación a 12 VDC y tienen un radio de alcance nominal de 2 a 2,5 metros, que hemos modificado para mejorar las características de detección de obstáculos.\par
+El bus de conexión con la placa de baterías y motores proporciona la alimentación tanto de 12 VDC como de 5 VDC. A traves del mismo bus se envian las señales de control del sistema motriz. Éste está formado por una batería independiente y cuatro motores de DC que llevan integrada una caja de engranajes 1:148 de acero. A cada motor va conectada diréctamente una rueda de escala 1/8 para coches radiocontrolados.\par
+El bus de conexión con la placa de expansión del GPS nos permite controlar dicho dispositivo así como leer tramas de información de posición, estado del receptor, hora y fecha, satélites a la vista, etc. También disponemos de señales especiales como 1PPS que podemos utilizar para contar tiempo en segundos o bien sincronizar el sistema con el tiempo UTM. A traves de este bus se proporciona alimentación a la placa del GPS.\par
+El puerto de conexión para el ICD 2 ha sido fundamental para desarrollar el proyecto en un tiempo factible. Se ha utilizado tanto para probar el software como para detectar posibles errores en el harware. Una vez finalizada la fase de desarrollo permite también reprogramar el robot sin necesidad de desmontar el sistema.\par
+El radioenlace de datos se ha implementado mediante módulos CEBEK C-0503 emisor y C-0504 receptor. Se trata de un emisor SAW a 433 MHz 2mW que se complementa con el receptor de datos también a 433 MHz que reconstruye la señal digital recibida. Con este radioenlace se puede implementar protocolos de comunicaciones de canal común para interactuar entre dispositivos móviles.\par
+El puerto de expansión de la placa de control está compuesto por señales de alimentación a 5 VDC, señal de reloj de 40 MHz que se obtiene de un generador de reloj HOC-10AN 40.000MHZ que también se utiliza como señal de reloj para el microcontrolador, dos líneas de interrupción por cambio de nivel que controlan a su vez los LED's de estado, y las líneas del bus I2C. A traves de este puerto se puede añadir todo tipo de dispositivos electronicos para ampliar las capacidades del robot.\\
+
+\subsection{PLACA DE CONTROL REMOTO}
+\dosfig{fotos/telecontrol.eps}{fotos/telecontrol.eps}{Placa de control remoto}{control:fig}
+El desarrollo de la placa de control remoto se ha llevado a cabo solo a ni\-vel hardware. Este dispositivo permite controlar el robot de forma remota a través del radioenlace. El control se puede realizar uilizando la pantalla y teclado del control remoto o bien conectando el radioenlace al puerto COM del control remoto y este a un PC. Los requisitos para este desarrollo son:\par
+   --Alimentación a 5 VDC
+\\ --Puerto de control para LCD de 2 líneas y 16 ca\-rac\-teres por línea.
+\\ --Puerto de control para teclado hexadecimal matricial 4x4.
+\\ --Puerto de comunicación RS232 a radioenlace.
+\\ --Radioenlace de datos.
+\\ --Puerto de conexión para el ICD2.
+\par
+\unafig{fotos/radienlace.eps}{Modulos de transmisión de datos por radio.}{radio:fig}
+En un principio se ha diseñado para controlar un único robot, pero gracias al radioenlace, figura \ref{radio:fig},y programando un protocolo de canal común se podría utilizar para intercomunicar una central con varios robots. Además, como permite conectar el puerto serie del PC con el radioenlace, se puede telecontrolar el robot desde el ordenador. El esquema correspondiente se puede ver en la figura \ref{control:fig}.\\
+
+\subsection{ESTRUCTURA Y MONTAJE DEL CUERPO DEL ROBOT}\label{estructura}
+Como se puede observar en la figura \ref{tripas:fig}, la base de la estructura del robot es una plancha de aluminio de 3 mm de espesor. A esta plancha van unidos los frontales mediante bisagras, de este modo se pueden abatir para dejar accesible el interior del robot. Los motores también van sujetos a la plancha inferior, de tal forma que las ruedas sobresalen por los laterales del robot. las planchas laterales van fijas a la base con ángulos metálicos. Para sujetar la parte superior del robot, donde quedan alojados tanto teclado como pantalla, también se utiliza ángulos metálicos.\par
+\unafig{fotos/tripasperfil.eps}{Interior del robot completamente accesible.}{tripas:fig}
+\unafig{fotos/ultrasonidos.eps}{Ubicación de los modulos de ultrasonidos.}{bandeja:fig}
+El sistema sensorial por ultrasonidos está alojado en una bandeja interna en la parte alta del interior, de forma que asoman por el frontal delantero, figura \ref{bandeja:fig}. En el frontal trasero está alojada la circuitería que queda colocada en vertical con los puertos RS232 accesibles por la parte superior del robot. Uno de los bumpers controla la apertura o cierre del frontal trasero para evitar accidentes. No es necesario controlar el frontal delantero ya que el sistema de cierre no permite abatirlo sin abrir previamente el frontal trasero, figura \ref{cierre:fig}.\par
+
+\dosfig{fotos/cierre.eps}{fotos/robot.eps}{Sistema de cierre del robot.}{cierre:fig}
+\unafig{fotos/antenaGPS.eps}{Montaje de la antena del GPS.}{antena:fig}
+
+\par
+En cuanto a las baterías, estas van alojadas en el interior del robot, en el centro de la base. Dicha disposición mejora la estabilidad del robot ya que baja el centro de gravedad del mismo. La antena del GPS está situada en la parte superior del robot en una plancha de hierro galvanizado a la que se fija mediante soporte magnético, figura \ref{antena:fig}. Todo el cableado de motores y baterías va conectado a una regleta fijada al lateral izquierdo del \bott\ para evitar tener que desconectar y conectar de la circuitería dicho cableado, figura \ref{regleta:fig}. El cable de la batería principal pasa por un interruptor que también podemos encontrar en la parte superior, al desconectarlo desactivamos la alimentación de la circuitería de modo que el robot no se puede mover ya que los motores van activados por relés que se alimentan de la batería principal. El sistema sensorial de contacto va situado en la parte baja de los frontales, figura \ref{bumpers:fig}. El diseño de la estructura del robot tiene como objetivo la estabilidad, sencilliez y robustez. Es una herramienta para probar los diseños electrónicos y de software realizados, en ningún momento pretende ser un diseño definitivo.\par
+\unafig{fotos/regleta.eps}{Regleta de conexión de baterías y motores.}{regleta:fig}
+\unafig{fotos/bumpers.eps}{Ubicación de los sensores de contacto.}{bumpers:fig}
+\par
+Con esta explicación del montaje del robot concluye el capítulo de desarrollo hardware y damos paso al capítulo de desarrollo software.\\

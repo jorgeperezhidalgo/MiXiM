@@ -1,0 +1,181 @@
+\chapter{DESARROLLO SOFTWARE}
+El desarrollo de software se ha llevado a cabo al mismo tiempo que el de\-sa\-rro\-llo de hardware. Los primeros algoritmos implementados fueron los corres\-pondientes a la interfaz humana. Que se llevaron a cabo una vez terminada la placa de comunicaciones con pic 16F876.
+\section[\bfseries PRINCIPAL]{\bfseries ALGORITMO PRINCIPAL}
+El algoritmo principal es el encargado de inicializar el robot. Permite probar los algoritmos de enrutamiento sin necesidad de conocer las coordenadas exactas de la zona de pruebas ya que almacena como destino la primera trama de posición que recibe después de completar la inicialización. Una vez almacenado el destino se procede a colocar el robot en el punto de salida, del cual tampoco necesitamos saber la posición UTM. Al realizar la pulsación de arranque del algoritmo el robot entra en modo automático y busca el destino esquivando y corrigiendo la trayectoria cada vez que detecte obstáculos.\\
+
+\begin{algoritmo}{Función principal.} \label{alg:MAIN}\par
+{\bf Etapa 0.} Inicialización y configuración de los distintos módulos del microcontrolador.\\
+{\bf Etapa 1.} Comprobación correcta colocación componentes móviles.\\
+{\bf Etapa 2.} Retardo de seguridad.\\
+{\bf Etapa 3.} Captura trama de posición. Almacenamiento de posición como destino.\\
+{\bf Etapa 4.} Espera evento para comenzar a buscar destino.\\
+{\bf Etapa 5.} Enrutamiento mediante algoritmo \ref{alg:SOLU}\footnote{Algoritmo \ref{alg:SOLU} página \pageref{alg:SOLU}.}.\\
+{\bf Etapa 6.} Parada del robot y bloqueo del flujo de ejecución.
+\end{algoritmo}
+
+\section[\bfseries CONTROL DE LA INTERFAZ HUMANA]{\bfseries ALGORITMOS DE CONTROL DE LA INTERFAZ HUMANA}
+Los algoritmos de control de la interfaz humana son los encargados de controlar la pantalla LCD y el teclado. Para comprender los algoritmos hay que tener en cuenta que los eventos de teclado producen una interrupción por hardware que lanza el código de gestión de interrupciones, por lo que en ningún momento desde los algoritmos principales se llama al gestor de teclado. El algoritmo de teclado queda así:\par \par
+\begin{algoritmo}{Algoritmo de control del teclado} \label{alg:keyb}\par
+{\bf Etapa 0.} Captura de un evento de teclado.\\
+{\bf Etapa 1.} Discriminación de tecla pulsada.\\
+{\bf Etapa 2.} Almacenamiento tecla pulsada y activación testigo evento de teclado.\\
+\end{algoritmo}
+
+La pantalla LCD se controla mediante tres señales de control y un bus de datos de ocho bits. El algoritmo de control de la pantalla LCD que así:\par
+
+\begin{algoritmo}{Algoritmo de control de la pantala LCD} \label{alg:LCD}\par
+{\bf Etapa 0.} Inicializar punteros de caracter y línea.\\
+{\bf Etapa 1.} Si final de línea se coloca el puntero del LCD al principio de la segunda línea.\\
+{\bf Etapa 2.} Esperamos LCD desocupado.\\
+{\bf Etapa 3.} Cargar siguiente caracter en el bus del LCD. Activar la señal E de habilitación.\\
+{\bf Etapa 5.} Comprobación fin de mensaje. Si no finalizado volver a etapa 1.
+\end{algoritmo}
+Además la pantalla LCD requiere una secuencia de inicialización que se ejecuta cada vez que se resetea el robot. El algoritmo de inicialización es el encargado de configurar la comunicación con bus de ocho bits.\\
+
+\section[\bfseries ALGORITMOS PARA COMA FLOTANTE]{\bfseries ALGORITMOS MATEMÁTICOS\\PARA COMA FLOTANTE}
+Para manejar las coordenadas suministradas por el módulo GPS es necesario realizar operaciones matemáticas en coma flotante. Usualmente se utiliza la programación en C para este propósito, en detrimento de la velocidad y el tamaño del código. Para optimizar el funcionamiento se ha implementado una completa librería matemática en código ensamblador para coma flotante. Las funciones que puede realizar la librería son suma, resta y multiplicación todas ellas con signo, y módulo de la diferencia. Además de estas operaciones matemáticas también realiza funciones especificas para el guiado mediante coordenadas UTM.\\
+
+\subsection{SUMA DE FLOAT CON SIGNO}
+\nota{bibliografia hennesy paterson}
+La necesidad de representación de números grandes viene dada por el sistema de referencia UTM. Las coordenadas Norte--Este alcanzan facilmente miles de metros. Además los datos que transmite el GPS tienen formato de coma flotante IEEE~754 de 32 bits.\nota{bibliograf de coma flotante y re\-pre\-sen\-ta\-ción numérica}
+
+\begin{algoritmo}{Suma con signo} \label{alg:SUMA}\par
+	{\bf Etapa 0.} Comprobación de signos. Si son iguales se hace suma de módulos. Si son distintos se hace diferencia de 	módulos.\\
+	{\bf Etapa 1.} Ajuste el número menor para que los exponentes coincidan.\\
+	{\bf Etapa 2.} Se realiza la operación correspondiente.\\
+	{\bf Etapa 3.} Si acarreo se reajusta el exponente del resultado.\\
+	\phantom{\bf Etapa 3.} Si overflow resultado normalizado infinito.\\
+	\phantom{\bf Etapa 3.} Si underflow resultado normalizado cero.\\
+	{\bf Etapa 4.} Se calcula el signo del resultado.\\
+	{\bf Etapa 5.} Se empaqueta el resultado en formato IEEE~754\\
+	\end{algoritmo}
+
+\subsection{RESTA DE FLOAT CON SIGNO}
+En este caso el algoritmo sencillamente cambia el signo del sustraendo y se aplica el algoritmo \ref{alg:SUMA}\footnote{Algoritmo \ref{alg:SUMA} página \pageref{alg:SUMA}.} para obtener el resultado.
+
+\subsection{MULTIPLICACIÓN DE FLOAT CON SIGNO}
+La multiplicación de números reales es necesaria para calcular la dirección a seguir durante el recorrido de búsqueda. Además nos permite utilizar distintas escalas y hacer cambio de unidades.
+
+\begin{algoritmo}{Multiplicación de float con signo} \label{alg:MULT}\par
+	{\bf Etapa 0.} Se comprueba que ambos factores sean distintos de cero. Si alguno es cero el resultado es cero.\\
+	{\bf Etapa 1.} Se suman los exponentes.\\
+	{\bf Etapa 2.} Si desbordamiento, resultado infinito o cero según co\-rres\-pon\-da.\\
+	{\bf Etapa 3.} Se realiza la multiplicación de las mantisas.\\
+	{\bf Etapa 4.} Se normaliza la mantisa resultado. Si hay desbordamiento se normaliza el resultado a cero o infinito.\\
+	{\bf Etapa 5.} Se calcula el signo del resultado.\\
+	{\bf Etapa 6.} Se empaqueta el resultado en formato IEEE~754.\\
+\end{algoritmo}
+
+\subsection{MÓDULO DE LA DIFERENCIA}
+El cálculo del módulo de la diferencia se utiliza para evaluar la cercanía del destino y tomar como válido un punto cualquiera de una caja de tamaño prefijado centrada en el destino. Esta función se utiliza en el algoritmo \ref{alg:SOLU}\footnote{Algoritmo \ref{alg:SOLU} página \pageref{alg:SOLU}.}.\par
+
+\begin{algoritmo}{Módulo de la diferencia} \label{alg:DIF}\par
+	{\bf Etapa 0.} Se igualan los exponentes desplazando la mantisa de menor peso.\\
+	{\bf Etapa 1.} Se calcula la diferencia entre mantisas.\\
+	{\bf Etapa 2.} Si underflow resultado cero.\\
+	{\bf Etapa 3.} Se empaqueta el resultado en formato IEEE~754.\\
+\end{algoritmo}
+
+\subsection{CAMBIO DE COORDENADAS \\CARTESIANAS A POLARES}
+Esta es la función más importante de la librería matemática para el funcionamiento del robot. Es la encargada de convertir las coordenadas UTM en coordenadas polares que nos permitirán, después, calcular el desfase entre la dirección actual del robot y la dirección óptima para alcanzar el destino.\par
+El algoritmo implementado es un algoritmo CORDIC --COrdinate Rotation DIgital Computer--. Se trata de algoritmos iterativos capaces de calcular funciones trigonométricas, logarítmicas, módulo y fase de vectores con cualquier precisión. Son utilizados generalmente en FPGA's --Field Programmable Gate Array-- para funciones DSP --Digital Signal Processor--. Matemáticamente se basa en la rotación de vectores con unos desfases determinados que permiten simplificar el cálculo a sumas y restas y multiplicaciones por potencias de dos.\par
+Para la librería en ensamblador solo se ha implementado el algoritmo de cambio de base cartesiana a polar. El algoritmo inicial tiene convergencia en $\left[-90º,90º\right]$ por lo que es necesaria una iteración inicial de $90º$ de desfase. Las variables utilizadas son: \par
+
+\centerline{\llap{\textsc{$X \left( n \right) \Rightarrow$}} \rlap{$~Coordenada~Este~UTM$}}
+\centerline{\llap{\textsc{$Y \left( n \right) \Rightarrow$}} \rlap{$~Coordenada~Norte~UTM$}}
+\centerline{\llap{\textsc{$Z \left( n \right) \Rightarrow$}} \rlap{$~Inicialmente~tiene~valor~cero$}}
+\centerline{\llap{\textsc{$A \left( n \right) \Rightarrow$}} \rlap{$~Arcotangente~de~2^{-n}$}}
+
+\begin{algoritmo}{CART2POL} \label{alg:C2P}\par
+	{\bf Etapa 0.} Iteración inicial de desfase $\pi/2$:\\
+	$	 X \left( n+1 \right) = ~~sign\left( Y \left( n \right) \right)\cdot Y \left( n \right)$\\
+	$	 Y \left( n+1 \right) = -sign\left( Y \left( n \right) \right)\cdot X \left( n \right)$\\
+	$  Z \left( n+1 \right) = ~~sign\left( Y \left( n \right) \right)\cdot \pi/2$\\
+	{\bf Etapa 1.} Iteración general. Se itera 24 veces para obtener 23 bits de precisión:\\
+	$	 X \left( n+1 \right) = X\left( n \right) + sign\left( Y \left( n \right) \right)\cdot 2^{-n}\cdot Y \left( n \right)$\\
+	$	 Y \left( n+1 \right) = Y\left( n \right) - sign\left( Y \left( n \right) \right)\cdot 2^{-n}\cdot X \left( n \right)$\\
+	$  Z \left( n+1 \right) = Z\left( n \right) + sign\left( Y \left( n \right) \right)\cdot 2^{-n}\cdot A\left( n \right)$\\
+	$  A \left( n \right) = \arctan \left( 2^{-n} \right)$\\
+	{\bf Etapa 2.} Ajuste del módulo.\\
+	$  X_{final} = X \cdot \prod^{n}_{1}\left(\cos\left(n\right)\right)$
+	\nota{cite de apuntes y web de cordic}
+\end{algoritmo}
+
+Una vez finalizados los cálculos los resultados quedan almacenados de la siguiente forma:\\
+\centerline{\llap{\textsc{$X \left( n \right) \Rightarrow$}} \rlap{$~M\acute{o}dulo~del~vector~inicial$}}\\
+\centerline{\llap{\textsc{$Y \left( n \right) \Rightarrow$}} \rlap{$~Valor~pr\acute{o}ximo~a~cero$}}\\
+\centerline{\llap{\textsc{$Z \left( n \right) \Rightarrow$}} \rlap{$~Argumento~del~vector~inicial$}}\\
+
+\subsection{CONVERSIÓN DE RADIANES A GRADOS}
+El argumento obtenido mediante el algoritmo \ref{alg:C2P}\footnote{Algoritmo \ref{alg:C2P} página \pageref{alg:C2P}.} se mide en radianes y tiene formato IEEE~754. Para poder calcular de forma sencilla la desviación necesaria para encarar el punto destino es conveniente trabajar con un número entero binario. Esta función convierte el argumento del vector a grados enteros. La precisión de $\pm 1º$ es suficiente para la aplicación.
+
+\begin{algoritmo}{RAD2DEG}\label{alg:R2D}\\
+	{\bf Etapa 0.} Carga la constante $180/\pi$.\\
+	{\bf Etapa 1.} $Z_{grados} = Z_{radianes} \cdot 180/\pi$\\
+	{\bf Etapa 2.} $Z_{final} = int\left(Z_{grados}\right)$\\
+\end{algoritmo}
+
+\subsection{UTILIDADES MATEMÁTICAS} \label{alg:UTIL}
+Para facilitar la programación también se ha incluido en la librería ma\-te\-má\-ti\-ca algunas funciones de uso frecuente.\par
+{\bf  RES2OP1}\\
+Copia el resultado de la operación binaria anterior en el operando 1. Reproduce la función Ans(1) de las calculadoras programables.\par
+{\bf CARGA DE OPERANDOS}\\
+Desempaqueta los números en formato IEEE~754 a formato de signo, mantisa y exponente. Es de gran utilidad para trabajar con las distintas partes del número en coma flotante por separado. Se ejecuta al inicio de cada una de las operaciones matemáticas.\par
+{\bf  EMPAQUETAR RESULTADO}\\
+Empaqueta los valores de signo, mantisa y exponente en formato IEEE~754. Esta función se ejecuta despues de cada una de las operaciones programadas en la librería.\par
+{\bf  DESPLAZAMIENTO}\\
+Multiplica un número en coma flotante por una potencia entera de 2. Se utiliza para el algoritmo CORDIC.\par
+
+\section{\bfseries ALGORITMOS DE TIEMPO} \label{alg:TEMP}
+Los algoritmos de temporización se utilizan para controlar la inicialización del robot, para los retardos de seguridad y para controlar los movimientos de giro. Hay dos algoritmos de retardo,uno ajustable a milisegundos, y otro ajustable a segundos. Ambos funcionan de manera similar. Configuran el módulo de temporización Timer0 del microcontrolador para producir el retardo mínimo del algoritmo y se repite la operación tantas veces como se indique. De este modo podemos obtener temporizaciones del número de segundos y milisegundos que deseemos.
+
+\section[\bfseries SISTEMA SENSORIAL]{\bfseries ALGORITMOS DE CONTROL DEL \\SISTEMA SENSORIAL}
+El sistema sensorial, al igual que el teclado, es controlado por eventos de interrupción que lanzan la rutina correspondiente de inmediato, in\-te\-rrum\-pien\-do el flujo normal del programa. Cuando se detecta algún obstáculo se detiene el robot, se activan los testigos de obstáculo correspondientes y se devuelve el control al flujo principal de programa. El algoritmo encargado de interpretar los testigos de obstáculo y actuar en consecuencia es el algoritmo de enrutamiento y evasión de obstáculos.
+
+\section[\bfseries ALGORITMO DE COMUNICACIÓN SERIE]{\bfseries ALGORITMO DE COMUNICACIÓN \\SERIE}
+El algoritmo de comunicación serie para el LASSEN LP GPS es el encargado de recibir las tramas de bytes y almacenarlas en la memoria RAM para su posterior interpretación. La funcionalidad más relevante de este algoritmo es eliminar el byte stuffing\footnote{El byte stuffing es una técnica de codificación que consiste en duplicar los caracteres DLE --Data Link Escape-- que aparezcan en los datos enviados para evitar confundirlos con los caracteres especiales} y localizar los inicios de trama ya que en el protocolo TSIP no se emplea el caracter STX --Start of TeXt-- sino que directamente introduce el identificador de trama después del DLE inicial. El algoritmo utiliza varios testigos binarios para controlar el flujo de programa:\\
+DLEanterior $\rightarrow$ Se activa cuando se recibe un primer DLE.\\
+Primera\_trama $\rightarrow$ Se activa cuando se recibe el primer final de trama. Es necesario haber recibido una trama inicial o al menos parte de ella porque la localización del principio de una trama se basa en el conjunto de bytes de final de trama con el inicio de la siguiente.\\
+Trama\_recibida $\rightarrow$ Se activa al recibir una trama completa.\\
+Byte\_actual $\rightarrow$ Valor del último byte recibido.\par
+
+\begin{algoritmo}{RC1\_TSIP}\label{alg:RC1}\\
+	Si $DLEanterior == 1$\\
+	\phantom{MM} Se desactiva DLEanterior.\\
+	\phantom{MM} Si $\left(Byte\_actual == DLE\right)$ Se termina el algoritmo.\\
+	\phantom{MMM} El si\-guien\-te byte sobreescribe el segundo DLE.\\
+	\phantom{MM} Si $\left(Byte\_actual == ETX\right)$ Es final de trama.\\
+	\phantom{MMM }$Byte\_actual \Rightarrow RAM$\\
+	\phantom{MMM }$Puntero~lectura = inicio~trama$\\
+	\phantom{MMM }$Trama\_recibida = 1$\\
+	\phantom{MMM} Termina el algoritmo.\\
+	\phantom{MM} Si $\left(\left( Byte\_actual \neq DLE\right) \&\& \left( Byte\_actual \neq ETX\right) \right)$ \\
+	\phantom{MMM }$Byte\_actual \Rightarrow RAM$\\
+	Si $DLEanterior == 0$\\
+	\phantom{MM} Si $\left(Byte\_actual == DLE\right)$\\
+	\phantom{MMM }$DLEanterior == 1$\\
+	\phantom{MM}$Byte\_actual \Rightarrow RAM$\\
+\end{algoritmo}
+
+La detección de final de trama se basa en la búsqueda de la secuencia:\\
+\phantom{MMMM} $\dots<data><DLE><ETX>\dots$\par
+La búsqueda del inicio de trama termina al localizar la secuencia:\\ 
+\phantom{MMMM} $\dots<ETX><DLE><ID>\dots$\par
+No se ha incluido el algoritmo de búsqueda de inicio de trama porque es el mismo que para localizar el final de trama pero recorriendo la ventana de recepción en sentido inverso.\par
+El puntero de lectura toma el valor de la dirección del inicio de trama. Los punteros de acceso indirecto a direcciones de memoria se llaman FSR. A traves de ellos se puede leer o escribir cualquier dirección de la memoria RAM. Se ha configurado una ventana de 512 bytes para la comunicación con el GPS.\par
+La opción de almacenar las tramas que transmite el GPS en la memoria RAM se tomó para poder analizar el funcionamiento del programa. El protocolo TSIP permite también leer los datos que interesen al vuelo, sin almacenarlos en RAM. Esto se prodría hacer combinando el algoritmo de interpretación de tramas con el algoritmo \ref{alg:RC1} de recepción serie.\\
+
+\section{\bfseries ALGORITMO INTERPRETE TSIP}\label{alg:TSIP}
+El algoritmo interprete TSIP interpreta los bytes de la trama recibida y extrae la información relevante.\par
+Comprueba el identificador de trama y si coincide con la trama de posicionamiento UTM guarda la posición en los registros reservados a tal efecto.
+
+\section[\bfseries ALGORITMO DE MOVIMIENTO MA\-NU\-AL]{\bfseries ALGORITMO DE MOVIMIENTO \\MA\-NU\-AL}
+El algoritmo de dirección manual permite controlar los movimientos del robot a traves del teclado. Una vez programado el control remoto se puede teledirigir el robot. De este modo el robot puede aprender rutas recorriendolas y almacenando los puntos UTM que les corresponden. Durante la ejecución del algoritmo de movimiento manual los sensores actuan deteniendo el robot para evitar colisiones.
+
+\section[\bfseries LIBRERÍA DE CONTROL DE MO\-TO\-RES]{\bfseries LIBRERÍA DE CONTROL DE \\MOTORES}
+La librería de control de motores transforma órdenes simples como adelante, atras, etc.~en los cambios de bits necesarios para ejecutar dichas órdenes. Además tiene algunos algoritmos de movimientos precalculados como el giro, que recibe como parámetro el número de grados a girar, o la función rebotes que evita cualquier obstáculo con ayuda de los sensores de movimiento.
+
+\section[\bfseries ENRUTAMIENTO Y EVASIÓN DE OBSTÁCULOS]{\bfseries ENRUTAMIENTO Y EVASIÓN DE \\OBSTÁCULOS} 
+El enrutamiento y la evasión de obstáculos es el objetivo que debe cumplir el robot. Este algoritmo es, junto con la librería matemática, la porción de código más importante para el comportamiento del robot. El funcionamiento del algoritmo se basa en la composición de vectores de coordenadas relativas UTM. En concreto, los vectores utilizados son el vector que parte del punto anterior y llega a la posición actual, al que llamaremos $\stackrel{\longrightarrow}{AO}$, y el vector que parte de la posición actual para llegar al punto destino, al que llamaremos $\stackrel{\longrightarrow}{OD}$. A partir de estos vectores se calcula la desviación del robot y la corrección necesaria para encarar el destino.\par
+Básicamente el algoritmo final de enrutamiento y evasión de obstáculos coincide con el algoritmo \ref{alg:SOLU}\footnote{Algoritmo \ref{alg:SOLU} página \pageref{alg:SOLU}.}.\par
+En la versión definitiva del algoritmo se han introducido varios bits de control que nos permiten mejorar la corrección cuando acaba un obstáculo, evitar las correcciones redundantes cuando el giro es largo y llega una nueva trama de posición antes de comenzar el avance, e incluir retardos de seguridad cuando se pulsa un bumper trasero para poder actuar sobre el robot en caso de emergencia.

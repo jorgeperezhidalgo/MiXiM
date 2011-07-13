@@ -1,0 +1,22 @@
+\newcommand{\dosfig}[4]{
+	\begin{figure}[h]
+		\begin{minipage}[t]{.45\textwidth}  %0.45 por el ancho del texto
+			\includegraphics[width=.99\textwidth]{#1}
+		\end{minipage}
+		\hfill %la siguiente figura estará separada en horizontal 0.1 por el ancho del texto (porque 0.45+045=0.90)
+		\begin{minipage}[t]{.45\textwidth}  %0.45 por el ancho del texto, como la anterior
+			\includegraphics[width=.99\textwidth]{#2}
+		\end{minipage}
+		\caption{#3}
+		\label{#4}
+	\end{figure}
+}
+\newcommand{\unafig}[3]{
+	\begin{figure}[h]
+		\begin{minipage}[t]{.99\textwidth}  %0.45 por el ancho del texto
+			\includegraphics[width=.99\textwidth]{#1}
+		\end{minipage}
+		\caption{#2}
+		\label{#3}
+	\end{figure}
+}

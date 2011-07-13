@@ -1,0 +1,86 @@
+\chapter{HERRAMIENTAS UTILIZADAS}
+Durante el desarrollo del proyecto se ha utilizado gran cantidad de herramientas de todo tipo. En este capítulo hablaremos sobre cada una de ellas, clasificandolas principalmente en software o hardware, áunque algunos pares de herramientas software-hardware vayan intimamente relacionadas.\\
+
+\section{\bfseries HERRAMIENTAS SOFTWARE}
+En esta sec\-ción de\-ta\-lla\-re\-mos to\-das las aplicaciones uti\-li\-za\-das du\-ran\-te el de\-sa\-rro\-llo del pro\-yec\-to.\\
+
+\subsection{SOFTWARE DE DISEÑO}
+En este apartado veremos los programas empleados para diseñar los planos tanto de montaje como de circuitos impresos.\\
+\subsubsection[AUTOCAD MECHANICAL DESKTOP 6 POWER PACK]{AUTOCAD MECHANICAL DESKTOP 6 \\POWER PACK}
+El AutoCAD es el programa de diseño por excelencia. Se ha convertido en el estandar tanto de la arquitectura como del diseño industrial y en general de cualquier dibujo que requiera exactitud milimétrica. El Mechanical Desktop es una ampliación orientada al diseño industrial, que facilita el modelado de piezas en tres dimensiones, su acotación así como la obtención de todo tipo de planos y vistas.\par
+Con ayuda de este programa se realizó un esquema en tres dimensiones del cuerpo del robot, de la ubicación de los sensores y motores. Dicho esquema lo podemos encontrar en el disco compacto adjunto.\\
+\subsubsection{ORCAD RELEASE 9}
+El OrCAD es una suite completa para el diseño de circuitos electrónicos. Está compuesto por varias aplicaciones que funcionan en conjunto para realizar todos los pasos necesarios para diseñar y fabricar una placa de circuito electronico. Los programas son:\\
+\begin{itemize}
+\item Capture - Con el podemos diseñar los circuitos.
+\item PSpice AD - Es el simulador. Nos permite hacer pruebas simuladas que se ajustan bastante bien a la realidad.
+\item LayOut - Con ayuda de este programa se diseña el circuito impreso
+\item Otras aplicaciones que los acompañan para poder editar y diseñar nuevos componentes, nuevas pruebas para las simulaciones y un sin fin de aplicaciones más.
+\end{itemize}
+Con ayuda de esta suite hemos diseñado desde cero toda la electrónica que gobierna el robot.\\
+
+\subsection{SOFTWARE DE PROGRAMACIÓN}
+En este apartado describiremos las aplicaciones de programación.\\
+
+\subsubsection{MICROCHIP MPLAB IDE 6.40}
+Este programa es una herramienta facilitada por Microchip. Este entorno de programación para microcontroladores PIC nos permite explotar todas las ventajas de estos chips. Viene acompañado de multidud de plantillas para los distintos modelos para hacer más sencilla y legible la programación, ya que los microcontroladores se programan directamente en código máquina y los programas se escriben generalmente en código ensamblador que tiene practicamente la misma sintaxis que el código máquina.\par 
+También trae integrado el MPASM, que es el encargado de traducir de un código a otro dependiendo del modelo de microcontrolador. Este último programa también soporta algunas directivas que hacen más amigable la programación, evitando tareas repetitivas de programación como puede ser la inserción de tablas de datos en el código.\par
+Pero la caracteristica más relevante de este programa es que permite, mediante la conexion del ICD 2, probar la ejecución del programa en el circuito real. Esto facilita sobremanera la resolución de pequeños fallos, ya sean de electrónica o de programación, que de otra manera son muy farragosos y nos obligarían a perder horas buscando el motivo. En cualquier momento se puede detener la ejecución del programa para comprobar el valor de los re\-gis\-tros de la memoria RAM, la línea de código en la que se queda bloqueado y muchas cosas más.\par
+Pues bien, esta es la herramienta utilizada para desarrollar el firmware del microcontrolador.\\
+
+\subsubsection{CCS PIC MCU C COMPILER}
+El PIC MCU C Compiler de CCS es un interprete del lenguaje de alto nivel C para microcontroladores PIC. Esta aplicación permite escribir programas en lenguaje C para después ejecutarlos en los PIC. La desventaja es que, áunque la programación se hace menos tediosa, no se pueden aprobechar todos los recursos del PIC, y la ejecución se ralentiza debido al número excesivo de líneas de código que se insertan para comprobar que todo funcione correctamente, cosa que programando en ensamblador es responsabilidad nuestra. Esta aplicación también se integra con el MPLAB para facilitarnos las cosas.\\
+
+\subsubsection[TEXNICCENTER 1 BETA 5.05 MIKTEX 2.4]{TEXNICCENTER 1 BETA 5.05 \\ MIKTEX 2.4}
+El documento que tiene entre las manos se ha excrito en lenguaje \LaTeX. Este lenguaje de programación permite crear documentos de gran calidad estética. Los editores y compiladores para \LaTeX	\ utilizados son respectivamente TeXnicCenter y MikTeX. Con ayuda de estos programas obtenemos documentos en los cuales el formato y el contenido están completamente separados. Para obtener la versión imprimida es necesario compilar el/los archivos fuente. Gracias a este proceso se obtiene rapidez a la hora de escribir y calidad en la version imprimible.\nota{bibliografia "`LATEX una imprenta en sus manos"' de Bernardo Cascales Salinas y otros}\\
+
+
+\subsection{OTRAS APLICACIONES}
+En este apartado encontraremos la descripción de aplicaciones varias que han sido de gran utilidad a la hora de analizar los distintos problemas que han ido apareciendo durante el desarrollo del proyecto.\\
+\subsubsection{TSIPMONITOR}\label{tsipmon}
+TSIPMonitor es un programa proporcionado por Trimble, fabricante de nues\-tro GPS, para probar el protocolo de comunicaciones TSIP. Nos informa de todo lo que ocurre en el GPS. También nos permite conigurar la comunicación de forma sencilla. En nuestro caso fue utilizado para testear la placa que realizámos para acondicionar las señales de comunicación entre el GPS y el PIC o el ordenador \cite{web:trimble}.\nota{webgrafia ``www.trimble.es''}\\
+\subsubsection{SIOW.EXE}\label{siow}
+Esta aplicación es una utilidad que acompaña al interprete de CCS. Con su ayuda se puede recibir y enviar cualquier tipo de información por el puerto COM. Fue utilizado para testear tanto las comunicaciones del GPS por RS-232 como las de la placa principal del \bott. También se utilizó para configurar inicialmente el módulo GPS.\\
+\subsubsection{MATLAB 5.4}
+El Matlab es una herramienta muy utilizada para el desarrollo de algoritmos matemáticos de todo tipo. En nuestro caso se ha utilizado para probar los algoritmos de coma flotante y los CORDIC --Coordinate Rotation Digital Computer--.\\
+\subsubsection{WINHEX 11.7}
+El WinHex es un editor de archivos hexadecimales con el cual se ha podido analizar las capturas del puerto serie durante la comunicación entre el microcontrolador y el GPS. También se ha utilizado para componer las tramas de configuración necesarias para el GPS.\\
+
+\section{\bfseries HERRAMIENTAS HARDWARE}
+En esta sección tenemos un resumen de las herramientas hardware más re\-le\-van\-tes para el desarrollo del proyecto.\\
+\subsection{MICROCHIP ICD 2}
+El ICD 2 -- In Circuit Debuger -- es un dispositivo microcontrolado de Microchip. Su función es comunicar el microcontrolador de la aplicación a desarrollar con el PC, de manera que se puede programar el PIC sin necesidad de sacarlo de la placa de aplicación, ni usar el módulo ICSP -- In Circuit Serial Programing~--.\par
+Pero su aplicación más interesante es que permite ejecutar el firmware desarrollado directamente sobre la placa de aplicación y con control absoluto desde el PC. Permite ejecución normal, la cual funciona a la velocidad real del diseño ya que utiliza el reloj de la placa aplicación. También permite ejecución paso por paso en el microcontrolador, es decir, no simula la ejecución paso por paso sino que ejecuta realmente las instrucciones en el PIC. En cualquiera de los dos modos de ejecución están activos todos los puertos disponibles del PIC, de modo que éste interaccionará con las señales electricas que le proporcione la placa aplicación, cosa que es realmente útil para comprobar la validez del circuito electronico, así como para localizar los fallos que se puedan haber introducido durante el diseño o la construcción del circuito.\par
+La ejecución se puede pausar en el momento que deseemos, una vez hecho esto, podremos leer los valores almacenados en cualquiera de las memorias del microcontrolador, modificarlos y ver en que instrucción se ha pausado el proceso. Cambiando el registro especial PCL y ajustando correctamente los registros PCH y PCU podemos continuar la ejecución en el punto que deseemos del programa, lo que nos permite probar el código correspondiente a una situación dificil de reproducir en la práctica. También podemos colocar breakpoints, que en castellano viene a sirnificar punto de ruptura, para que la ejecución del programa se detenga automáticamente al llegar a dichos puntos, cosa que nos permite leer los valores de los registros en puntos muy determinados de la rutina.\par
+Definitivamente el ICD otor\-ga con\-trol ab\-so\-lu\-to so\-bre la eje\-cu\-ción del firm\-ware en la aplicación real ocupando únicamente dos patas del integrado. Es una herramienta esencial para el desarrollo de proyectos microcontrolados de cierta envergadura.
+\subsection{LASSEN LP GPS}
+El Lassen LP GPS es un receptor GPS de ocho canales en paralelo, funciona con la portadora L1 (1575.42MHz), el servicio de posicionamiento básico. El receptor está diseñado en formato modular, ideal para aplicaciones móviles, alimentadas a baterías. Una de las características más importantes del módulo GPS es el bajo consumo de baterías que se puede lograr utilizando los modos de control de energía programables.\par
+La adquisición de satélites comienza nada más aplicar la alimentación y comienza a mandar tramas de posicionamiento tan pronto como es posible, sin necesidad de intervención del usuario. Si se provee al módulo de una tensión de backup, el GPS reitene el almanaque, efemerides, última posición y hora adquiridas para un arranque más rápido. Las opciones de usuario, configuración de puertos, y administración de energía se almacenan en EEPROM no volatil.\par
+El Lassen LP GPS tiene dos puertos serie de comunicaciones. El puerto principal es bidireccional y se encarga de las comunicaciones en general del módulo con la aplicación. El otro puerto es unidireccional de entrada para la información de corrección diferencial en formato RTCM SC-104. La configuración de ambos puertos es completamente independiente.\\
+\subsubsection{PROTOCOLOS DE COMUNICACIÓN}
+Los protocolos de comunicaciones que soporta el módulo GPS son tres:
+\begin{itemize}
+\item Trimble Standard Interface Protocol --- TSIP. Es un protocolo binario, especifico de Trimble, con más de 75 comandos disponibles para configurar y controlar el GPS. Este protocolo permite configurar todos los parámetros posibles del GPS. Aparte de permitir una configuración más específica que los otros dos protocolos, es el único que proporciona posiciones en coordenadas UTM.
+\item Trimble ASCII Interface Protocol --- TAIP. Este protocolo es especifico de Trimble. Codificado en caracteres ASCII. Diseñado especificamente para monitorización de vehículos. Permite asignar un número a cada módulo GPS que se utiliza para identificar la procedencia o destinatario de las tramas de datos. Un módulo con identificador 0000 ignorará cualquier trama que lleve un identificador distinto.
+\item NMEA 0183. Este protocolo fue creado por la National Marine Electronics Association. La versión incorporada en el módulo GPS es la v2.1 del 15 de Octubre de 1995. Codificado en ASCII. Es el protocolo estandar de salida de los receptores GPS.
+\end{itemize}
+\subsubsection{CONEXIONADO DEL MÓDULO}
+El Lassen LP GPS tiene dos conectores. El co\-nec\-tor prin\-ci\-pal es un co\-nec\-tor de 8 pines de 3.8 mm de altura y espaciado de 2 mm. Las señales que podemos encontrar en cada pin son:\par
+{\small
+\begin{tabular}{|c|l|l|} \hline
+Pin\# & Función & Descripción\\ \hline
+1 & Signal Control & Control para modo de ahorro de batería\\ \hline
+2 & Alimentación principal & 3.3 VDC $\pm$0.3 VDC\\ \hline
+3 & TXD 1 & Transmisión puerto 1. CMOS/TTL\\ \hline
+4 & Alimentación de Backup & 3.3 VDC $\pm$0.3 VDC\\ \hline
+5 & RXD 1 & Recepción puerto 1. CMOS/TTL\\ \hline
+6 & 1 PPS & Pulso Por Segundo. CMOS/TTL\\ \hline
+7 & RXD 2 & Recepción puerto 2. CMOS/TTL\\ \hline
+8 & GND & Tierra, para alimentación y datos\\ \hline
+\end{tabular}
+}
+ 
+
+\subsection{HERRAMIENTAS DE MECANIZADO}
+Para construir la carcasa del \bott se ha utilizado planchas de aluminio de 3mm de espesor. Las ventanas necesarias en la carcasa se han realizado con una Dremel con un disco para cortar metal. Los agujeros para los tornillos se han hecho con un taladro de velocidad regulable.\par
+Para adaptar las ruedas se han utilizado tacos de nylon a los que se dió forma con un torno DC-BV20B-L de SilverLine \cite{http://silverline.us/dc-bv20bl.htm}. \nota{Agradecimientos a Paul}

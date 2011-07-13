@@ -1,0 +1,45 @@
+\chapter[CONCLUSIONES]{CONCLUSIONES Y FUTURAS LÍNEAS DE DESARROLLO}
+\label{conclusiones}
+Este capítulo cierra la memoria descriptiva del proyecto. En el podemos encontrar las conclusiones finales y las futuras líneas de desarrollo.
+
+\section{\bfseries CONCLUSIONES}
+Al término del proyecto se ha alcanzado el objetivo final del mismo. Se ha diseñado y construido el robot, se ha puesto en marcha, y funciona como cabía esperar. La estructura básica del guia robótico es completamente operativa. El robot es capaz de alcanzar el destino prefijado evitando los obstáculos que se presenten, y corrigiendo de forma dinámica la trayectoria con ayuda del GPS.\par
+Por tanto, teniendo en cuenta las futuras mejoras del sistema de po\-si\-cio\-na\-mien\-to global y las capacidades de ampliación del robot, podemos afirmar que el guia robótico para personas con deficiencias visuales es viable, y podría mejorar la calidad de vida de estas personas. No sin remarcar que el trabajo a realizar sería muy amplio, como muestra la siguiente sección.\par
+
+\section[\bfseries FUTURAS LÍNEAS DE DE\-SA\-RRO\-LLO]{\bfseries FUTURAS LÍNEAS DE\\DE\-SA\-RRO\-LLO}
+Debido a la diversidad de futuras líneas de desarrollo que presenta el proyecto realizado, las hemos agrupado en varias secciones.\\
+\subsection{MEJORAS GENERALES}
+Son las mejoras que consideramos necesarias, sea cual sea la futura aplicación del robot. Algunas de estas mejoras no se han realizado por cuestiones económicas.
+\subsubsection[MEJORAS MECÁNICAS Y ESTRUCTURALES DEL CUERPO DEL ROBOT]{MEJORAS MECÁNICAS Y ESTRUCTURALES DEL CUERPO DEL ROBOT}
+La estructura actual del robot, como ya se comentó en la sección \ref{estructura}, no se ha diseñado para ser definitiva. Es, por tanto, una de las mejoras inmediatas que requiere el robot para cualquier aplicación a la que se destine. Los pámetros a tener en cuenta para la mejora son:\par
+--Dotar al robot de una carcasa impermeable que le permita ser funcional independientemente de la meteorología.\\
+--Diseñar un sistema motriz que sea capaz de superar pequenos escalones, llegando incluso a poder subir y bajar tramos de escaleras.\\
+--Integrar el sistema sensorial en la carcasa de forma que no se deterioren, ni queden expuestos a posibles accidentes.\\
+--Cumplir las distintas normativas de fabricación y funcionamiento, emisión electromagnética, etc.\nota{mirar cd de normativas, biblio}
+\subsubsection{MEJORAS DEL SISTEMA SENSORIAL}
+El sistema sensorial a distancia implementado cumple las funciones básicas, pero para aplicaciones complejas sería conveniente dotar al robot de dispositivos de detección que no dependan del movimiento, como por ejemplo un escáner láser. Con un dispositivo de este tipo, no solo se puede evitar los obstáculos, sino que se puede llegar a realizar un mapa del camino recorrido, encontrando más facilmente la solución a los obstáculos complejos.\par
+Otra opción es implementar sistemas de visión por computador, este sistema requeriría ampliar la capacidad de proceso del robot considerablemente, incluyendo por ejemplo un PC embebido.\\
+\subsubsection{MEJORAS DEL SISTEMA DE NAVEGACIÓN}
+En las mejoras del sistema de navegación podemos incluir la sustitución del módulo GPS por un receptor de posicionamiento mejorado, como por ejemplo un receptor con sistema de corrección diferencial EGNOS, que dotaría al sistema de mayor precisión en el enrutamiento. O bien, en un futuro, incluir en el sistema un receptor de posicionamiento GALILEO.\par
+Otro punto interesante sería incorporar giroscópios y acelerómetros para calcular la trayectoria en lugares donde falle la cobertura de los satélites, como dentro de los edificios, estaciones de tren, etc.\\
+\subsubsection{MEJORAS DEL SISTEMA DE COMUNICACIONES}
+Para dotar al robot de más independencia sería necesario desarrollar el sistema de comunicación inalámbrica. Que permitiría programar el robot sin necesidad de cables. También sería posible colocar puntos de información para el robot distribuidos por la ciudad. A su vez el robot sería capaz de interactuar con otros robots, capacidad que abre un gran abanico de aplicaciones.\\
+\subsection{DESARROLLOS ORIENTADOS AL GUIADO DE PERSONAS}
+Para poder orientar la aplicación al guiado de personas, es necesario tener en cuenta las capacidades de las mismas, y sus necesidades.\\
+\subsubsection{INTERFAZ HUMANA}
+Siguiendo la línea de la idea inicial del proyecto, una de las mejoras necesaria sería la implementación de una interfaz humana por voz. De este modo las personas con deficiencias visuales podrían interactuar con el robot de forma natural. Y también serviría para las funciones de guia turístico.\par
+Sería conveniente a su vez, un sistema que permitiese mantener el contacto físico entre el usuario y el \bott, dejando libertad al robot para moverse, similar a las correas de los perros lazarillo. Se podría incluir un teclado para facilitar la comunicación en ambientes con mucho ruido.
+\subsubsection{MAPAS DE RUTAS}
+El siguiente paso en el desarrollo software es dotar al guía robótico de algoritmos capaces de interpretar mapas, y recorrer las rutas programadas sobre dichos mapas. Un punto interesante sería que el robot fuera capaz de calcular la mejor ruta entre el punto actual y cualquier destino programado en el mapa. Esto brindaría la posibilidad de cambiar de idea al usuario en cualquier momento y cambiar la ruta sobre la marcha. Además de permitir la gestión de contingencias.\par
+También sería necesario desarrollar un sistema de actualización y descarga de nuevas rutas a traves de Internet. Esto incluye tanto la base de datos principal donde se almacenen los mapas, como la aplicación terminal que descarga los mismos y los programa en el robot.\\
+
+\subsection{DESARROLLOS O\-RIEN\-TA\-DOS A LA CO\-MU\-NI\-DAD DE RO\-BOTS}
+Aprovechando el sistema de comunicación sin cables, se podría crear una comunidad de robots que interactuaran para llevar a cabo tareas diversas. Comentaremos algunas de las posibles ideas a desarrollar, sabiendo que muchas quedan en el tintero.
+\subsubsection{SISTEMAS DE MEDICIÓN}
+Poniendo en marcha varios robots a la vez, se puede implementar sistemas de medición y toma de muestras automatizadas. Colocando el sensor pertinente en cada robot, y facilitándoles las coordenadas en las que deben tomar muestras, para que ellos mismo se distribuyan el trabajo de la forma que consideren óptima. Si además se implementa un sistema centralizado de recogida de información, se puede integrar la comunidad de robots en un sistema de mapeado, del tipo que sea.
+\subsubsection{CONVOY INTELIGENTE}
+La idea de poner en marcha un camión con conductor humano, y un convoy que lo siga sin necesidad de más conductores es algo que podría resultar interesante. Pero si el convoy fuese dirigido por un robot autómata, o incluso cada camión con su propio conductor robótico, estaríamos hablando de una flota de camiones que pueden viajar dia y noche sin descanso. Es algo que parece utópico pero que está a la vuelta de la esquina.\par
+Así mismo, si se implementara el mismo sistema en los coches utilitarios, se podría automatizar toda la navegación por carretera. Esto podría suponer una reducción drástica de las infracciones de tráfico, y por consecuencia de los accidentes. Esta idea deriva del proyecto AUTOPÍA.\nota{biblio y web}\\
+\subsubsection{SISTEMAS DE BÚSQUEDA}
+Esta idea es una especialización mayor del sistema de medición. Si, en lugar de medir en los puntos designados, se mide el factor correspondiente durante la trayectoria, se puede implementar un sistema de búsqueda automatizado que podría ser útil en grandes catástrofes buscando personas, en los desiertos buscando agua, o en otras empresas más específicas como encontrar explosivos o personas.\par
+También corresponde a este apartado la búsqueda de caminos viables en terrenos desconocidos. Se puede poner varios robots con varios destinos a partir de la posición de partida, buscando caminos accesibles teniendo en cuenta distintos factores. Esta aplicación es, más bien, especifica para expediciones y uso militar, pero se podría aplicar a otros menesteres.\\

@@ -1,0 +1,175 @@
+\chapter{EL PROBLEMA}\label{problema}
+El problema de enrutamiento de un punto a otro se puede resolver de muchas formas. Sabemos que entre dos puntos el camino más corto es una recta, pero puede ocurrir que el camino más corto en espacio no lo sea en tiempo. Además, no tenemos que olvidar que la probable presencia de obstáculos nos obliga a ir buscando el camino correcto en cada instante. No podemos tomar una dirección y suponer que todo recto llegamos al destino. De todas formas comenzaremos haciendo hipótesis, para ir de la solución más sencilla a la más compleja.\\
+
+\section[\bfseries HIPÓTESIS Y SOLUCIONES PO\-SI\-BLES]{\bfseries HIPÓTESIS Y SOLUCIONES \\PO\-SI\-BLES}
+
+\subsection[ALGORITMOS PARA EN\-TOR\-NOS ES\-TÁ\-TI\-COS SIN OBS\-TÁ\-CU\-LOS]{ALGORITMOS PARA EN\-TOR\-NOS \\ES\-TÁ\-TI\-COS SIN OBS\-TÁ\-CU\-LOS}
+En estos algoritmos no tendremos en cuenta obstáculos ni cambios en el terreno. Estos algoritmos son soluciones matemáticas que se pueden aplicar a ciertos casos de la vida real, pero en general no llegan a su destino.\\
+\subsubsection{EL CAMINO RECTO}
+\unafig{fotos/dibujo1.eps}{Camino matemático.}{dibujo1}
+\nota{Dibujo1}Si nos encontramos en un punto dado por sus coordenadas \punto[0] y queremos llegar al punto \punto[d], tendremos que seguir el camino dictado por la función $y = \frac{y_{d}-y_{0}}{x_{d}-x_{0}}\cdot x + \frac{y_{0}\cdot x_{d} + y_{0}\cdot x_{d}}{x_{0} - x_{d}}$, de forma que iremos en línea recta hacia el destino. Como muestra la figura \ref{dibujo1}, la manera de seguir dicho camino con el robot es relativamente sencilla, giramos hasta encontrarnos en la dirección correcta y marchamos adelante. Cuanto tenemos que avanzar es calculable, $ distancia = \sqrt{\left(x_{d} - x_{0}\right)^{2} + \left(y_{d} - y_{0}\right)^{2}} $, la incognita está en cuanto tenemos que girar.\nota{Dibujo2} Si intentáramos avanzar primero para después girar nos encontrariamos con el mismo problema, como podemos ver en la figura \ref{dibujo2}, solo sabemos que estamos en un punto cualquiera de una circunferencia de radio igual al avance realizado.\par
+\unafig{fotos/dibujo2.eps}{Avance inicial.}{dibujo2}
+\nota{Dibujo3}Es obvio que necesitamos alguna forma de saber nuestra posición en cada momento, por ello se hace necesario el GPS. Con ayuda de éste podemos resolver el problema de la cantidad de giro con el siguiente algoritmo:\par
+
+\begin{enumerate}
+\item Obtenemos de la lectura del GPS el punto inicial \punto[0].
+\item Una vez conocidos \punto[0] y \punto[d] avanzamos un metro.
+\item Obtenemos de la lectura del GPS el punto auxiliar que es nuestra nueva posición \punto[a].
+\item Calculamos el vector que va de \punto[0] a \punto[a], en coordenadas polares.  
+\item Calculamos a su vez el vector que va de \punto[a] a \punto[d], en coordenadas polares.
+\item Restando las fases calculamos cuanto tiempo tenemos que girar y en que dirección para encarar el punto destino.
+\item Giramos ese tiempo.
+\item Calculamos la distancia a recorrer y avanzamos hasta el destino.
+\begin{table}[h]
+\caption{Algoritmo del camino recto.\label{Alg2.1}}
+\end{table}
+\end{enumerate}
+\par
+\unafig{fotos/dibujo3.eps}{Camino recto.}{dibujo3}
+\par
+Este algoritmo es la solución matemática en un plano ideal, figura \ref{dibujo3}. Por tanto el algoritmo anterior no nos sirve. El motivo es que si avanzamos una cantidad fija de espacio lineal sobre un firme irregular probablemente nos quedemos cortos y no alcancemos el destino. Esto nos lleva a un nuevo planteamiento del problema.\\
+
+\subsubsection{EL CAMINO DIRECTO}
+Para tener en cuenta la distancia a recorrer para llegar exactamente al destino necesitamos conocer el terreno con todo lujo de detalles, cosa que no es posible. Solo tenemos una opción, ir capturando nuestra posición desde el módulo GPS. Con ello sabemos en que momento alcanzamos el destino para detenernos. El algoritmo sería el siguiente:\\
+
+\begin{enumerate}
+\item Obtenemos de la lectura del GPS el punto inicial \punto[0].
+\item Una vez conocidos \punto[0] y \punto[d] avanzamos un metro.
+\item Obtenemos de la lectura del GPS el punto auxiliar que es nuestra nueva posición \punto[a].
+\item Calculamos el vector que va de \punto[0] a \punto[a], en coordenadas polares.  
+\item Calculamos a su vez el vector que va de \punto[a] a \punto[d], en coordenadas polares.
+\item Restando las fases calculamos cuanto tiempo tenemos que girar y en que dirección para encarar el punto destino.
+\item Giramos ese tiempo.
+\item Comenzamos a avanzar y esperamos la siguiente lectura del GPS.
+\item Si la lectura se aproxima lo suficiente al punto \punto[d] paramos, en caso contrario volvemos al paso número 8.
+\begin{table}[h]
+\caption{Algoritmo del camino directo.\label{Alg2.2}}
+\end{table}
+\end{enumerate}
+
+Bien, ya tenemos una forma de alcanzar el destino, a menos que, debido a algún deslizamiento de las ruedas, el giro no se realizara bien o en algún momento, por cualquier motivo, la trayectoria recta del \bott\ no sea tan recta.\\
+
+\subsubsection{EL CAMINO DIRECTO CORREGIDO}
+\unafig{fotos/dibujo4.eps}{Camino directo corregido.}{dibujo4}
+\par
+\nota{Dibujo4}Para corregir estas posibles desviaciones tenemos que volver a retocar el algoritmo teniendo en cuenta ahora no solo los tres primeros puntos \{ \punto[0] \punto[a] \punto[d] \} sino que iremos analizando todos los puntos que leamos del GPS, corrigiendo la dirección del modo que vemos en la figura \ref{dibujo4}. El algoritmo retocado quedaría así:\\
+
+\begin{enumerate}
+\item Obtenemos de la lectura del GPS el punto inicial \punto[0].
+\item Una vez conocidos \punto[0] y \punto[d] avanzamos un metro.
+\item Obtenemos de la lectura del GPS el punto auxiliar que es nuestra nueva posición \punto[a]. Si la lectura se aproxima lo suficiente al punto \punto[d] paramos y finaliza el algoritmo, en caso contrario continuamos con el algoritmo.
+\item Calculamos el vector que va de \punto[0] a \punto[a], en coordenadas polares.  
+\item Calculamos a su vez el vector que va de \punto[a] a \punto[d], en coordenadas polares.
+\item Restando las fases calculamos cuanto tiempo tenemos que girar y en que dirección para encarar el punto destino.
+\item Giramos ese tiempo.
+\item Colocamos los valores del punto \punto[a] como los nuevos valores del punto \punto[0].
+\item Marchamos adelante y volvemos al paso 3.
+\begin{table}[h]
+\caption{Algoritmo del camino directo corregido.\label{Alg2.3}}
+\end{table}
+\end{enumerate}
+
+De esta manera hemos resuelto los problemas que puede causar tanto el firme irregular como los deslizamientos. Ahora debemos tener en cuenta los obstáculos presentes en el camino que elijamos.\\
+
+\subsection{ALGORITMOS PARA ESQUIVAR\\OBSTÁCULOS INMÓVILES}
+En este apartado hablaremos de obstáculo sin tener en cuenta su naturaleza ni como se ha detectado su presencia, este asunto queda relegado al los capítulos cuarto y quinto.\par
+En esta sección resolveremos, mediante algoritmos similares a los de la sección \thechapter .1, los distintos laberintos que se pueden presentar en el camino del \bott. Una vez resuelto cada uno de ellos construiremos un algoritmo capaz de superarlos todos.\\
+\subsubsection{EL OBSTACULO MÁS SIMPLE}
+\unafig{fotos/dibujo5.eps}{Obstáculo simple.}{dibujo5}
+\par
+\nota{dibujo5}Como se aprecia en la figura \ref{dibujo5}, el obstaculo más simple que nos podemos encontrar es un objeto de tamaño parecido al \bott. Para esquivarlo simplemente necesitamos girar, avanzar un par de cuerpos\footnote{CUERPO: Entendemos por cuerpo la dimensión mayor del \bott\ que normalmente es la longitud.} para después volver a girar y seguir adelante. Estructuradamente quedaría así:\\
+
+\begin{enumerate}
+\item Marchamos adelante.
+\item	Esperamos a encontrar obstáculo. Paramos y vamos al siguiente paso.
+\item Si el obstáculo lo hemos detectado a la derecha giramos 90 grados a la izquierda y viceversa.
+\item Avanzamos 2 cuerpos.
+\item Giramos 90 grados en sentido contrario al giro anterior.
+\item Volvemos al paso 1.
+\begin{table}[h]
+\caption{Algoritmo del obstaulo simple.\label{Alg2.4}}
+\end{table}
+\end{enumerate}
+\par
+\unafig{fotos/dibujo6.eps}{Obstáculo largo.}{dibujo6}
+\par
+\nota{dibujo6}Con este algoritmo no solo podemos esquivar una caja, sino que podemos esquivar un objeto cerrado por grande que sea ya que iremos haciendo rebotes hasta llegar al final del obstáculo. Hay que tener en cuenta que con este algoritmo no se sabe exactamente hacia que lado girará el robot al acercarse frontalmente a un obstáculo. Podemos ver un ejemplo del comportamiento en la figura \ref{dibujo6}\\
+
+\subsubsection{LA ELE GIGANTE}
+\unafig{fotos/dibujo7.eps}{Ele gigante con algoritmo \ref{Alg2.4}.}{dibujo7}
+\par
+\nota{dubujo7}Como se puede apreciar en la figura \ref{dibujo7}, con el algoritmo anterior es fácil que nos quedemos bloqueados si se da el caso de ir hacia la otra pared de una esquina. La solución consiste en comprobar la presencia de obstaculo durante el avance entre giros, de forma que el algoritmo se ``resetea'' al toparse con un obstaculo mientras se realiza la maniobra de esquive. Paso por paso queda así:\\
+
+\begin{enumerate}
+\item Marchamos adelante.
+\item	Esperamos a encontrar obstáculo. Paramos y vamos al siguiente paso.
+\item Si el obstáculo lo hemos detectado a la derecha giramos 90 grados a la izquierda y viceversa.
+\item Comenzamos a avanzar. Si encontramos obstáculo saltamos al paso 3, en caso contrario paramos cuando hemos recorrido 2 cuerpos y continuamos con el siguiente paso.
+\item Giramos 90 grados en sentido contrario al giro anterior.
+\item Volvemos al paso 1.
+\begin{table}[h]
+\caption{Algoritmo de la ele gigante.\label{Alg2.5}}
+\end{table}
+\end{enumerate}
+\par
+\unafig{fotos/dibujo8.eps}{Ele gigante con algoritmo \ref{Alg2.5}.}{dibujo8}
+\par
+\nota{dibujo8}De este modo se resuelve el problema parcialmente por que, como se puede apreciar en la figura \ref{dibujo8}, la dirección de salida después de haber evitado el obstáculo probablemente esté desfasada 90 grados con la dirección inicial.\par
+La solución para que las direcciones de entrada y salida sean paralelas es anidar el algoritmo del obstáculo simple en forma recursiva. Ésto nos puede llevar en ocasiones al desbordamiento de la pila de llamadas. Ver figura \ref{dibujo9}\par
+\unafig{fotos/dibujo9.eps}{Obstáculo espiral.}{dibujo9}
+\par
+
+\subsubsection{OBSTÁCULOS COMPLEJOS}
+Para evitar el problema de desbordamiento a causa del algoritmo anidado podemos ir almacenando en memoria las veces que debemos girar en sentido contrario de forma que podemos girar tantas veces como sea necesario para volver a la dirección inicial.\par
+\unafig{fotos/dibujo10.eps}{Bordeando el obstáculo.}{dibujo10}
+\par
+Otra forma de resolver el problema es con ayuda del GPS. Si, en vez de evitar el obstáculo, vamos siguiendo su controno sin dejar de tenerlo a la vista, es decir, detectándolo en todo momento, de modo que en algún momento la dirección del \bott\ será igual y de sentido opuesto al momento en que encontramos el obstáculo. En ese momento nos encontramos al otro lado del obstáculo, áunque sea un ``al otro lado'' parcial, como se aprecia en la figura \ref{dibujo10}. Además de poder topar con obstáculos especialmente difíciles de resolver\nota{Dibujo11} por lo que este algoritmo requiere memorizar también el camino recorrido para no quedar encerrados en obstáculos como el de la figura \ref{dibujo11}.\par
+\unafig{fotos/dibujo11.eps}{Obstáculo trampa.}{dibujo11}
+\par
+
+\subsection{ALGORITMOS PARA ENTORNOS DINÁMICOS}
+Primeramente detallaremos el significado de entorno dinámico. En un entorno dinámico la presencia o ausencia de obstáculos, así como su naturaleza, no tiene porqué seguir ninguna regla establecida. Por tanto la programación para dichos entornos debe contemplar cualquier posibilidad. En nuestro caso tendrémos en cuenta todas las situaciones que es capaz de resolver nuestro \bott\ debido a sus limitaciones sensoriales.\par
+Para poder realizar algoritmos sencillos y resolubles por el hardware del que disponemos, debemos alumir como cierta la hipótesis de que todo obstáculo movil es, al menos, tan inteligente como nuestro \bott. Lo que queremos expresar con esta hipótesis es que si el \bott\ se queda quieto, no será arrollado por ningún otro móvil. En caso de no ser posible esta afirmación ya no hablaríamos de algoritmos de enrutamiento, sino de algoritmos de supervivencia, los cuales requieren un sistema sensorial bastante más sofisticado.\par
+Una vez aclarado este punto pasamos a desarrollar los algoritmos de enrutamiento. Para ello dividiremos los obstáculos en móviles e inmóviles. La forma de distinguir un obstáculo móvil de un inmóvil es quedarse quieto en cuanto sea detectado, así si el obstáculo es móvil seguirá activando los sensores de movimiento, con lo cual basta con esperar a que desaparezca de nuestro radio sensorial, permitiendo que sea el otro móvil el que nos esquive a nosotros. En caso de que sea un obstáculo inmóvil, en cuanto dejemos de movernos dejaremos de detectarlo y al reanudar la marcha volveremos a detectarlo, este será el momento de realizar la maniobra de esquive.\par
+Para clarificar el comportamiento a seguir en entornos dinámicos colocaremos el párrafo anterio en forma de algoritmo:\\
+
+\begin{enumerate}
+\item Obstáculo detectado. Paramos.
+\item Si sigue habiendo movimiento después de parar pasamos al punto 4. En caso contrario continuamos con el algoritmo.
+\item	Realizamos la maniobra de esquive y finaliza el algoritmo.
+\item Esperamos a que desaparezca el móvil. Iniciamos la marcha y finaliza el algoritmo.
+\begin{table}[h]
+\caption{Algoritmo para entornos dinámicos.\label{Alg2.6}}
+\end{table}
+\end{enumerate}
+
+Las maniobras de esquive que realizaremos serán las mismas que se han des\-cri\-to en la sección de obstáculo inmóviles.\\
+
+
+\section{\bfseries LA SOLUCIÓN ADOPTADA}
+Hemos visto varios algoritmos tanto de enrutamiento como de evasión de obstáculos. Ahora expondremos la combinación adoptada para este proyecto. Seguidamente discutiremos las ventajas e inconvenientes, así como las razones por las cuales se ha tomado esta opción. El algoritmo de decisión de la trayectoria del \bott\ es el siguiente:
+
+\begin{enumerate}
+\item Obtenemos de la lectura del GPS el punto inicial \punto[0].
+\item Una vez conocidos \punto[0] y \punto[d] comenzamos a avanzar. 
+\item Si encontramos obstáculo saltamos al paso 10, en caso contrario si ocurre la siguiente lectura del GPS continuamos con el paso 4. Mientras no se cumpla ninguna de las dos condiciones anteriores se repite este paso.
+\item Obtenemos, de la lectura del GPS, el punto auxiliar \punto[a], que es nuestra nueva posición. Si la lectura se aproxima lo suficiente al punto \punto[d] paramos y finaliza el algoritmo, en caso contrario continuamos con el algoritmo.
+\item Calculamos el vector que va de \punto[0] a \punto[a], en coordenadas polares.  
+\item Calculamos a su vez el vector que va de \punto[a] a \punto[d], en coordenadas polares.
+\item Restando las fases calculamos cuanto tiempo tenemos que girar y en que sentido para encarar el punto destino.
+\item Giramos ese tiempo.
+\item Colocamos los valores del punto \punto[a] como los nuevos valores del punto \punto[0] y volvemos al paso 2.
+\item Paramos.
+\item Si sigue habiendo movimiento después de parar pasamos al punto 12. En caso contrario saltamos al punto13.
+\item Esperamos a que desaparezca el móvil. Volvemos al paso 2.
+\item Si el obstáculo lo hemos detectado a la derecha giramos 90 grados a la izquierda y viceversa.
+\item Comenzamos a avanzar. Si encontramos obstáculo saltamos al paso 10, en caso contrario paramos cuando hemos recorrido 2 cuerpos y continuamos con el siguiente paso.
+\item Giramos 90 grados en sentido contrario al giro anterior.
+\item Volvemos al paso 2.
+\begin{table}[h]
+\caption{Algoritmo de enrutamiento dinámico.\label{alg:SOLU}}
+\end{table}
+\end{enumerate}
+
+Como podemos observar, este último algoritmo es una combinación de los algoritmos de camino directo corregido (\ref{Alg2.3}), la ele gigante (\ref{Alg2.5}) y el algoritmo de decisión sobre obstáculos para entornos dinámicos (\ref{Alg2.6}).\par
+El motivo por el cual se ha elegído esta combinación de algoritmos es principalmente porque solo requiere memorizar y analizar tres puntos GPS a la vez, cosa que ya resulta costosa para el microcontrolador. Además, áunque el algoritmo de evasión no termine en dirección paralela a la que nos hizo tropezar con el obstáculo, gracias a utilizar el camino directo corregido no existe la posibilidad de perder el rumbo.\\
