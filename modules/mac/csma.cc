@@ -285,7 +285,9 @@ void csma::updateStatusIdle(t_mac_event event, cMessage *msg) {
 		EV << "(15) FSM State IDLE_1, EV_DUPLICATE_RECEIVED: setting up radio tx -> WAITSIFS." << endl;
 		//sendUp(decapsMsg(static_cast<MacSeqPkt *>(msg)));
 		delete msg;
-		if(useMACAcks) {
+		// We check if we are still in RX because if the waiting time for the ask report is gone and at this moment
+		// while we go sleep, we receiv the packet from Anchor, then we'll try to send an ACK when changing to sleep and we'll get an error
+		if(useMACAcks && (phy->getRadioState() == Radio::RX)) {
 			phy->setRadioState(Radio::TX);
 			updateMacState(WAITSIFS_6);
 			if (node->moduleType == 2) { // Only for Mobile Nodes
@@ -300,7 +302,9 @@ void csma::updateStatusIdle(t_mac_event event, cMessage *msg) {
 		sendUp(decapsMsg(static_cast<MacPkt *>(msg)));
 		delete msg;
 
-		if(useMACAcks) {
+		// We check if we are still in RX because if the waiting time for the ask report is gone and at this moment
+		// while we go sleep, we receiv the packet from Anchor, then we'll try to send an ACK when changing to sleep and we'll get an error
+		if(useMACAcks && (phy->getRadioState() == Radio::RX)) {
 			phy->setRadioState(Radio::TX);
 			updateMacState(WAITSIFS_6);
 			if (node->moduleType == 2) { // Only for Mobile Nodes
@@ -746,8 +750,7 @@ void csma::manageQueue() {
 		}
 		if(! backoffTimer->isScheduled()) {
 			startTimer(TIMER_BACKOFF);
-		}
-		else if (backoffTimer->getTimestamp() + timeFromBackOffToTX >= nextPhaseStartTime) {
+		} else if (backoffTimer->getTimestamp() + timeFromBackOffToTX >= nextPhaseStartTime) {
 			cancelEvent(backoffTimer);
 		}
 		if (backoffTimer->isScheduled()) {

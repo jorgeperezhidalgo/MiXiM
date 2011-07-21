@@ -171,6 +171,7 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 				goToSleep(simTime());
 			} else { // If we don't go to sleep is because another event is comming
 				EV << "Don't sleeping as another sending or event is coming soon" << endl;
+				phy->setRadioState(Radio::RX);
 				energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
 			}
 		}
@@ -247,6 +248,7 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 			waitForAnchor = 0;
 			anchorDestinationRequest = 0;
 			nbRequestWihoutAnswer++;
+			canSleep = false; // Makes the node not to sleep unless it can
 			if (transfersQueue.isEmpty()) { // If the queue is empty, if not the node cannot sleep
 				// Sleep the node if the following conditions fulfill
 				canSleep = true; // Activate the sleep variable, we will make it false if some condition is not fulfilled
@@ -257,14 +259,14 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 						canSleep = false;
 					}
 				}
-				if (canSleep) { // If after all the conditions it is true, we sleep the node
-					goToSleep(simTime());
-				} else { // If we don't go to sleep is because another event is comming
-					EV << "Don't sleeping as another sending or event is coming soon" << endl;
-					energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
-				}
 			}
-
+			if (canSleep) { // If after all the conditions it is true, we sleep the node
+				goToSleep(simTime());
+			} else { // If we don't go to sleep is because another event is comming
+				EV << "Don't sleeping as another sending or event is coming soon" << endl;
+				phy->setRadioState(Radio::RX);
+				energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
+			}
 		}
 		break;
 	case NodeAppLayer::SEND_SYNC_TIMER_WITHOUT_CSMA:
@@ -621,6 +623,7 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 				goToSleep(simTime());
 			} else { // If we don't go to sleep is because another event is comming
 				EV << "Don't sleeping as another sending or event is coming soon" << endl;
+				phy->setRadioState(Radio::RX);
 				energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
 			}
 			if (syncListenReport) {
@@ -645,6 +648,7 @@ void NodeAppLayer::handleSelfMsg(cMessage *msg)
 				goToSleep(simTime());
 			} else { // If we don't go to sleep is because another event is comming
 				EV << "Don't sleeping as another sending or event is coming soon" << endl;
+				phy->setRadioState(Radio::RX);
 				energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
 			}
 			// Wake up node for next sync phase 2 if necessary, wake it up timeSleepToRX sec. before
@@ -941,6 +945,7 @@ void NodeAppLayer::handleLowerControl(cMessage *msg)
 		} else { // We reached the maximum number of retransmissions
 			EV << " maximum number of retransmission reached, dropping the packet in App Layer.";
 			nbErasedPacketsBackOffMax++;
+			canSleep = false; // Makes the node not to sleep unless it can
 			if (transfersQueue.isEmpty()) { // If the queue is empty, if not the node cannot sleep
 				// Sleep the node if the following conditions fulfill
 				canSleep = true; // Activate the sleep variable, we will make it false if some condition is not fulfilled
@@ -971,12 +976,13 @@ void NodeAppLayer::handleLowerControl(cMessage *msg)
 						canSleep = false;
 					}
 				}
-				if (canSleep) { // If after all the conditions it is true, we sleep the node
-					goToSleep(simTime());
-				} else { // If we don't go to sleep is because another event is comming
-					EV << "Don't sleeping as another sending or event is coming soon" << endl;
-					energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
-				}
+			}
+			if (canSleep) { // If after all the conditions it is true, we sleep the node
+				goToSleep(simTime());
+			} else { // If we don't go to sleep is because another event is comming
+				EV << "Don't sleeping as another sending or event is coming soon" << endl;
+				phy->setRadioState(Radio::RX);
+				energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
 			}
 			delete pkt;
 		}
@@ -996,6 +1002,7 @@ void NodeAppLayer::handleLowerControl(cMessage *msg)
 		} else { // We reached the maximum number of retransmissions
 			EV << " maximum number of retransmission reached, dropping the packet in App Layer.";
 			nbErasedPacketsNoACKMax++;
+			canSleep = false; // Makes the node not to sleep unless it can
 			if (transfersQueue.isEmpty()) { // If the queue is empty, if not the node cannot sleep
 				// Sleep the node if the following conditions fulfill
 				canSleep = true; // Activate the sleep variable, we will make it false if some condition is not fulfilled
@@ -1026,12 +1033,13 @@ void NodeAppLayer::handleLowerControl(cMessage *msg)
 						canSleep = false;
 					}
 				}
-				if (canSleep) { // If after all the conditions it is true, we sleep the node
-					goToSleep(simTime());
-				} else { // If we don't go to sleep is because another event is comming
-					EV << "Don't sleeping as another sending or event is coming soon" << endl;
-					energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
-				}
+			}
+			if (canSleep) { // If after all the conditions it is true, we sleep the node
+				goToSleep(simTime());
+			} else { // If we don't go to sleep is because another event is comming
+				EV << "Don't sleeping as another sending or event is coming soon" << endl;
+				phy->setRadioState(Radio::RX);
+				energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
 			}
 			delete pkt;
 		}
@@ -1050,6 +1058,7 @@ void NodeAppLayer::handleLowerControl(cMessage *msg)
 		pkt = check_and_cast<ApplPkt*>((cMessage *)transfersQueue.pop());
 		EV << "The Broadcast packet was successfully transmitted into the air" << endl;
 		nbBroadcastPacketsSent++;
+		canSleep = false; // Makes the node not to sleep unless it can
 		if (transfersQueue.isEmpty()) { // If the queue is empty, if not the node cannot sleep
 			// Sleep the node if the following conditions fulfill
 			canSleep = true; // Activate the sleep variable, we will make it false if some condition is not fulfilled
@@ -1080,12 +1089,13 @@ void NodeAppLayer::handleLowerControl(cMessage *msg)
 					canSleep = false;
 				}
 			}
-			if (canSleep) { // If after all the conditions it is true, we sleep the node
-				goToSleep(simTime());
-			} else { // If we don't go to sleep is because another event is comming
-				EV << "Don't sleeping as another sending or event is coming soon" << endl;
-				energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
-			}
+		}
+		if (canSleep) { // If after all the conditions it is true, we sleep the node
+			goToSleep(simTime());
+		} else { // If we don't go to sleep is because another event is comming
+			EV << "Don't sleeping as another sending or event is coming soon" << endl;
+			phy->setRadioState(Radio::RX);
+			energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
 		}
 		delete pkt;
 		break;
@@ -1100,6 +1110,7 @@ void NodeAppLayer::handleLowerControl(cMessage *msg)
 			scheduleAt(simTime() + waitForRequestTime, waitForRequest);
 			EV << "The Packet was a Request, so it starts Waiting for Request Timer (" << waitForRequestTime << "s), to wait for Request answer from AN addr " << pkt->getDestAddr() << endl;
 		} else { // We try to sleep the node only if this report is not a request
+			canSleep = false; // Makes the node not to sleep unless it can
 			if (transfersQueue.isEmpty()) { // If the queue is empty, if not the node cannot sleep
 				// Sleep the node if the following conditions fulfill
 				canSleep = true; // Activate the sleep variable, we will make it false if some condition is not fulfilled
@@ -1110,18 +1121,20 @@ void NodeAppLayer::handleLowerControl(cMessage *msg)
 						canSleep = false;
 					}
 				}
-				if (canSleep) { // If after all the conditions it is true, we sleep the node
-					goToSleep(simTime());
-				} else { // If we don't go to sleep is because another event is comming
-					EV << "Don't sleeping as another sending or event is coming soon" << endl;
-					energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
-				}
+			}
+			if (canSleep) { // If after all the conditions it is true, we sleep the node
+				goToSleep(simTime());
+			} else { // If we don't go to sleep is because another event is comming
+				EV << "Don't sleeping as another sending or event is coming soon" << endl;
+				phy->setRadioState(Radio::RX);
+				energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
 			}
 		}
 		delete pkt;
 		break;
 	case BaseMacLayer::ACK_SENT:
 		// When the mobile node receives a Report from the Selected Anchor, it answers with an ACK and in that moment we sleep the node if the conditions are satisfied
+		canSleep = false; // Makes the node not to sleep unless it can
 		if (transfersQueue.isEmpty()) { // If the queue is empty, if not the node cannot sleep
 			// Sleep the node if the following conditions fulfill
 			canSleep = true; // Activate the sleep variable, we will make it false if some condition is not fulfilled
@@ -1132,12 +1145,13 @@ void NodeAppLayer::handleLowerControl(cMessage *msg)
 					canSleep = false;
 				}
 			}
-			if (canSleep) { // If after all the conditions it is true, we sleep the node
-				goToSleep(simTime());
-			} else { // If we don't go to sleep is because another event is comming
-				EV << "Don't sleeping as another sending or event is coming soon" << endl;
-				energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
-			}
+		}
+		if (canSleep) { // If after all the conditions it is true, we sleep the node
+			goToSleep(simTime());
+		} else { // If we don't go to sleep is because another event is comming
+			EV << "Don't sleeping as another sending or event is coming soon" << endl;
+			phy->setRadioState(Radio::RX);
+			energy->updateStateStatus(true, EnergyConsumption::MAC_IDLE_1, Radio::RX);
 		}
 		break;
 	}
