@@ -10,66 +10,67 @@
 
 \begin{document}
 
+\pagestyle{empty}
+
 \input{cover.tex}
-\pagestyle{plain}
+
 
 % First pages before the content of the document
 \frontmatter
 
+\pagestyle{plain}
+
+\chapter*{\begin{it}Acknowledgements\end{it}}
+\begin{quotation}
+To my bichito :)
+\end{quotation}
+\pagestyle{empty}
+\cleardoublepage
+
+\chapter*{\begin{it}Abstract\end{it}}
+\begin{quotation}
+Nobody can hesitate about the importance of technology in our lives. This technology helps us in many applications, 
+some of them can be done without any environment knowledge, but many others cannot. Whenever the situation is an important
+issue (obtaining some information of the place I am, how to reach a determinate room, how full my fridge is \ldots), a way
+to detect our position is needed.
+
+Many systems try to fulfill this task, but not all are suitable in all scenarios. 802.15.4 beacon-less \ac{WSN} are chosen as an easy, cheap, 
+low consumption and portable structure to achieve this aim. There are many ways to obtain an specific position. In this 
+work, \ac{RSSI} from received packets will be used. The more \ac{RSSI} values and the more strength, the more exactitude obtained, but also 
+the more energy is needed. Energy is hence, an important parameter in this process, and to try to reduce its consumption, 
+this work purposes a high configurable protocol which permits to adjust this energy-exactitude compromise as needed, depending
+on the context. In this work a framework for the OmNet++ network simulator is developed and different situations are 
+analyzed to show the improvement of this protocol compared with the existing ones.
+\end{quotation}
+\pagestyle{empty}
+\cleardoublepage
+
 % Prints the content index
 \tableofcontents
 
+% Prints the figure index
+
 % Pages with the content of the document
 \mainmatter
-\chapter{Some interesting words}
-Here starts ``everything''.
-The TEAMS Middle English Texts are published for TEAMS (The Consortium for the Teaching of the Middle Ages) in association with the University of Rochester by Medieval Institute Publications, Western Michigan University, Kalamazoo, Michigan. The General Editor of the series is Russell Peck of the University of Rochester. The texts are made available here by permission of the Executive Committee of TEAMS and The Medieval Institute at Western Michigan University. Please address questions about this website to Alan Lupack (alupack@ library.rochester.edu).
 
-The goal of the TEAMS Middle English text series is to make available to teachers and students texts which occupy an important place in the literary and cultural canon but which have not been readily available in student editions.
+\pagestyle{fancy}
+\renewcommand{\sectionmark}[1]{
+\lhead{\thesection.\ #1}}
+\rhead{\thepage}
+\cfoot{}
 
-The focus is upon literature adjacent to that normally in print, which teachers need in compiling the syllabi they wish to teach. The editions maintain the linguistic integrity of the original works but within the parameters of modern reading conventions.
 
-We are grateful to the National Endowment for the Humanities for its generous support in creating and maintaining this site.
+\input{chap1.tex}
+\input{chap2.tex}
+\input{chap3.tex}
+\input{chap4.tex}
+\input{chap5.tex}
+\input{chap6.tex}
 
-NOTE: Depending on the settings of your screen and your browser, you may find that some of the TEAMS texts do not fit on your screen. You can correct this problem by adjusting the font size in your browser. In Netscape, e.g., select VIEW, then DECREASE FONT.
-The TEAMS Middle English Texts are published for TEAMS (The Consortium for the Teaching of the Middle Ages) in association with the University of Rochester by Medieval Institute Publications, Western Michigan University, Kalamazoo, Michigan. The General Editor of the series is Russell Peck of the University of Rochester. The texts are made available here by permission of the Executive Committee of TEAMS and The Medieval Institute at Western Michigan University. Please address questions about this website to Alan Lupack (alupack@ library.rochester.edu).
+\bibliographystyle{plain}
+\bibliography{bib}
 
-The goal of the TEAMS Middle English text series is to make available to teachers and students texts which occupy an important place in the literary and cultural canon but which have not been readily available in student editions.
-
-The focus is upon literature adjacent to that normally in print, which teachers need in compiling the syllabi they wish to teach. The editions maintain the linguistic integrity of the original works but within the parameters of modern reading conventions.
-
-We are grateful to the National Endowment for the Humanities for its generous support in creating and maintaining this site.
-
-NOTE: Depending on the settings of your screen and your browser, you may find that some of the TEAMS texts do not fit on your screen. You can correct this problem by adjusting the font size in your browser. In Netscape, e.g., select VIEW, then DECREASE FONT.
-The TEAMS Middle English Texts are published for TEAMS (The Consortium for the Teaching of the Middle Ages) in association with the University of Rochester by Medieval Institute Publications, Western Michigan University, Kalamazoo, Michigan. The General Editor of the series is Russell Peck of the University of Rochester. The texts are made available here by permission of the Executive Committee of TEAMS and The Medieval Institute at Western Michigan University. Please address questions about this website to Alan Lupack (alupack@ library.rochester.edu).
-
-The goal of the TEAMS Middle English text series is to make available to teachers and students texts which occupy an important place in the literary and cultural canon but which have not been readily available in student editions.
-
-The focus is upon literature adjacent to that normally in print, which teachers need in compiling the syllabi they wish to teach. The editions maintain the linguistic integrity of the original works but within the parameters of modern reading conventions.
-
-We are grateful to the National Endowment for the Humanities for its generous support in creating and maintaining this site.
-
-NOTE: Depending on the settings of your screen and your browser, you may find that some of the TEAMS texts do not fit on your screen. You can correct this problem by adjusting the font size in your browser. In Netscape, e.g., select VIEW, then DECREASE FONT.
-The TEAMS Middle English Texts are published for TEAMS (The Consortium for the Teaching of the Middle Ages) in association with the University of Rochester by Medieval Institute Publications, Western Michigan University, Kalamazoo, Michigan. The General Editor of the series is Russell Peck of the University of Rochester. The texts are made available here by permission of the Executive Committee of TEAMS and The Medieval Institute at Western Michigan University. Please address questions about this website to Alan Lupack (alupack@ library.rochester.edu).
-
-The goal of the TEAMS Middle English text series is to make available to teachers and students texts which occupy an important place in the literary and cultural canon but which have not been readily available in student editions.
-
-The focus is upon literature adjacent to that normally in print, which teachers need in compiling the syllabi they wish to teach. The editions maintain the linguistic integrity of the original works but within the parameters of modern reading conventions.
-
-We are grateful to the National Endowment for the Humanities for its generous support in creating and maintaining this site.
-
-NOTE: Depending on the settings of your screen and your browser, you may find that some of the TEAMS texts do not fit on your screen. You can correct this problem by adjusting the font size in your browser. In Netscape, e.g., select VIEW, then DECREASE FONT.
-The TEAMS Middle English Texts are published for TEAMS (The Consortium for the Teaching of the Middle Ages) in association with the University of Rochester by Medieval Institute Publications, Western Michigan University, Kalamazoo, Michigan. The General Editor of the series is Russell Peck of the University of Rochester. The texts are made available here by permission of the Executive Committee of TEAMS and The Medieval Institute at Western Michigan University. Please address questions about this website to Alan Lupack (alupack@ library.rochester.edu).
-
-The goal of the TEAMS Middle English text series is to make available to teachers and students texts which occupy an important place in the literary and cultural canon but which have not been readily available in student editions.
-
-The focus is upon literature adjacent to that normally in print, which teachers need in compiling the syllabi they wish to teach. The editions maintain the linguistic integrity of the original works but within the parameters of modern reading conventions.
-
-We are grateful to the National Endowment for the Humanities for its generous support in creating and maintaining this site.
-
-NOTE: Depending on the settings of your screen and your browser, you may find that some of the TEAMS texts do not fit on your screen. You can correct this problem by adjusting the font size in your browser. In Netscape, e.g., select VIEW, then DECREASE FONT.
-\chapter{Bye, World}
-...and here comes to the end.
+\input{apx1.tex}
 
 % Pages with extra content of the document
 \appendix

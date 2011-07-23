@@ -1,0 +1,97 @@
+\chapter{Introduction}
+
+We are inside the information era, it is even said that information means money. It is clear then, that acceding to this information
+everywhere and every time is an important issue. Thanks to telecommunications advances and the need of this information, it is
+possible now to be permanently connected. Technology has made also possible that devices are smaller, cheaper and more powerful
+every day (\ac{PDA}, Mobile Telephones, \ac{MP3} Players \ldots). All this together has created the \ac{WPAN} concept, a way 
+all this devices can be interconnected, so they can complement each other to obtain applications beyond our imagination. The 
+problem in all this magic world is an old problem, energy. All this devices are supplied with batteries, what means that their 
+lives are not so long until we must plug them in to continue working with them. This is the reason why making them to reduce its 
+energy consumption, is a really important issue.
+
+With the objective of creating an standard for this \ac{WPAN}, the \ac{IEEE}, created the 802.15 group, who created different 
+kind of networks attending to the data rate. Among this kind of networks it is found the 802.15.4, designed for low data rates but 
+also for low consume. This standard is the one this work is based in.
+
+\section{Why \ac{WSN}?}
+
+As a cabled technology would be unpractical for a topology where free of movement is a statement, it is clear the need of a 
+wireless technology, but why did we choose 802.15.4 \ac{WSN} and not other alternatives?
+
+One possible alternative would have been Wi-Fi. This technology is based in \ac{IEEE} 802.11 standard, and with bit rates up to
+54 Mbps and much bigger ranges, would be a good alternative, but its energy consumption is much bigger than for 802.15.4 \ac{WSN}.
+
+In the same group as \ac{WSN}, it can be found the Bluetooth (\ac{IEEE} 802.15.1), this standard has still bigger bit rates as 
+802.15.4, but its energy consumption is still bigger, as it is not thought for this kind of applications. Also Bluetooth scalability
+is not as good as for 802.15.4.
+
+This reasons together with the low prices of 802.15.4 compared with the other alternatives, made this work use the \ac{IEEE} 802.15.4 
+standard as the standard for building a High Configurable Protocol for localization. The idea is that using this protocol we could
+get a little node working with a couple of AA batteries for many months or even some years.
+
+\section{Applications}
+
+\ac{WSN} applications are wide and diverse, this application areas are just some examples:
+
+\begin{itemize}
+ \item \textbf{Medicine.} As the nodes size is every time smaller, some patients with problems which should be controlled all the time,
+could find this networks really useful.
+ \item \textbf{Security environments.} Places with toxic substances, where there cannot be humans, and where some parameters should be measured,
+or delicate places that need the presence of sensors 24/7 to check that there was no intruder. This could be done also by \ac{WSN}.
+ \item \textbf{Environmental sensors.} Vast areas like forests, sees, coasts \ldots that need to be controlled in some parameters like
+humidity, temperature, fire, seismic activity \ldots which are impossible to be controlled by humans, are good controlled with sensors
+and at the same time they minimize the environmental impact.
+ \item \textbf{Industrial sensors.} The size of the sensors makes possible to access every corner of the industrial process, and it is also
+possible to control much more parameters.
+ \item \textbf{Indoor positioning.} Sensor make possible to be guided inside a building we don't know, or even to people with some handicaps.
+They are also good to locate determinate objects in a building.
+ \item \textbf{Home automation.} Every element in our house could have a sensor inside, they could communicate among them and even notify us
+about some alerts or needs from the house, they could even check how we feel to prepare the house in a specific way.
+\end{itemize}
+
+Table \ref{wsn_applications} was made from all this applications and many more. This table reflects a summary and divide and group
+the applications according to the priority in energy, accuracy and emergency, but also if the involved device needs to obtain some information
+from the network. Priority in energy means that we don't care much about the other parameters, we just need to save energy, the same happens 
+with accuracy and with emergency, where the rest doesn't matter, the exact position or speed are needed.
+
+\begin{table}[h]\footnotesize
+\begin{center}
+ \begin{tabular}{lcccc}
+  \noalign{\vspace*{0.5cm}}
+  & \textbf{Consume} & \textbf{Accuracy} & \textbf{Emergency} & \textbf{Do I need} \\
+  & \textbf{Priority} & \textbf{Priority} & \textbf{Priority} & \textbf{some data?} \\
+  \hline\hline
+  \textbf{Guided System} & High & High & Very High & Yes \\
+  \hline 
+  \textbf{Routine inspection in mobile stations} & Very High & High & Low & No \\
+  \hline
+  \textbf{Objects localization with accuracy} & High & High & Low & No \\
+  \hline
+  \textbf{Get some data about my position} & High & High & Low & Yes \\
+  \hline
+  \textbf{Objects localization with emergency} & High & Low & High & No \\
+  \hline
+  \textbf{Big objects with battery localization} & Very High & Low & Low & No \\
+  \hline
+  \textbf{Routine inspection in fixed stations} & Very High & Very Low & Low & No \\
+  \hline
+  \textbf{Get position with low energy consumption} & Very High & Low & Low & Yes \\
+  \hline
+  \textbf{Emergency measurement in mobile stations} & Low & High & Very High & No \\
+  \hline
+  \textbf{Emergency measurement in fixed stations} & Low & Very Low & Very High & No \\
+  \hline
+  \textbf{Plugged in objects localization} & Very Low & Low & Low & No \\
+  \hline
+  \textbf{High accuracy localization at any price} & Very Low & Very High & Very Low & No \\
+  \hline
+  \end{tabular}
+ \caption{Summed and grouped \ac{WSN} applications}
+ \label{wsn_applications}
+\end{center}
+\end{table}
+
+
+\section{Challenges and Objectives}
+
+\section{Document structure}

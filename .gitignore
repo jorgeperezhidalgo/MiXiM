@@ -36,6 +36,9 @@ tests*
 !.gitignore
 !*.tex
 !*.eps
+!*.kilepr
+!*.dia
+!*.bib
 
 examples/ieee802154Narrow/NetworkStackTrafficGen.cc
 examples/ieee802154Narrow/NetworkStackTrafficGen.h
