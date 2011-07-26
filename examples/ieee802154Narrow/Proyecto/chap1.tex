@@ -1,32 +1,33 @@
 \chapter{Introduction}
+\label{chap:introduction}
 
 We are inside the information era, it is even said that information means money. It is clear then, that acceding to this information
-everywhere and every time is an important issue. Thanks to telecommunications advances and the need of this information, it is
-possible now to be permanently connected. Technology has made also possible that devices are smaller, cheaper and more powerful
+everywhere and every time is an important issue. Thanks to telecommunication advances and the need of this information, it is
+possible now to be permanently connected. Technology has also made devices smaller, cheaper and more powerful
 every day (\ac{PDA}, Mobile Telephones, \ac{MP3} Players \ldots). All this together has created the \ac{WPAN} concept, a way 
 all this devices can be interconnected, so they can complement each other to obtain applications beyond our imagination. The 
-problem in all this magic world is an old problem, energy. All this devices are supplied with batteries, what means that their 
-lives are not so long until we must plug them in to continue working with them. This is the reason why making them to reduce its 
-energy consumption, is a really important issue.
+problem in this idyllic world is an old problem, energy. All this devices are supplied with batteries, what means that their 
+lives are not so long until we must plug them in to continue working with them. This is the reason why it is necessary to build them
+a way they reduce its energy consumption.
 
-With the objective of creating an standard for this \ac{WPAN}, the \ac{IEEE}, created the 802.15 group, who created different 
+With the objective of creating an standard for this \ac{WPAN}, the \ac{IEEE}, created the 802.15 group, which created different 
 kind of networks attending to the data rate. Among this kind of networks it is found the 802.15.4, designed for low data rates but 
-also for low consume. This standard is the one this work is based in.
+also for low consumption. This standard is the one this work is based on.
 
 \section{Why \ac{WSN}?}
 
-As a cabled technology would be unpractical for a topology where free of movement is a statement, it is clear the need of a 
+As a cabled technology would be unpractical for a topology where free of movement is a must, it is clear the need of a 
 wireless technology, but why did we choose 802.15.4 \ac{WSN} and not other alternatives?
 
 One possible alternative would have been Wi-Fi. This technology is based in \ac{IEEE} 802.11 standard, and with bit rates up to
 54 Mbps and much bigger ranges, would be a good alternative, but its energy consumption is much bigger than for 802.15.4 \ac{WSN}.
 
 In the same group as \ac{WSN}, it can be found the Bluetooth (\ac{IEEE} 802.15.1), this standard has still bigger bit rates as 
-802.15.4, but its energy consumption is still bigger, as it is not thought for this kind of applications. Also Bluetooth scalability
+802.15.4, but its energy consumption is still too big, as it is not thought for this kind of applications. Also Bluetooth scalability
 is not as good as for 802.15.4.
 
 This reasons together with the low prices of 802.15.4 compared with the other alternatives, made this work use the \ac{IEEE} 802.15.4 
-standard as the standard for building a High Configurable Protocol for localization. The idea is that using this protocol we could
+standard as the standard for building a High Configurable Protocol for localization. The idea is that using this protocol we should
 get a little node working with a couple of AA batteries for many months or even some years.
 
 \section{Applications}
@@ -37,7 +38,7 @@ get a little node working with a couple of AA batteries for many months or even 
  \item \textbf{Medicine.} As the nodes size is every time smaller, some patients with problems which should be controlled all the time,
 could find this networks really useful.
  \item \textbf{Security environments.} Places with toxic substances, where there cannot be humans, and where some parameters should be measured,
-or delicate places that need the presence of sensors 24/7 to check that there was no intruder. This could be done also by \ac{WSN}.
+or delicate places that need the presence of sensors 24/7 to check that there was no intruders. This could be done also by \ac{WSN}.
  \item \textbf{Environmental sensors.} Vast areas like forests, sees, coasts \ldots that need to be controlled in some parameters like
 humidity, temperature, fire, seismic activity \ldots which are impossible to be controlled by humans, are good controlled with sensors
 and at the same time they minimize the environmental impact.
@@ -49,14 +50,14 @@ They are also good to locate determinate objects in a building.
 about some alerts or needs from the house, they could even check how we feel to prepare the house in a specific way.
 \end{itemize}
 
-Table \ref{wsn_applications} was made from all this applications and many more. This table reflects a summary and divide and group
-the applications according to the priority in energy, accuracy and emergency, but also if the involved device needs to obtain some information
-from the network. Priority in energy means that we don't care much about the other parameters, we just need to save energy, the same happens 
-with accuracy and with emergency, where the rest doesn't matter, the exact position or speed are needed.
+Table \ref{tab:wsn_applications} was made from all this applications and many more. This table reflects a summary, and also divides and groups
+the applications according to the priority in energy, accuracy and emergency, and also if the involved device needs to obtain some information
+from the network. Priority in energy means that the other parameters do not matter too much, saving energy is the important task. 
+The same happens with accuracy and with emergency, where the rest does not matter, the exact position or speed are needed.
 
 \begin{table}[h]\footnotesize
 \begin{center}
- \begin{tabular}{lcccc}
+ \begin{tabular}{l||cccc}
   \noalign{\vspace*{0.5cm}}
   & \textbf{Consume} & \textbf{Accuracy} & \textbf{Emergency} & \textbf{Do I need} \\
   & \textbf{Priority} & \textbf{Priority} & \textbf{Priority} & \textbf{some data?} \\
@@ -87,11 +88,64 @@ with accuracy and with emergency, where the rest doesn't matter, the exact posit
   \hline
   \end{tabular}
  \caption{Summed and grouped \ac{WSN} applications}
- \label{wsn_applications}
+ \label{tab:wsn_applications}
 \end{center}
 \end{table}
 
+Later on, this kind of applications will derive in 4 different types of nodes in our network.
 
 \section{Challenges and Objectives}
 
+The market demands low cost devices, able to build a network in a easy way, and capable to measure different parameters and react to them
+or answer to determinate orders received from a central computer. As it was already said, the ability to move is an important issue, so is 
+also localization, as the position is needed to be able to communicate with a device and to provide it the best information possible.
+
+This standard nodes have not a big range, that is why all the end devices cannot connect directly with a central computer and a routers network 
+is needed. This, makes necessary again a system to locate where the end devices are, as a routing path is needed to send the information.
+
+All this, and the reasons stated before, are the reasons why the 802.15.4 standard was chosen to build up a High Configurable Protocol for 
+localization with \ac{WSN}. But this is not just perfect, some challenges are still to solve:
+
+\begin{itemize}
+ \item \textbf{Energy.} End devices with movement capability are supplied with batteries, and unless we want to change the battery often,
+a good protocol making the battery life longer is needed.
+ \item \textbf{Scalability.} Networks can be small at the beginning, but they can grow rapidly and decrease again. A network that adapts 
+dynamically to new conditions is also needed.
+ \item \textbf{Adaptability.} Routers and above all end devices might be configured to save energy but an emergency could happen where they 
+must communicate immediately and with reliability with a central computer, this is incompatible with energy saving. Hence, devices must be
+adaptable to the circumstances.
+ \item \textbf{Simplicity.} Devices must remain low cost and small, this means usually that hardware components have not a good performance
+or big memory capacities. This is a strong constraint in the design, and that is why the protocol must remain simple.
+\end{itemize}
+
+The objective of this Final Project is hence, the design of a Protocol based in \ac{IEEE} 802.15.4 standard, able to deal with all the 
+challenges before. But the objective is also the design of a robust and complete framework where future works could add more functionalities
+or improve the existing ones without worrying about the communication or basic functionality.
+As this is a design stage, simulation was chosen instead of testing directly on real devices. The simulation will be done with the Discrete 
+Events Simulator OMNet++ 4 using the \ac{MiXiM} framework, and the results will be treated with \ac{MATLAB}, this tools will be commented later on.
+
 \section{Document structure}
+
+This Final Project tries to explain in a detailed way the design and test of a High Configurable Protocol for localization in \ac{WSN}. To 
+fulfill this, the following document structure will be used:
+
+\begin{itemize}
+ \item \textbf{Chapter \ref{chap:introduction}: \nameref{chap:introduction}.} In the current chapter, different wireless solutions, applications
+for \ac{WSN}, challenges and objectives were exposed.
+ \item \textbf{Chapter \ref{chap:802154standard}: \nameref{chap:802154standard}.} In this chapter, aspects of the 802.15.4 standard needed
+in the following chapters are presented. This chapter does not mean to be a detailed explanation of the standard.
+ \item \textbf{Chapter \ref{chap:protocoldesign}: \nameref{chap:protocoldesign}.} This chapter comments briefly, existing solutions for the
+presented challenges and proposes and explains a new protocol.
+ \item \textbf{Chapter \ref{chap:protocolimplementation}: \nameref{chap:protocolimplementation}.} Here a detailed description of the protocol 
+implementation is presented, preceded by an explanation of the tools, the functionalities they already implemented and how they were
+improved.
+ \item \textbf{Chapter \ref{chap:simulationandresults}: \nameref{chap:simulationandresults}.} Several scenarios are proposed, which after their
+simulation, give some results that will be analyzed. The whole protocol will be simulated, but this chapter will also focus on one of the 
+phases where deeper results will be obtained.
+ \item \textbf{Chapter \ref{chap:conclusionsandfuture}: \nameref{chap:conclusionsandfuture}.} Conclusions from previous chapters will be 
+exposed followed by possible new paths to follow after this work and improvements that could be done.
+ \item \textbf{Appendix \ref{chap:installation}: \nameref{chap:installation}.} Detailed manual how to install and configure the source code in 
+the \ac{CD}, to make easier a new person to continue working with it. Introduction to the version control system GIT, used in the development of 
+this Final Project.
+\end{itemize}
+
