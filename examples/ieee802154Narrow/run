@@ -1,15 +1,19 @@
 
-rm -Rf results
-mkdir results
-rm -f csv/scalar*
-rm -f csv/vector*
-./ieee802154Narrow -f omnetpp.ini -c RandomNodes -u Cmdenv
+#rm -Rf results
+#mkdir results
+#rm -f csv/scalar*
+#rm -f csv/vector*
+./ieee802154Narrow -f omnetpp.ini -c Config1 -u Cmdenv
+#./ieee802154Narrow -f omnetpp.ini -c Config2 -u Cmdenv
+#./ieee802154Narrow -f omnetpp.ini -c Config3 -u Cmdenv
+#./ieee802154Narrow -f omnetpp.ini -c Config4 -u Cmdenv
+#./ieee802154Narrow -f omnetpp.ini -c Config5 -u Cmdenv
 
-T='$T'
+#T='$T'
 
-for (( i = 1; i <= 30; i++ ))
-do
-	scavetool scalar -p "module(**node**) AND (nbFramesWith*)" -O ./csv/scalar-N=30.csv -F csv ./results/RandomNodes-\$sizeX\=1000\,\ \$sizeY\=1000\,\ \$numAnchors\=30\,\ \$T=$i\,*.sca
-	scavetool scalar -p "module(**node**) AND (nbFramesWith*)" -O ./csv/scalar-N=70.csv -F csv ./results/RandomNodes-\$sizeX\=1000\,\ \$sizeY\=1000\,\ \$numAnchors\=70\,\ \$T=$i\,*.sca
-done
+#for (( i = 1; i <= 30; i++ ))
+#do
+#	scavetool scalar -p "module(**node**) AND (nbFramesWith*)" -O ./csv/scalar-N=30.csv -F csv ./results/RandomNodes-\$sizeX\=1000\,\ \$sizeY\=1000\,\ \$numAnchors\=30\,\ \$T=$i\,*.sca
+#	scavetool scalar -p "module(**node**) AND (nbFramesWith*)" -O ./csv/scalar-N=70.csv -F csv ./results/RandomNodes-\$sizeX\=1000\,\ \$sizeY\=1000\,\ \$numAnchors\=70\,\ \$T=$i\,*.sca
+#done
 

@@ -19,8 +19,15 @@ void AppLayer::initialize(int stage)
 		syncPacketsPerSyncPhase = par("syncPacketsPerSyncPhase");
 		if (syncPacketsPerSyncPhase <= 0) error("You must introduce a positive number of periods.");
 
-		packetLength = par("packetLength");
-		packetTime = par("packetTime");
+	   	syncPacketLength = par("syncPacketLength");
+	   	normalReportPacketLength = par("normalReportPacketLength");
+	   	type2ReportPacketLength = par("type2ReportPacketLength");
+	   	askReportPacketLength = par("askReportPacketLength");
+	   	requestPacketLength = par("requestPacketLength");
+	   	broadcastPacketLength = par("broadcastPacketLength");
+	   	answerANtoMNPacketLength = par("answerANtoMNPacketLength");
+	   	bcastMixANPacketLength = par("bcastMixANPacketLength");
+
 		destination = par("destination");
 
 		syncPacketTime = par("syncPacketTime");

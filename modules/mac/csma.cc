@@ -148,7 +148,7 @@ void csma::initialize(int stage) {
 		fullPhaseTime = getParentModule()->getParentModule()->getParentModule()->par("fullPhaseTime");
 		timeComSinkPhase = getParentModule()->getParentModule()->getParentModule()->par("timeComSinkPhase");
 		smallTime = 0.000001;			//  1 us
-		guardTransmitTime = 0.002;		//  2 ms, we use this time as guard time at the end of every phase
+		guardTransmitTime = 0.010;		//  2 ms, we use this time as guard time at the end of every phase
 		timeFromBackOffToTX = ccaDetectionTime + aTurnaroundTime + rxSetupTime + guardTransmitTime;
 
 		computer = cc->findNic(getParentModule()->getParentModule()->getParentModule()->getSubmodule("computer", 0)->findSubmodule("nic"));

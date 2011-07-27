@@ -1163,7 +1163,8 @@ void NodeAppLayer::sendBroadcast()
 	ApplPkt *pkt = new ApplPkt("Broadcast Message with CSMA", SYNC_MESSAGE_WITH_CSMA);
 
 	pkt->setNumberOfBroadcasts(numberOfBroadcasts);
-	pkt->setBitLength(packetLength);
+	pkt->setBitLength(broadcastPacketLength);
+	//pkt->setBitLength(88);
 	pkt->setSrcAddr(myNetwAddr);
 	pkt->setRealSrcAddr(myNetwAddr);
 	pkt->setDestAddr(destination);
@@ -1179,6 +1180,7 @@ void NodeAppLayer::sendReport()
 	int selectedAnchor = -1;
 	double highestRSSI = 0.0;
 	int netwAddr;
+	int listenedRSSI = 0; // Store how much RSSI did we listened to
 
 	ApplPkt *pkt = new ApplPkt("Report with CSMA", REPORT_WITH_CSMA);
 
@@ -1188,6 +1190,9 @@ void NodeAppLayer::sendReport()
 		if ((listRSSI[i].RSSIAdition / listRSSI[i].counterRSSI) > highestRSSI) {
 			highestRSSI = listRSSI[i].RSSIAdition / listRSSI[i].counterRSSI;
 			selectedAnchor = i;
+		}
+		if ((listRSSI[i].RSSIAdition / listRSSI[i].counterRSSI) > 0) {
+			listenedRSSI ++;
 		}
 	}
 
@@ -1211,10 +1216,23 @@ void NodeAppLayer::sendReport()
 	}
 
 	if ((netwAddr != 0) || (anchorDestinationRequest != 0)) { // If we have a destination address, now meassured or from the previous ask report
-        pkt->setBitLength(packetLength);
 		pkt->setSrcAddr(myNetwAddr);
 		pkt->setRealSrcAddr(myNetwAddr);
 		pkt->setCSMA(true);
+
+		if (nodeConfig != NodeAppLayer::LISTEN_AND_CALCULATE) { // If MN is not type 2 then the report will be a normal one with measurements info to add to packetsize
+			pkt->setBitLength(normalReportPacketLength + 2*8*listenedRSSI); // 2 bytes per RSSI
+			//pkt->setBitLength(88);
+			EV << "I read " << listenedRSSI << " RSSIs" << endl;
+		} else { // It is type 2, in the extra report sends the position calculations it made, we have to change packet size according to this
+			pkt->setBitLength(type2ReportPacketLength + 6*8*positionsSavedCounter); // 6 bytes per position
+			//pkt->setBitLength(88);
+			EV << "I sent " << positionsSavedCounter << " positions" << endl;
+			int old_positionsSavedCounter = positionsSavedCounter; // positionsSavedCounter changes during the for, that is why making a copy
+			for (int i = 0; i < old_positionsSavedCounter; i++) {
+				extractElementFIFO(); // Empties the queue with positions
+			}
+		}
 
 		// FLAG management
 		if (askForRequest) {
@@ -1223,16 +1241,18 @@ void NodeAppLayer::sendReport()
 			EV << "Selected Anchor for ASK Report with MAC Addr: " << anchorDestinationRequest << endl;
 			requestPacket = true;
 			askForRequest = false;
-			EV << "Dentro" << endl;
+	        pkt->setBitLength(pkt->getBitLength() + askReportPacketLength);
 		} else if (requestPacket) {
 			pkt->setRequestPacket(true); // Set Request Flag = true
 			pkt->setDestAddr(anchorDestinationRequest); // Redefine Dest Addr
 			pkt->setRealDestAddr(anchorDestinationRequest); // Redefine Real Dest Addr
 			EV << "Selected Anchor for Request Report with MAC Addr: " << anchorDestinationRequest << endl;
 			requestPacket = false;
-			EV << "Dentro2" << endl;		}
+	        pkt->setBitLength(pkt->getBitLength() + requestPacketLength);
+		} else {
+		}
 
-		EV << "Send Report to Anchor with Netw Addr " << pkt->getDestAddr() << ", with end destination Netw Addr " << pkt->getRealDestAddr() << endl;
+		EV << "Send Report to Anchor with Netw Addr " << pkt->getDestAddr() << ", with end destination Netw Addr " << pkt->getRealDestAddr() << " a packet of size " << pkt->getBitLength() / 8 << " bytes" << endl;
 		transfersQueue.insert(pkt->dup()); // Make a copy of the sent packet till the MAC says it's ok or to retransmit it when something fails
 		sendDown(pkt);
 

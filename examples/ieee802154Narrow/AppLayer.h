@@ -55,8 +55,15 @@ protected:
 
 	BaseConnectionManager* cc;			// Pointer to the Propagation Model module
 
-	int packetLength;					// Standard Packet Length, in some cases when we transmit info we'll have to change it
-	simtime_t packetTime;				// We'll have to change the packet time according to the Packet Length
+	// All of them except syncPacket have a + 6 bytes due to the extra bytes needed by the long address for Mobile Nodes, it corresponds to MAC layer but here is easier to add the offset
+   	int syncPacketLength;				// Sync Packet Length, includes 1 byte status, 4 byte timestamp and 2 + 2 + 2 bytes possition
+   	int normalReportPacketLength;		// Rutinary Report Packet Length, includes 1 byte status and should be added 2 bytes x each listened Anchor, only exists in MN type 1 and 4
+   	int type2ReportPacketLength;		// MN type 2 Report Packet Length, includes 1 byte status and should be added (2 + 2 + 2 = 6) position bytes x each position calculated, only MN type 2
+   	int askReportPacketLength;			// Ask Report Packet Length, includes 1 byte status and 10 bytes information. This is the report to ask for information to the AN in next period
+   	int requestPacketLength;			// Request Packet Length, includes 1 byte status and 1 aditional byte information. This request asks for the theoretically already available information in AN
+   	int broadcastPacketLength;			// Broadcast Packet Length, includes 1 byte status and 1 aditional byte information. This is the broadcast packet sent by MN type 3 and 4
+   	int answerANtoMNPacketLength;		// Report sent by AN to MN when MN makes a request, includes 1 byte status and 10 bytes info.
+   	int bcastMixANPacketLength;			// Report sent by AN when it receives broadcasts from a MN, sends a report per broadcast, includes 1 byte status and 2 bytes RSSI info.
 
 	long destination;					// Broadcast destination, usually -1
 

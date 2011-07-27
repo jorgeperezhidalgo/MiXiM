@@ -164,6 +164,8 @@ void AnchorAppLayer::handleSelfMsg(cMessage *msg)
 			for (int i = 0; i < numberOfNodes; i++) {
 				if (broadcastCounter[i] > 0) { // If the AN has received at least one Broadcast
 					ApplPkt *pkt = new ApplPkt("Report with CSMA", REPORT_WITH_CSMA);
+					pkt->setBitLength(bcastMixANPacketLength);
+					//pkt->setBitLength(88);
 					pkt->setRealDestAddr(getParentModule()->getParentModule()->getSubmodule("computer", 0)->findSubmodule("nic"));
 					pkt->setDestAddr(pkt->getRealDestAddr());
 					pkt->setSrcAddr(myNetwAddr);
@@ -316,7 +318,8 @@ void AnchorAppLayer::handleLowerMsg(cMessage *msg)
 							// -------------------------------------------------------------------------------------------
 							// Change the packet info to answer the mobile node
 							EV << "The Anchor answers immediately to the Mobile Node Request packet" << endl;
-							pkt->setBitLength(packetLength);
+							pkt->setBitLength(answerANtoMNPacketLength);
+							//pkt->setBitLength(88);
 							pkt->setDestAddr(pkt->getSrcAddr());
 							pkt->setRealDestAddr(pkt->getRealSrcAddr());
 							pkt->setSrcAddr(myNetwAddr);
@@ -533,7 +536,8 @@ void AnchorAppLayer::sendBroadcast()
 {
 	// It doesn't matter if we have slotted version or not, CSMA must be disabled, we control random time and retransmission in Appl layer
 	ApplPkt *pkt = new ApplPkt("SYNC_MESSAGE_WITHOUT_CSMA", SYNC_MESSAGE_WITHOUT_CSMA);
-	pkt->setBitLength(packetLength);
+	pkt->setBitLength(syncPacketLength);
+	//pkt->setBitLength(88);
 
 	pkt->setSrcAddr(myNetwAddr);
 	pkt->setRealSrcAddr(myNetwAddr);
