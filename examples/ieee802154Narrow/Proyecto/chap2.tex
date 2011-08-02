@@ -41,10 +41,12 @@ among them but also with other \ac{RFD}. They are usually plugged in, so energy 
 information or act as routers to redirect this information. In every network, there should be one \ac{FFD} who works as \ac{WPAN}
 Coordinator, depending on the topology (see Figure \ref{fig:WPAN_Network_Topologies}) all communications must go through the 
 Coordinator or not. This Coordinator is usually connected to a central computer that deals with the complexer tasks in the system 
-and distributes all the information to the rest of the devices.
+and distributes all the information to the rest of the devices. This devices will be refered as \ac{AN} during this work, as they
+are the ones which would be fixed.
  \item \acl{RFD}, this devices have a reduce capacity and functionality as they are thought for easy tasks. This devices are
 usually powered with battery and that is why the energy consumption reduction must be focused on them. They can connect only
-\ac{FFD} and cannot handle high traffic loads.
+\ac{FFD} and cannot handle high traffic loads. This devices will be refered as \ac{MN} during this work, as they are the ones with 
+movement possibility.
 
 \vspace*{1cm}
 
@@ -165,7 +167,7 @@ but if the maximum is reached, all process gets canceled and \ac{MAC} layer info
  \begin{center}
   \includegraphics[width=0.5\textwidth]{CSMACA.eps}
  \end{center}
- \caption{Non-Slotted \ac{CSMA/CA} Algorithm}
+ \caption{Non-Slotted \ac{CSMA/CA} Algorithm \cite{IEEE802.15.4-2003}}
  \label{fig:CSMACA}
 \end{figure}
 
@@ -216,7 +218,7 @@ just the frames relative to this mode will be explained. Figure \ref{fig:MACFram
  \begin{center}
   \includegraphics[width=0.7\textwidth]{MACFrame.eps}
  \end{center}
- \caption{Data and \ac{ACK} \ac{MAC} Frames}
+ \caption{Data and \ac{ACK} \ac{MAC} Frames \cite{IEEE802.15.4-2003}}
  \label{fig:MACFrame}
 \end{figure}
 
