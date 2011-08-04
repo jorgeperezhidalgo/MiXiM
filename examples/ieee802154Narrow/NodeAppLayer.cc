@@ -118,6 +118,7 @@ void NodeAppLayer::finish()
 	recordScalar("Number of Reports really for me received in MN", nbReportsForMeReceived);
 	recordScalar("Number of Answers for Requests out of waiting time", nbAnswersRequestOutOfTime);
 	recordScalar("Number of Requests without answer from AN", nbRequestWihoutAnswer);
+	recordScalar("nodeConfig",nodeConfig);
 }
 
 void NodeAppLayer::handleSelfMsg(cMessage *msg)

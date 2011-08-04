@@ -78,6 +78,28 @@ void EnergyConsumption::finish() {
 	recordScalar("Total Idle Time", totalTimeIdle);
 	recordScalar("Total CCA Time", totalTimeCCA);
 	recordScalar("Total BackOff Time", totalTimeBackOff);
+	double totalPowerUControler	= powerUControler * (totalTimeCalculating.dbl() + totalTimeOn.dbl());
+	double totalPowerSleep 		= powerSleep * totalTimeSleep.dbl();
+	double totalPowerRx 			= powerRx * (totalTimeRx.dbl() + totalTimeCCA.dbl());
+	double totalPowerTx 			= powerTx * totalTimeTx.dbl();
+	double totalPowerIdle			= powerIdle * (totalTimeIdle.dbl() + totalTimeBackOff.dbl());
+	double totalPowerIdleToTx		= powerIdleToTx * totalTimeIdleToTx.dbl();
+	double totalPowerIdleToRx		= powerIdleToRx * totalTimeIdleToRx.dbl();
+	double totalPowerIdleToSleep	= powerIdleToSleep * totalTimeIdleToSleep.dbl();
+	double totalPowerTxToRx		= powerTxToRx * totalTimeTxToRx.dbl();
+	double totalPowerTxToSleep		= powerTxToSleep * totalTimeTxToSleep.dbl();
+	double totalPowerTxToIdle		= powerTxToIdle * totalTimeTxToIdle.dbl();
+	double totalPowerRxToTx		= powerRxToTx * totalTimeRxToTx.dbl();
+	double totalPowerRxToSleep		= powerRxToSleep * totalTimeRxToSleep.dbl();
+	double totalPowerRxToIdle		= powerRxToIdle * totalTimeRxToIdle.dbl();
+	double totalPowerSleepToRx		= powerSleepToRx * totalTimeSleepToRx.dbl();
+	double totalPowerSleepToIdle	= powerSleepToIdle * totalTimeSleepToIdle.dbl();
+    double totalPower = totalPowerUControler + totalPowerSleep + totalPowerRx +
+    		totalPowerTx + totalPowerIdle + totalPowerIdleToTx + totalPowerIdleToRx +
+    		totalPowerIdleToSleep + totalPowerTxToRx + totalPowerTxToSleep + totalPowerTxToIdle +
+    		totalPowerRxToTx + totalPowerRxToSleep + totalPowerRxToIdle + totalPowerSleepToRx +
+    		totalPowerSleepToIdle;
+    recordScalar("totalPower", totalPower);
 }
 
 void EnergyConsumption::updateStateStatus(bool transmitting, int macState, int phyState) {

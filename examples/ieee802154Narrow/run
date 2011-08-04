@@ -4,16 +4,20 @@
 #rm -f csv/scalar*
 #rm -f csv/vector*
 ./ieee802154Narrow -f omnetpp.ini -c Config1 -u Cmdenv
-#./ieee802154Narrow -f omnetpp.ini -c Config2 -u Cmdenv
-#./ieee802154Narrow -f omnetpp.ini -c Config3 -u Cmdenv
-#./ieee802154Narrow -f omnetpp.ini -c Config4 -u Cmdenv
-#./ieee802154Narrow -f omnetpp.ini -c Config5 -u Cmdenv
+./ieee802154Narrow -f omnetpp.ini -c Config2 -u Cmdenv
+./ieee802154Narrow -f omnetpp.ini -c Config3 -u Cmdenv
+./ieee802154Narrow -f omnetpp.ini -c Config4 -u Cmdenv
+./ieee802154Narrow -f omnetpp.ini -c Config5 -u Cmdenv
+./ieee802154Narrow -f omnetpp.ini -c Config6 -u Cmdenv
+./ieee802154Narrow -f omnetpp.ini -c Config7 -u Cmdenv
+./ieee802154Narrow -f omnetpp.ini -c Config8 -u Cmdenv
+./ieee802154Narrow -f omnetpp.ini -c Config9 -u Cmdenv
+./ieee802154Narrow -f omnetpp.ini -c Config10 -u Cmdenv
 
 #T='$T'
 
-#for (( i = 1; i <= 30; i++ ))
-#do
-#	scavetool scalar -p "module(**node**) AND (nbFramesWith*)" -O ./csv/scalar-N=30.csv -F csv ./results/RandomNodes-\$sizeX\=1000\,\ \$sizeY\=1000\,\ \$numAnchors\=30\,\ \$T=$i\,*.sca
-#	scavetool scalar -p "module(**node**) AND (nbFramesWith*)" -O ./csv/scalar-N=70.csv -F csv ./results/RandomNodes-\$sizeX\=1000\,\ \$sizeY\=1000\,\ \$numAnchors\=70\,\ \$T=$i\,*.sca
-#done
-
+scavetool scalar -p "module(**anchor**) AND (Number*of*AN*Rep*)" -O ./csv/graphic1.csv -F csv ./results/Config*-*.sca
+scavetool scalar -p "module(**anchor**) AND ((Erased*) OR (Dropped*Packets*Time*Phase) OR (Dropped*Packets*App*Queue*Full))" -O ./csv/graphic2.csv -F csv ./results/Config*-*.sca
+scavetool scalar -p "module(**node**) AND ((nbBackoffs) OR (nbMissedAcks))" -O ./csv/graphic3.csv -F csv ./results/Config*-*.sca
+scavetool scalar -p "(module(**node**) OR module(**anchor**)) AND (meanBackoff)" -O ./csv/graphic4.csv -F csv ./results/Config*-*.sca
+scavetool scalar -p "module(**node**) AND (totalPower)" -O ./csv/graphic5.csv -F csv ./results/Config*-*.sca
