@@ -2,36 +2,39 @@
 \label{chap:protocoldesign}
 
 In the state of the art, there are different protocols constructed over \ac{IEEE} 802.15.4, like ZigBee, WirelessHART, 6LoWPAN \ldots \ some
-are prepared for low consumption, others build different applications, but almost none of them are focused in localization. In the
-department \ac{LPL} and \ac{OLP} \cite{LPLandOLP} protocols were proposed for this purpose. This protocols are based in \ac{IEEE} 802.15.4 and specifically 
-designed for localization. In the next section a brief overview will be given, for a deeper view, please consult \cite{LPLandOLP}.
+are prepared for low consumption, but almost none of them are focused in localization. To cover this necessity, as an alternative, 
+\ac{LPL} and \ac{OLP} \cite{LPLandOLP} protocols were proposed in the department. This protocols are based in 
+\ac{IEEE} 802.15.4 and are specifically designed for low consumption localization. In the next sections a brief overview will be given, 
+for a deeper view, please consult \cite{LPLandOLP}.
 
 \section{\ac{LPL} and \ac{OLP}}
 
-\ac{LPL} and \ac{OLP} \cite{LPLandOLP}, are two protocols designed for localization and based in \ac{RSSI} values. This values give an idea of 
-the received signal strength in the device, and have the advantage that this information is already in all packets a device receives, there
-is no need of special hardware or data to be prepared or obtained like in other methods (ultra wide band for example). But \ac{RSSI} values have 
-a big problem for localization, its dispersion is very big, making the localization resolution (in some cases up to many meters 
-\cite{fingerprint}) bad for some applications. 
+\ac{LPL} and \ac{OLP} \cite{LPLandOLP}, are two protocols designed for localization, and specifically localization with \ac{RSSI} 
+values. This values give an idea of the received signal strength in the device, knowing with this, that the higher this value is,
+the nearer the device is. \ac{RSSI} have the big advantage that its value is already in all packets a device receives, there
+is hence, no need of special hardware or data to be prepared or obtained like in other methods (Ultra Wide Band e.g.). But \ac{RSSI} 
+values have a big problem for localization, its dispersion is very big, making the localization resolution (in some cases up to 
+many meters \cite{fingerprint}) bad for some applications. 
 
-This resolution problem, can be solved through some approaches. One kind is using localization techniques like ``fingerprint 
-technique'' \cite{fingerprint} that improves the resolution. Another option is, taking more than 1 \ac{RSSI} value to obtain a more stable 
+However, this resolution problem can be solved. One solutioin is using localization techniques like ``fingerprint 
+technique'' \cite{fingerprint} to improve the resolution. Another option is, taking more than one \ac{RSSI} value to obtain a more stable 
 result. This technique has one big challenge, the more values are taken, the higher the energy consumption. Without a good approach, 
 the \ac{MN} would need to listen to the channel most of the time waiting to receive packets from \ac{AN} to obtain \ac{RSSI} values, 
-this way a lot of energy would be wasted just doing nothing, this is called idle listening. This 2 protocols propose 2 different 
+this way a lot of energy would be wasted just doing nothing, this is called idle listening. \ac{LPL} and \ac{OLP} propose two different 
 approaches to solve this.
 
-Another aspect in localization is who calculates the position, 3 different alternatives can be obtained.
+Another important aspect in localization is who calculates the position, three different alternatives can be obtained.
 
 \begin{itemize}
  \item \textbf{Centralized.} A central computer receives the \ac{RSSI} values from all \acp{AN} in the network and calculates the positions of 
 the \acp{MN}. The advantage is that the computer can use complicate algorithms to obtain better results, but this method 
 charges the network with a lot of traffic, specially if the \ac{MN} needs to know its position back after calculation.
- \item \textbf{Distributed-A.} The \ac{MN} sends the \ac{RSSI} values directly to the \ac{AN}, and this calculates directly the \ac{MN} position,
-this does not charge the network so much like the centralized approach but the resolution is also not so good. It is important to note that 
-each \ac{MN} has a ``selected \ac{AN}'', this \ac{AN} is the one in charge to calculate \ac{MN} position and the one the \ac{MN} communicates
-with and through. This \ac{AN} is usually the one closest to the \ac{MN}.
- \item \textbf{Distributed-M.} In this mode, is the \ac{MN} who calculates directly its position from \ac{RSSI} values obtained from \acp{AN},
+ \item \textbf{Distributed-A.} The \ac{AN} gets the \ac{RSSI} values directly from the packet sent by the \ac{MN}, and this \ac{AN}
+calculates directly the \ac{MN} position, this method does not charge the network as the centralized approach but the resolution 
+is also not so good. It is important to note that each \ac{MN} has a ``selected \ac{AN}'', this \ac{AN} is the one in charge to 
+calculate \ac{MN} position and the one the \ac{MN} communicates with and through. This \ac{AN} is usually the one closest to 
+the \ac{MN}.
+ \item \textbf{Distributed-M.} In this mode, the \ac{MN} is who calculates directly its position from \ac{RSSI} values obtained from \acp{AN},
 the problem is that \acp{MN} cannot use powerful localization algorithms. This solution is the one that almost does not charge the network.
 \end{itemize}
 
@@ -41,18 +44,18 @@ the synchronization information from their parents (do not forget that a tree to
 To get a graphical explanation check Figure \ref{fig:synchronization}.
 
 \begin{itemize}
- \item \textbf{Passive Synchronization.} The parent starts the process sending a packet R1 to \ac{MAC} to be transmitted, this packet is
+ \item \textbf{Passive Synchronization.} The parent starts the process sending a packet (R1) to \ac{MAC} Layer to be transmitted, this packet is
 created at the time-stamp Tx1, and includes this time, the time until the next phase start (TF) and info about this phase. Due to random time in 
-\ac{CSMA/CA} process and other processing times, R1 is not transmitted immediately but in Tx2. When the packet is transmitted, \ac{MAC} informs
+\ac{CSMA/CA} process and other processing times, R1 is not transmitted immediately but in Tx2. When the packet is transmitted, \ac{MAC} Layer informs
 the application layer and this creates another packet (R2) including the new time-stamp Tx2. At the child, 2 packets will be received, R1 and 
-R2 in times Rx1 and Rx2 respectively. Calculation of next phase start from the child point of view (TZ) is done like in (\ref{mat:pasivesync}).
+R2 in times Rx1 and Rx2 respectively. Calculation of next phase start, from the child point of view (TZ), is done like in (\ref{mat:pasivesync}).
 
 \begin{equation}
   TZ = TF - (Rx2 - Rx1) - (Tx2 - Tx1)
   \label{mat:pasivesync}
 \end{equation}
 
-\begin{figure}[here]
+\begin{figure}[ht]
  \begin{center}
   \includegraphics[width=0.6\textwidth]{synchronization.eps}
  \end{center}
@@ -70,18 +73,18 @@ with like in (\ref{mat:activesync}).
 \end{equation}
 
 The C parameter in (\ref{mat:activesync}), represents an estimation of all the processing times and random times from \ac{CSMA/CA}, that is why
-this method is not so exact like the passive one, although it does not need 2 packets like it.
+this method is not so exact like the passive one, although it does not need two packets like it.
 \end{itemize}
 
-In the following subsections, both protocols \ac{LPL} and \ac {OLP} are going to be introduced.
+In the following subsections, both protocols \ac{LPL} and \ac {OLP} are going to be explained.
 
 \subsection{\acl{LPL}}
 
 To reduce the idle listening, and thus the energy consumption, this protocol, proposes that instead of listening to the \acp{AN}, the
-\acp{MN} are the ones who transmit and the \acp{AN} the ones who listen and transmit this information. This protocol is divided in 3 
-phases which can be appreciated in Figure \ref{fig:LPL}.
+\acp{MN} are the ones who transmit and the \acp{AN} the ones who listen and transmit this information to the central computer. This protocol is 
+divided in three phases which can be appreciated in Figure \ref{fig:LPL}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
  \begin{center}
   \includegraphics[width=0.7\textwidth]{LPL.eps}
  \end{center}
@@ -96,20 +99,20 @@ about the phase times. This process makes sure that only the nearest \acp{AN} an
 the \ac{MN} needs to know its position, it asks its selected \ac{AN} about this information, and if not it just synchronizes.
  \item \textbf{Phase 2:} In phase 2, the \ac{MN} broadcasts several packets in random times to minimize the collisions. Any time the node is not
 transmitting, it goes to sleep, this makes that \acp{MN} are awake only when they transmit eliminating this way the idle listening. The \acp{AN} that
-received this broadcasts, store the read \ac{RSSI} values and the selected \ac{AN}.
+received this broadcasts, store the read \ac{RSSI} values and the selected \ac{AN} address.
  \item \textbf{Phase 3:} During this phase, the \acp{MN} sleeps and the \acp{AN} send the measured \ac{RSSI} values to the selected \ac{AN}. 
-This \ac{AN} will calculate the \ac{MN} position in Distributed-A case or send the data to a central computer in Centralized case. In this phase is
-also done the synchronization between \acp{AN} and network configuration.
+This \ac{AN} will calculate the \ac{MN} position in Distributed-A case or send the data to a central computer in Centralized case. In this phase, both 
+synchronization among the \acp{AN} and the network configuration take place.
 
 This protocol, has some problems that make it not suitable for all conditions:
 
 \begin{itemize}
- \item Hidden Terminal Problem. This problem is here strong not only because it could make big idle listening in phase 2, but it could also 
-happen that, if 2 \acp{MN} transmit at the same time, the selected \ac{AN} might not be the one closest to the \ac{MN} but one with a not so 
-good connection.
+ \item Hidden Terminal Problem. This problem is here strong not only because it could make big idle listening in phase 2, but also because the number
+of collisions could be high and the packets would have been sent for nothing, wasting a lot of energy. In phase 1, it could also 
+happen that, if two \acp{MN} transmit at the same time, the selected \ac{AN} might not be the one closest to the \ac{MN} but one with a bad connection.
  \item High \ac{MN} number. If the number of \acp{MN} is high, phase 2 is going to be full of collisions and thus, the idle listening will be
-high. In phase 1, the hidden terminal problem would be stronger.
- \item Selected \ac{AN} selection. If many \acp{AN} are close to the \ac{MN}, all of them are going to try to answer causing collisions. Also, 
+high. This problem would be worser due to the hidden terminal problem.
+ \item Selected \ac{AN} selection. In phase 1, If many \acp{AN} are close to the \ac{MN}, all of them are going to try to answer causing collisions. Also, 
 when the \acp{AN} are not close to the \ac{MN}, a lot of energy is wasted in the \ac{MN} trying to detect gradually the selected \ac{AN}.
 \end{itemize}
 
@@ -133,7 +136,7 @@ them can be appreciated in Figure \ref{fig:OLP}.
 \begin{itemize}
  \item \textbf{Phase A:} In this phase, and thanks to the synchronization among \acp{AN}, the inter-arrival time is reduced, reducing so the
 idle listening. This packets also content synchronization information for the \ac{MN}. In this phase \ac{RSSI} values are received and stored
-by the \ac{MN}, and then it goes to sleep.
+by the \ac{MN}. Then it goes to sleep.
  \item \textbf{Phase B:} In this phase and in Distributed-M mode, the \ac{MN} will use easy localization algorithms together with all the \ac{RSSI}
 values read to get its position. In case of Distributed-A or Centralized mode, the \ac{MN} will send a report to the selected \ac{AN}, took 
 from the highest \ac{RSSI} value, with all the stored \ac{RSSI} values in Phase A. The selected \ac{AN} will answer with an \ac{ACK}. In next
@@ -170,25 +173,30 @@ configuration where their main action is listening and others could have a confi
 configuration should be variable depending on the current network situation and the necessities of the node. From this, arises the necessity
 of a High Configurable Protocol with different node configurations.
 
+As it was seen, \ac{OLP} and \ac{LPL} localization protocols, are based in \ac{RSSI} values, this work is also based in localization using 
+\ac{RSSI} values. Anyhow, this simulation work proposes a framework for the protocol and does not try to locate any node, it concentrates
+in the communication aspects and defines a base for the protocol to be developed further in future works.
+
+
 \subsection{Node Configurations}
 
 From the Table \ref{tab:wsn_applications} (page~\pageref{tab:wsn_applications}) where different applications for \ac{WSN} where stated and the
-previous paragraph, it is possible to extract this 4 different node configurations.
+previous quotation, it is possible to extract this four different node configurations.
 
 \begin{itemize}
  \item \textbf{Mode 1.} This is the normal configuration, when the \ac{MN} does not have any special need. A \ac{MN} with this configuration,
 will listen to the \acp{AN} and then send the selected \ac{AN} a packet with the measurements. This is equivalent to having just \ac{OLP}. This
 configuration supports the Centralized and Distributed-A working modes.
  \item \textbf{Mode 2.} This configuration mode is similar to mode 1, but in this case is prepared to work only with Distributed-M working mode.
-From time to time in case it's needed, it could send the estimated positions to its selected \ac{AN}.
- \item \textbf{Mode 3.} This configuration, also called \ac{VIP} mode, is used when the node is in a critical situation respecting the battery.
+From time to time in case it is needed, the \ac{MN} could send the estimated positions to its selected \ac{AN}.
+ \item \textbf{Mode 3.} This configuration, also called \ac{VIP} mode, is used when the node is in a battery critical situation.
 This configuration is similar to \ac{LPL} where the \ac{MN} broadcasts and the \acp{AN} receive the packets and send them to a coordinator that
 will be able to estimate \ac{MN} position. When it is needed, a way for the \ac{MN} to request its position is provided, this will be explained 
 later. 
  \item \textbf{Mode 4.} Unlike the previous configuration, this configuration is for nodes without battery problems, and with a high accuracy
-need or a big urgency. This configuration is a mix of mode 1 and 3, the \ac{MN} listens to the \acp{AN} broadcasts but also they broadcast their
+need. This configuration is a mix of mode 1 and 3, the \ac{MN} listens to the \acp{AN} broadcasts but also they broadcast their
 self packets to be measured by the \acp{AN}, all this information together is sent to a coordinator that will estimate \ac{MN} position.
-This node loads the network so much and will be used just when strictly needed.
+This Mode as well as Mode 3 load the network so much and will be used just when strictly needed.
 \end{itemize}
 
 This is just a brief description of the different configurations. As the protocol is yet to be explained, a full behavior description from 
@@ -196,7 +204,7 @@ every configuration will be done later together with the protocol description.
 
 \subsection{Protocol Description}
 
-From previous section, it is obtained that this protocol, needs at least 3 different phases to work. One of the phases is Sync 
+From previous section, it is obtained that this protocol, needs at least 3 different phases to work. One of the phases is a Sync 
 Phase, where the \acp{AN} will transmit broadcasts and the \acp{MN} will listen to get \ac{RSSI} values and synchronize. Another needed 
 phase is a phase where \acp{AN} and \acp{MN} could communicate among them. And the last needed phase, is a phase where the \acp{AN} could 
 communicate with each other to and from the coordinator.
@@ -204,7 +212,7 @@ communicate with each other to and from the coordinator.
 \acp{MN} configured with mode 3, are nodes with critical battery. This nodes cannot waste energy, and this means their idle listening must be
 as low as possible. As this nodes will not waste time listening and will just transmit broadcasts, it could be interesting reserving a phase
 just for them, where their transmissions will not interfere with the ones from the rest of the \acp{MN}, this phase will be called \ac{VIP} 
-Phase. It is clear, that the number of \ac{VIP} \acp{MN} cannot be too big as this way, their exclusivity will not be anymore exclusive.
+Phase. It is clear, that the number of \ac{VIP} \acp{MN} cannot be too big, if so, their exclusivity will not be anymore exclusive.
 This phase should not be so long as there are still many other \acp{MN} to transmit and the phases collection would become too long.
 The phase for communication among \acp{MN} and \acp{AN} will be named Report Phase, and here is where Mode 4 \acp{MN} can make 
 their broadcasts and where communication among \acp{MN} and \acp{AN} can take place.
@@ -212,12 +220,12 @@ their broadcasts and where communication among \acp{MN} and \acp{AN} can take pl
 The main purpose of the phase where \acp{AN} communicate with each other, is to transmit information between the coordinator or sink and 
 the \acp{MN}. That is the reason why this phase will be called ComSink Phase. This phase should be the biggest one, as all traffic from 
 the \acp{MN} should reach the sink and come back, and all \acp{AN} must transmit their own \acp{MN} information and route the one coming from
-their sons or parents. As the traffic in this phase will be high, its useful to distinguish between up-links traffic and down-links traffic, 
+their sons or parents. As the traffic in this phase will be high, it could be useful to separate up-links traffic and down-links traffic, 
 ComSink Phase will be divided in ConSink Phase 1 (up-links) and ComSink Phase 2 (down-links).
 
 As it was said, \ac{RSSI} values are very correlated in near times \cite{RSSIcorrelated}, that is why it could be favorable to distribute the 
-Sync Phase to get better \ac{RSSI} samples. As apart from Sync Phase, the protocol consists in Report Phase, \ac{VIP}
-Phase, ComSink Phase 1 and ComSink Phase 2, if Report Phase and \ac{VIP} Phase are scheduled together, Sync Phase can be divided into 3
+Sync Phase to get better \ac{RSSI} samples. As, apart from Sync Phase, the protocol consists in Report Phase, \ac{VIP}
+Phase, ComSink Phase 1 and ComSink Phase 2, if Report Phase and \ac{VIP} Phase are scheduled together, Sync Phase can be divided into three
 separated in time phases, Sync Phase 1, Sync Phase 2 and Sync Phase 3. This sync phases will be intercalated between the other phases.
 
 This phase collection will be repeated in time, being the period every phases collection repetition. For a better understanding of this 
@@ -235,26 +243,58 @@ The Figure \ref{fig:ProtocolPhases} is divided into 5 sections, one per Configur
 Request. To understand properly how the protocol works, this sections have to be explained in detail:
 
 \begin{itemize}
- \item \textbf{Mode 1.} This \acp{MN} listen during the Sync Phases to the \acp{AN} broadcasts, here they take the \ac{RSSI} values and send them
-to their selected \ac{AN}, this is obtained from the highest measured \ac{RSSI}. The selected \ac{AN} answers with an \ac{ACK} to the \ac{MN}.
- \item \textbf{Mode 2.} 
- \item \textbf{Mode 3.} 
- \item \textbf{Mode 4.} 
- \item \textbf{General Information Request.} 
+ \item \textbf{Mode 1.} \acp{MN} listen during the Sync Phases to the \acp{AN} broadcasts, and read the \ac{RSSI} values and send them
+to their selected \ac{AN} during the Report Phase, this is obtained from the highest measured \ac{RSSI}. The selected \ac{AN} answers with an \ac{ACK} 
+to the \ac{MN}. \acp{MN} sleep during the \ac{VIP}, ComSink 1 and ComSink 2 Phases as well as during Report Phase when no transmitting. 
+\acp{AN} will communicate among them during ComSink 1 phase (up-links) and during ConSink 2 phase (down-links), this aspect is common for all the 
+sections, that is why it will be commented only here. Whenever the \ac{MN} must communicate something to the selected \ac{AN} and no report is going to 
+be sent during the period, it can schedule an extra report during the Report Phase. This extra report behavior is the same as the report where
+the \ac{RSSI} values are sent.
+ \item \textbf{Mode 2.} Like in Mode 1, \acp{MN} listen during the Sync Phases to the \acp{AN} broadcasts, and read the \ac{RSSI} values, but instead
+of sending them and due to the fact that packets content also information of \acp{AN} localization, it is the \ac{MN} who calculates its own position 
+and saves it. From time to time, this positions information will be sent to the 
+coordinator through the selected \ac{AN} during the Report Phase. The selected \ac{AN} will answer with an \ac{ACK} to the \ac{MN} and this will go to
+sleep. \ac{MN} sleeps, like Mode 1, during \ac{VIP}, ComSink 1 and ComSink 2 Phases as well as during Report Phase when no transmitting.
+ \item \textbf{Mode 3.} Unlike Mode 1 and 2, Mode 3 does not listen during the Sync Phases but sleeps, from time to time Mode 3 will not sleep during a 
+Sync Phase and will listen just for a couple of packets (not the whole phase) to resynchronize. During the \ac{VIP} Phase, the \ac{MN} will broadcast
+some packets that will be listened by the \acp{AN} in the surrounding. This \acp{AN} will send the \ac{RSSI} information to the coordinator during the 
+ComSink 1 phase, and this will calculate the \ac{MN} position. As Mode 1, \acp{MN} in Mode 3 could schedule an extra report during Report Phase to
+communicate something to the selected \ac{AN}. Mode 3 \acp{MN} sleep during Sync, Report, ComSink 1 and ComSink2 phases as well as during \ac{VIP} phase
+when not transmitting. Whenever a \ac{MN} sends an extra report, during that period it will not send the broadcasts during \ac{VIP} Phase, this is to 
+save energy, as with the extra report it will send already \ac{RSSI} information to the selected \ac{AN}.
+ \item \textbf{Mode 4.} This is a combination of Modes 1 and 3. In one side, the \acp{MN} listen during Sync Phases to get \ac{RSSI} values and send them
+to their selected \ac{AN} during Report Phase waiting for an \ac{ACK}. But in the other side, they broadcast also their own packets during the Report Phase.
+This broadcasted \ac{RSSI} values are sent by all \acp{AN} to coordinator who with all this values and the values reported by the \ac{MN} through the 
+selected \ac{AN}, calculates the \ac{MN} position. As for Mode 1, whenever a \ac{MN} wants to send something, it can schedule an extra report. This node sleeps
+during \ac{VIP}, ComSink 1 and ComSink 2 phases as well as during Report Phase when no transmitting.
+ \item \textbf{General Information Request.} What happens if a \ac{MN} wants to know its position? or if it wants to change its configuration, how does it
+warns the coordinator? Thanks to the General Information Request, this can be done. During Report Phase and using a report or extra report, the \ac{MN}
+will activate in this packet an ASK flag to notify the selected \ac{AN} that some data (the requested info is given in this packet) will be requested 
+during next period in Report Phase, than the \ac{AN} acknowledges the packet like always. During the next Report Phase, the \ac{MN} will generate an extra
+report in case there is no scheduled one and will activate the Request flag to notify the \ac{AN} that it wants the data asked the previous period about. As soon
+as the \ac{MN} receives the \ac{ACK} from the selected \ac{AN}, a timer starts. If during this timer no packet from the selected \ac{AN} is received, all
+the process is canceled and it could be tried later. If during this timer the \ac{MN} receives a packet from the selected \ac{AN}, the \ac{MN} sends an
+\ac{ACK} to the \ac{AN} and the process is finished. The \ac{AN} will send a packet to the \ac{MN} even to indicate that it has no information available,
+this way idle listening in \ac{MN} is avoided.
+
+This process must be done from time to time even if the node does not have any change or requirement, because if the coordinator wants to communicate with a
+\ac{MN}, as they are all the time sleeping, this is the only way to do it.
 \end{itemize}
 
-Here, it is just defined the standard behavior of the different configurations, but to really extract a high configuration of the protocol, some 
+Like for \ac{LPL}, all packets sent (report and broadcasts), are sent in a random time and using \ac{CSMA/CA} to minimize collisions.
+
+Previously, it was just defined the standard behavior of the different configurations, but to really extract a high configuration of the protocol, some 
 parameters must be taken into account.
 
 \begin{itemize}
- \item \textbf{activePhases -} This are the periods where the \ac{MN} is active with its standard behavior (already commented).
- \item \textbf{inactivePhases -} This are the periods where the \ac{MN} is sleeping.
+ \item \textbf{activePhases -} This are the periods where the \acp{MN} are active with their standard behavior (already commented).
+ \item \textbf{inactivePhases -} This are the periods where the \acp{MN} are sleeping during all the phases.
  \item \textbf{offsetPhases -} This are the periods to leave inactive before the first active period comes.
- \item \textbf{offsetSyncPhases -} This are the Sync Phases where \acp{MN} don't listen in the first active phase, will be explained later.
- \item \textbf{reportPhases -} This is the periods frequency where the \ac{MN} can send an extra report to the \ac{AN}, even if it is 
-an inactive period.
- \item \textbf{askFrequency -} This is the extra report frequency when a flag will be activated in the extra report from a \ac{MN} to 
-an \ac{AN}, to indicate the \ac{AN} that next phase some information will be requested.
+ \item \textbf{offsetSyncPhases -} This are the number of Sync Phases during the first active period where the \acp{MN} do not listen, it will be explained 
+better with an example.
+ \item \textbf{reportPhases -} One out of reportPhases periods, the \ac{MN} will send an extra report in case this period does not have already one
+scheduled. This happens even if the period is an inactive one.
+ \item \textbf{askFrequency -} Every askFrequency extra reports, the extra report will have the ASK flag activated.
  \item \textbf{offsetReportPhases -} This are the periods to leave before the first extra report is scheduled.
 \end{itemize}
  
@@ -273,44 +313,111 @@ As an example to explain this parameters check Figure \ref{fig:parametersphases}
 \end{figure}
 
 In Figure \ref{fig:parametersphases}, it can be seen how the first period is left inactive due to the offsetPhases = 1. Although the period
-is inactive, it has an extra report (offsetReportPhases is 0). As reportPhases is 3, the first period of 3 will be an extra report (R1), 
-then 2 periods will not have extra report and then another extra report will be scheduled (R3). After the first inactive period, 2 active 
-periods come (activePhases = 2). Then 2 inactive periods (inactivePhases = 2) and so on.
+is inactive, it has an extra report (offsetReportPhases is 0). As reportPhases is 3, the first period of 3 will have an extra report (R1), 
+then two periods will not have extra report and then another extra report will be scheduled (R3). After the first inactive period, 2 active 
+periods come (activePhases = 2). Then 2 inactive periods (inactivePhases = 2) and so on. From now on, this work will call report to the one 
+corresponding to the standard behavior of \acp{MN} Mode 1 and 4, which is transmitted in every last active period. And extra report will be 
+the one scheduled with reportPhases frequency. Note that while reports are sent just for Modes 1 and 4 and only in the last active period,
+broadcasts in Modes 3 and 4 are send every active period. Note also that if extra report is scheduled in an inactive period, the \ac{MN} must
+listen to the first Sync Phase of the period to get to know who is its selected \ac{AN}.
 
-In the last active period from an active period group, during the Report Phase the position is calculated (for mode 2) or the \ac{RSSI} 
-values are sent (for modes 1 and 4) to the selected \ac{AN} (R2). After this moment, it makes no sense for the \acp{MN} listening to more
-Sync Phases, that is why this are crossed out.
+The position is calculated (for mode 2) or the \ac{RSSI} values are sent (for modes 1 and 4) to the selected \ac{AN} (R2), during the Report Phase from 
+the last active period from an active period group. After this moment, it makes no sense for the \acp{MN} listening to more
+Sync Phases, that is why this are crossed out. 
 
-It can be also seen that due to offsetSyncPhases = 1, the \ac{MN} is not listening to the first Sync Phase from every active periods 
-collection, this is so to make possible, playing with offsetSyncPhases and activePhases, to decide how many Sync Phases will the \ac{MN}
-listen to.
+It can also be seen that due to offsetSyncPhases = 1, the \ac{MN} is not listening to the first Sync Phase from the first active period in the active
+periods collection. This is so to make possible, playing with offsetSyncPhases and activePhases, to decide how many Sync Phases will the \ac{MN}
+listen to before calculating its position or sending the measured \ac{RSSI} values to its selected \ac{AN}, in this case three Sync Phases were listened to.
 
 Last but not least, as askFrequency = 2, every 2 extra reports, the ASK flag will be activated, in this case in R3. This flag indicates the 
 \ac{AN} that the \ac{MN} will ask for some information during the next period, this is made with R4. This request packet does not necessary correspond
 to a normal report (modes 1 or 4) or to an extra report but if the period has already one, the same report will be used activating a request
 flag.
 
-Make an explanation in detail of the figure, and the protocol with the types of nodes and depending on the parameters before.
-
-Figure \ref{fig:ProtocolPhases} 
-
-
-
-
-Synchronization in the phases.
-
-Centralized vs. Distributed.
-
-Low number of VIP nodes.
-
-Too much time listening to transmit, reduce cases with CSMA when battery is critic using broadcasts from nodes.
-
-As it was seen, \ac{OLP} and \ac{LPL} protocols, are based in \ac{RSSI} values
-This work is also based in localization using \ac{RSSI} values, although this work just proposes a framework for the protocol and does not try 
-to locate any
-node 
-
 
 \section{Sync Phase detail}
 
-Explain syncPacketsPerSyncPhase parameter.
+To make possible that all nodes follow all phase times inside the period, it is really important that all of them are correctly synchronized. This is 
+possible thanks to the Sync Phase, and that is why this phase will be studied in detail. It has to be taken into account that all nodes know the duration
+of the phases and the period.
+
+The separation between Sync Phases allows the \ac{MN} to take \ac{RSSI} measurements at different time instants within the period. It increases the 
+probability that the \ac{RSSI} values are not correlated. The minimal separation between Sync Phases can be defined by considering the coherence time 
+of the signal.  According to \cite{RSSIcorrelated}, the attenuations of the signal at two time instants separated by more than the coherence time 
+are weakly correlated. The coherence time depends on the carrier frequency and the speed of the \acp{MN}. In \cite{RSSIcorrelated2} a coherence time 
+of 125 ms was calculated for a node operating at 2.4 GHz, when it moves at 1.2 Km/h.
+
+In our network the coordinator is the time reference and initializes the synchronization propagation. The \acp{AN} start broadcasting packets only 
+when they are synchronized. Between transmissions the \ac{AN} listens to the new synchronization packets from all surrounding \acp{AN}. In this way 
+it is possible that the \acp{AN} are always synchronized.
+
+Two scenarios are going to be described and studied, in the first scenario, the Sync Broadcasts, are going to be randomly distributed through the Sync 
+Phase, in the second scenario, Sync Phase is going to be divided into slots where all \acp{AN} broadcasts will be distributed.
+
+In both scenarios, the \acp{AN} broadcast packets contain information about the synchronization of the network as well as the coordinates 
+of the \acp{AN}. They are used by the \acp{MN} to obtain \ac{RSSI} measurements, and for the network synchronization, so they can know the start time of 
+the next phase.
+
+\subsection{Random Sync Phase}
+
+In this first scenario, \ac{AN}'s application level, calculates the time to the next phase. This information is included in the synchronization packet 
+and sent to the \ac{MAC} layer for its transmission. Due to the random time of the \ac{CSMA/CA} process, the packet is not immediately transmitted. This 
+random delay degrades the synchronization performance, because it is unknown by the receivers. A possible solution to this problem is to transmit a 
+second packet, which informs about the \ac{CSMA/CA} delay of the first transmission (pasive synchronization, see Figure \ref{fig:synchronization}, 
+page~\pageref{fig:synchronization}). The main disadvantage of this proposal is that the \ac{MN} needs to listen at least two synchronization packets 
+from the same \ac{AN} in order to be synchronized.
+
+In order to reduce the idle listening period in the \acp{MN}, this work proposes to configure the \ac{AN}'s \ac{MAC} Layer to disable its random 
+Backoff delay. Thus, it is possible to have a constant time offset between the moment when the remaining time was calculated and the moment of the 
+transmission. According to the 802.15.4 Standard the Backoff delay can be disabled by setting the parameters macMaxCSMABackoffs, macMinBE and macMaxBE 
+to zero. Under this \ac{MAC} configuration, in case the channel is busy during the first \ac{CCA} detection, a \ac{CAF} is sent to the application 
+level, which can try a retransmission. To avoid all \acp{AN} trying to transmit at the same time and to make easier the access to the channel, a random 
+delay has to be generated in the application level before the generation of the transmission request to the \ac{MAC} layer. This way, the time until
+the next phase start will still be known in the application layer, but random anyway. 
+
+Hidden terminal problem has a high importance in this scenario, provoking collisions between Sync Packets. To prove this, during the Chapter 
+\ref{chap:simulationandresults}: \nameref{chap:simulationandresults}, a scenario avoiding hidden terminal problem and another having it will be simulated.
+
+\subsection{Slotted Sync Phase}
+
+To make the most of Sync Phase time and avoid random times where \acp{MN} are listening without any benefit, this synchronized in slots broadcast 
+transmission is proposed.
+
+A first approach is to divide the Sync Phase in so many slots like \acp{AN} in the network, this way each \ac{AN} could transmit a broadcast per Sync Phase.
+But as it was already said, it is beneficial to be able to listen to more than one \ac{RSSI} value to get a more stable value due to its dispersion. This
+way, the parameter syncPacketsPerSyncPhase is presented. This parameter defines in how many parts Sync Phase will be divided (typically three). Each of 
+this parts, will be divided in as many slots as \acp{AN} in the network. In example, if syncPacketsPerSyncPhase = 3 and there are 9 \acp{AN} in the 
+network, the Sync Phase will be divided into 27 slots. The problem is, that this way, Sync Phase could be very long when \acp{AN} number increases and this would make
+\acp{MN} to be listening to the channel for too much time, and most of the time to \acp{AN} at no reachable distance (idle listening).
+
+A way to solve this is to re-use the slots making possible that \acp{AN} far from each other could transmit at the same time. To avoid hidden terminal 
+problem, an \ac{AN} cannot transmit at the same time as its neighbors, or all the neighbors of them. With neighbors is understood all \acp{AN} at a 
+reachable distance. As an example check Figure \ref{fig:ejemplonetslots}.
+
+\begin{figure}[ht]
+ \begin{center}
+  \includegraphics[width=0.7\textwidth]{ejemplonetslots.eps}
+ \end{center}
+ \caption{Neighbors explanation}
+ \label{fig:ejemplonetslots}
+\end{figure}
+
+In Figure \ref{fig:ejemplonetslots}, a network with 12 \acp{AN} is presented. This \acp{AN} have their coverage painted with the discontinuous line circle,
+all \acp{AN} inside a circle are the neighbors from a determinate \ac{AN}. At the same time all this neighbor \acp{AN}, have their own coverage circles.
+All \acp{AN} inside this circles and the ones before, cannot transmit at the same time as the first \ac{AN} to avoid hidden terminal problem, the others 
+can without risk. In the Figure, \ac{AN} C has as neighbors \acp{AN} B, L, K, J, I and E, and this all have as neighbors the \acp{AN} A, D and F. All this
+\acp{AN} cannot transmit at the same time as \ac{AN} C, but \acp{AN} H and G perfectly could.
+
+Thanks to this technique, the bigger the network the more optimal this slots re-use technique, finding that, when \acp{AN} number is not so big this 
+technique almost does not help, as all \acp{AN} are inside the neighbor-neighbor distance, but when the \acp{AN} number grows maintaining the 
+density, the total needed slots are highly reduced.
+
+Explicar como hacer el algoritmo de forma automatica.
+
+Reuso de slots
+
+Hablar del ancho de los slots de 1.5 ms, porque y esas cosas de tiempos y bits.
+
+Explicar importancia de distribuir bien los AN
+
+Explicar que pasa cuando hay obstaculos.

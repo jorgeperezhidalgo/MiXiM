@@ -50,7 +50,7 @@ movement possibility.
 
 \vspace*{1cm}
 
-\begin{figure}[here]
+\begin{figure}[ht]
  \begin{center}
   \includegraphics[width=0.9\textwidth]{WPAN_Network_Topologies.eps}
  \end{center}
@@ -92,7 +92,7 @@ power of 1 mW and it must have a sensibility of at least -85 dBm \cite{IEEE802.1
 
 \vspace*{1cm}
 
-\begin{figure}[here]
+\begin{figure}[ht]
  \begin{center}
   \includegraphics[width=0.9\textwidth]{PPDU.eps}
  \end{center}
@@ -243,44 +243,45 @@ RCB230 V3.2 as is the one available in the department. This node has a AT86RF230
 to \cite{LPLandOLP} the consumption values of this node can be seen in Table \ref{tab:NodeEnergyConsumption}, and transition times not defined
 in 802.15.4 standard in Table \ref{tab:NodeTiming}.
 
-\begin{table}[h]\footnotesize
-\begin{center}
- \begin{tabular}{|l|c|}
-  \noalign{\vspace*{0.5cm}}
-  \hline
-  & \textbf{Energy Consumption} \\
-  \hline
-  Transceiver in \ac{Rx} mode & 0.06496 mW/s \\
-  \hline 
-  Transceiver in \ac{Tx} mode & 0.06672 mW/s \\
-  \hline
-  Transceiver in IDLE mode & 0.04342 mW/s \\
-  \hline
-  Transceiver in Sleep mode & 0.0728 $\mu$W/s \\
-  \hline
-  \ac{uC} (Transceiver Sleeps) & 0.03042 mW/s \\
-  \hline
+
+\begin{table}
+ \begin{center}
+  \begin{tabular}{|l|c|}
+   %\noalign{\vspace*{0.5cm}}
+   \hline
+   & \textbf{Energy Consumption} \\
+   \hline
+   Transceiver \ac{Rx} mode & 0.06496 mW/s \\
+   \hline 
+   Transceiver \ac{Tx} mode & 0.06672 mW/s \\
+   \hline
+   Transceiver IDLE mode & 0.04342 mW/s \\
+   \hline
+   Transceiver Sleep mode & 0.0728 $\mu$W/s \\
+   \hline
+   \ac{uC} (Transceiver Sleeps) & 0.03042 mW/s \\
+   \hline
   \end{tabular}
- \caption{Node RCB230 V3.2 Energy Consumption \cite{LPLandOLP}}
- \label{tab:NodeEnergyConsumption}
-\end{center}
+  \caption{Node RCB230 V3.2 Energy Consumption \cite{LPLandOLP}}
+  \label{tab:NodeEnergyConsumption}
+ \end{center}
+\end{table}
+\begin{table}
+ \begin{center}
+  \begin{tabular}{|l|c|}
+   %\noalign{\vspace*{0.5cm}}
+   \hline
+   & \textbf{Transition timing} \\
+   \hline
+   Transition: Sleep -> \ac{Rx} & 1.88 ms \\
+   \hline 
+   Transition: \ac{Tx} -> Sleep & 0.94 ms \\
+   \hline
+   Transition: \ac{Rx} -> Sleep & 0.94 ms \\
+   \hline
+  \end{tabular}
+  \caption{Transceiver AT86RF230 transition timing \cite{LPLandOLP}}
+  \label{tab:NodeTiming}
+ \end{center}
 \end{table}
 
-\begin{table}[h]\footnotesize
-\begin{center}
- \begin{tabular}{|l|c|}
-  \noalign{\vspace*{0.5cm}}
-  \hline
-  & \textbf{Transition timing} \\
-  \hline
-  Transition: Sleep -> \ac{Rx} & 1.88 ms \\
-  \hline 
-  Transition: \ac{Tx} -> Sleep & 0.94 ms \\
-  \hline
-  Transition: \ac{Rx} -> Sleep & 0.94 ms \\
-  \hline
-  \end{tabular}
- \caption{Transceiver AT86RF230 transition timing \cite{LPLandOLP}}
- \label{tab:NodeTiming}
-\end{center}
-\end{table}
