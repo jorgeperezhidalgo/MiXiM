@@ -73,6 +73,8 @@ public:
 //    double powerSleepToTx; // No need yet for this power
     double powerSleepToIdle;
 
+    double totalPower; // For saving the total consumed power in every node
+
 
 	// States for state machine
 	enum States{						// Phases of the Full Phase or Period

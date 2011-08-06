@@ -259,7 +259,7 @@ sleep. \ac{MN} sleeps, like Mode 1, during \ac{VIP}, ComSink 1 and ComSink 2 Pha
 Sync Phase and will listen just for a couple of packets (not the whole phase) to resynchronize. During the \ac{VIP} Phase, the \ac{MN} will broadcast
 some packets that will be listened by the \acp{AN} in the surrounding. This \acp{AN} will send the \ac{RSSI} information to the coordinator during the 
 ComSink 1 phase, and this will calculate the \ac{MN} position. As Mode 1, \acp{MN} in Mode 3 could schedule an extra report during Report Phase to
-communicate something to the selected \ac{AN}. Mode 3 \acp{MN} sleep during Sync, Report, ComSink 1 and ComSink2 phases as well as during \ac{VIP} phase
+communicate something to the selected \ac{AN}. Mode 3 \acp{MN} sleep during Sync, Report, ComSink 1 and ComSink 2 phases as well as during \ac{VIP} phase
 when not transmitting. Whenever a \ac{MN} sends an extra report, during that period it will not send the broadcasts during \ac{VIP} Phase, this is to 
 save energy, as with the extra report it will send already \ac{RSSI} information to the selected \ac{AN}.
  \item \textbf{Mode 4.} This is a combination of Modes 1 and 3. In one side, the \acp{MN} listen during Sync Phases to get \ac{RSSI} values and send them
@@ -292,16 +292,17 @@ parameters must be taken into account.
  \item \textbf{offsetPhases -} This are the periods to leave inactive before the first active period comes.
  \item \textbf{offsetSyncPhases -} This are the number of Sync Phases during the first active period where the \acp{MN} do not listen, it will be explained 
 better with an example.
- \item \textbf{reportPhases -} One out of reportPhases periods, the \ac{MN} will send an extra report in case this period does not have already one
+ \item \textbf{reportPhases -} One out of \textit{reportPhases} periods, the \ac{MN} will send an extra report in case this period does not have already one
 scheduled. This happens even if the period is an inactive one.
- \item \textbf{askFrequency -} Every askFrequency extra reports, the extra report will have the ASK flag activated.
+ \item \textbf{askFrequency -} Every \textit{askFrequency} extra reports, the extra report will have the ASK flag activated.
  \item \textbf{offsetReportPhases -} This are the periods to leave before the first extra report is scheduled.
 \end{itemize}
  
 As an example to explain this parameters check Figure \ref{fig:parametersphases}, where the parameters take the following values: 
 
 \begin{quote}
- activePhases = 2 | inactivePhases = 2 | offsetPhases = 1 | offsetSyncPhases = 1 | reportPhases = 3 | askFrequency = 2 | offsetReportPhases = 0
+ \textit{activePhases} = 2 | \textit{inactivePhases} = 2 | \textit{offsetPhases} = 1 | \textit{offsetSyncPhases} = 1 | \textit{reportPhases} = 3 
+| \textit{askFrequency} = 2 | \textit{offsetReportPhases} = 0
 \end{quote}
 
 \begin{figure}[ht]
@@ -312,12 +313,12 @@ As an example to explain this parameters check Figure \ref{fig:parametersphases}
  \label{fig:parametersphases}
 \end{figure}
 
-In Figure \ref{fig:parametersphases}, it can be seen how the first period is left inactive due to the offsetPhases = 1. Although the period
-is inactive, it has an extra report (offsetReportPhases is 0). As reportPhases is 3, the first period of 3 will have an extra report (R1), 
+In Figure \ref{fig:parametersphases}, it can be seen how the first period is left inactive due to the \textit{offsetPhases} = 1. Although the period
+is inactive, it has an extra report (\textit{offsetReportPhases} is 0). As \textit{reportPhases} is 3, the first period of 3 will have an extra report (R1), 
 then two periods will not have extra report and then another extra report will be scheduled (R3). After the first inactive period, 2 active 
-periods come (activePhases = 2). Then 2 inactive periods (inactivePhases = 2) and so on. From now on, this work will call report to the one 
+periods come (\textit{activePhases} = 2). Then 2 inactive periods (\textit{inactivePhases} = 2) and so on. From now on, this work will call report to the one 
 corresponding to the standard behavior of \acp{MN} Mode 1 and 4, which is transmitted in every last active period. And extra report will be 
-the one scheduled with reportPhases frequency. Note that while reports are sent just for Modes 1 and 4 and only in the last active period,
+the one scheduled with \textit{reportPhases} frequency. Note that while reports are sent just for Modes 1 and 4 and only in the last active period,
 broadcasts in Modes 3 and 4 are send every active period. Note also that if extra report is scheduled in an inactive period, the \ac{MN} must
 listen to the first Sync Phase of the period to get to know who is its selected \ac{AN}.
 
@@ -325,11 +326,11 @@ The position is calculated (for mode 2) or the \ac{RSSI} values are sent (for mo
 the last active period from an active period group. After this moment, it makes no sense for the \acp{MN} listening to more
 Sync Phases, that is why this are crossed out. 
 
-It can also be seen that due to offsetSyncPhases = 1, the \ac{MN} is not listening to the first Sync Phase from the first active period in the active
-periods collection. This is so to make possible, playing with offsetSyncPhases and activePhases, to decide how many Sync Phases will the \ac{MN}
+It can also be seen that due to \textit{offsetSyncPhases} = 1, the \ac{MN} is not listening to the first Sync Phase from the first active period in the active
+periods collection. This is so to make possible, playing with \textit{offsetSyncPhases} and \textit{activePhases}, to decide how many Sync Phases will the \ac{MN}
 listen to before calculating its position or sending the measured \ac{RSSI} values to its selected \ac{AN}, in this case three Sync Phases were listened to.
 
-Last but not least, as askFrequency = 2, every 2 extra reports, the ASK flag will be activated, in this case in R3. This flag indicates the 
+Last but not least, as \textit{askFrequency} = 2, every 2 extra reports, the ASK flag will be activated, in this case in R3. This flag indicates the 
 \ac{AN} that the \ac{MN} will ask for some information during the next period, this is made with R4. This request packet does not necessary correspond
 to a normal report (modes 1 or 4) or to an extra report but if the period has already one, the same report will be used activating a request
 flag.
@@ -354,7 +355,7 @@ it is possible that the \acp{AN} are always synchronized.
 Two scenarios are going to be described and studied, in the first scenario, the Sync Broadcasts, are going to be randomly distributed through the Sync 
 Phase, in the second scenario, Sync Phase is going to be divided into slots where all \acp{AN} broadcasts will be distributed.
 
-In both scenarios, the \acp{AN} broadcast packets contain information about the synchronization of the network as well as the coordinates 
+In both scenarios, the \acp{AN} broadcast packets contain information about the synchronization of the network as well as the position 
 of the \acp{AN}. They are used by the \acp{MN} to obtain \ac{RSSI} measurements, and for the network synchronization, so they can know the start time of 
 the next phase.
 
@@ -363,13 +364,14 @@ the next phase.
 In this first scenario, \ac{AN}'s application level, calculates the time to the next phase. This information is included in the synchronization packet 
 and sent to the \ac{MAC} layer for its transmission. Due to the random time of the \ac{CSMA/CA} process, the packet is not immediately transmitted. This 
 random delay degrades the synchronization performance, because it is unknown by the receivers. A possible solution to this problem is to transmit a 
-second packet, which informs about the \ac{CSMA/CA} delay of the first transmission (pasive synchronization, see Figure \ref{fig:synchronization}, 
+second packet, which informs about the \ac{CSMA/CA} delay of the first transmission (passive synchronization, see Figure \ref{fig:synchronization}, 
 page~\pageref{fig:synchronization}). The main disadvantage of this proposal is that the \ac{MN} needs to listen at least two synchronization packets 
 from the same \ac{AN} in order to be synchronized.
 
 In order to reduce the idle listening period in the \acp{MN}, this work proposes to configure the \ac{AN}'s \ac{MAC} Layer to disable its random 
 Backoff delay. Thus, it is possible to have a constant time offset between the moment when the remaining time was calculated and the moment of the 
-transmission. According to the 802.15.4 Standard the Backoff delay can be disabled by setting the parameters macMaxCSMABackoffs, macMinBE and macMaxBE 
+transmission. According to the 802.15.4 Standard the Backoff delay can be disabled by setting the parameters \textit{macMaxCSMABackoffs}, 
+\textit{macMinBE} and \textit{macMaxBE} 
 to zero. Under this \ac{MAC} configuration, in case the channel is busy during the first \ac{CCA} detection, a \ac{CAF} is sent to the application 
 level, which can try a retransmission. To avoid all \acp{AN} trying to transmit at the same time and to make easier the access to the channel, a random 
 delay has to be generated in the application level before the generation of the transmission request to the \ac{MAC} layer. This way, the time until
@@ -385,20 +387,20 @@ transmission is proposed.
 
 A first approach is to divide the Sync Phase in so many slots like \acp{AN} in the network, this way each \ac{AN} could transmit a broadcast per Sync Phase.
 But as it was already said, it is beneficial to be able to listen to more than one \ac{RSSI} value to get a more stable value due to its dispersion. This
-way, the parameter syncPacketsPerSyncPhase is presented. This parameter defines in how many parts Sync Phase will be divided (typically three). Each of 
-this parts, will be divided in as many slots as \acp{AN} in the network. In example, if syncPacketsPerSyncPhase = 3 and there are 9 \acp{AN} in the 
+way, the parameter \textit{syncPacketsPerSyncPhase} is presented. This parameter defines in how many parts Sync Phase will be divided (typically three). Each of 
+this parts, will be divided in as many slots as \acp{AN} in the network. In example, if \textit{syncPacketsPerSyncPhase} = 3 and there are 9 \acp{AN} in the 
 network, the Sync Phase will be divided into 27 slots. The problem is, that this way, Sync Phase could be very long when \acp{AN} number increases and this would make
 \acp{MN} to be listening to the channel for too much time, and most of the time to \acp{AN} at no reachable distance (idle listening).
 
 A way to solve this is to re-use the slots making possible that \acp{AN} far from each other could transmit at the same time. To avoid hidden terminal 
-problem, an \ac{AN} cannot transmit at the same time as its neighbors, or all the neighbors of them. With neighbors is understood all \acp{AN} at a 
+problem, an \ac{AN} cannot transmit at the same time as its neighbors, or all the neighbors of them. With neighbors, is understood all \acp{AN} at a 
 reachable distance. As an example check Figure \ref{fig:ejemplonetslots}.
 
 \begin{figure}[ht]
  \begin{center}
   \includegraphics[width=0.7\textwidth]{ejemplonetslots.eps}
  \end{center}
- \caption{Neighbors explanation}
+ \caption{Neighbors, and neighbors from neighbors from \ac{AN} C}
  \label{fig:ejemplonetslots}
 \end{figure}
 
@@ -406,18 +408,132 @@ In Figure \ref{fig:ejemplonetslots}, a network with 12 \acp{AN} is presented. Th
 all \acp{AN} inside a circle are the neighbors from a determinate \ac{AN}. At the same time all this neighbor \acp{AN}, have their own coverage circles.
 All \acp{AN} inside this circles and the ones before, cannot transmit at the same time as the first \ac{AN} to avoid hidden terminal problem, the others 
 can without risk. In the Figure, \ac{AN} C has as neighbors \acp{AN} B, L, K, J, I and E, and this all have as neighbors the \acp{AN} A, D and F. All this
-\acp{AN} cannot transmit at the same time as \ac{AN} C, but \acp{AN} H and G perfectly could.
+\acp{AN} cannot transmit at the same time as \ac{AN} C, but \acp{AN} H and G perfectly can.
 
 Thanks to this technique, the bigger the network the more optimal this slots re-use technique, finding that, when \acp{AN} number is not so big this 
-technique almost does not help, as all \acp{AN} are inside the neighbor-neighbor distance, but when the \acp{AN} number grows maintaining the 
+technique almost does not help, as all \acp{AN} are inside the neighbor-neighbor distance, but when the \acp{AN} number grows maintaining their 
 density, the total needed slots are highly reduced.
 
-Explicar como hacer el algoritmo de forma automatica.
+To obtain in automatic way the slot distribution among all the \acp{AN} using this technique, the following algorithm is proposed:
 
-Reuso de slots
+\begin{itemize}
+ \item First, a matrix with distances between \acp{AN} should be filled, in this matrix the number indicates the distance between
+two \acp{AN} in the network. 1 indicates the \acp{AN} are neighbors, 2 indicates that one is neighbor from a neighbor, and so on. For 
+the previous network example in Figure \ref{fig:ejemplonetslots}, Table \ref{tab:neighborsmatrix} is extracted.
 
-Hablar del ancho de los slots de 1.5 ms, porque y esas cosas de tiempos y bits.
+\begin{table}
+ \begin{center}
+  \begin{tabular}{c|c|c|c|c|c|c|c|c|c|c|c|c|}
+   %\noalign{\vspace*{0.5cm}}
+   & \textbf{A} & \textbf{B} & \textbf{C} & \textbf{D} & \textbf{E} & \textbf{F} & \textbf{G} & \textbf{H} & \textbf{I} & 
+    \textbf{J} & \textbf{K} & \textbf{L} \\
+   \hline
+   \textbf{A} & X & 1 & 2 & 1 & 2 & 2 & 2 & 2 & 3 & 3 & 2 & 1 \\
+   \hline
+   \textbf{B} & 1 & X & 1 & 1 & 1 & 1 & 2 & 2 & 2 & 2 & 2 & 1 \\
+   \hline
+   \textbf{C} & 2 & 1 & X & 2 & 1 & 2 & 3 & 3 & 1 & 1 & 1 & 1 \\
+   \hline
+   \textbf{D} & 1 & 1 & 2 & X & 2 & 1 & 1 & 1 & 3 & 3 & 3 & 2 \\
+   \hline
+   \textbf{E} & 2 & 1 & 1 & 2 & X & 1 & 2 & 3 & 1 & 2 & 2 & 2 \\
+   \hline
+   \textbf{F} & 2 & 1 & 2 & 1 & 1 & X & 1 & 2 & 2 & 3 & 3 & 2 \\
+   \hline
+   \textbf{G} & 2 & 2 & 3 & 1 & 2 & 1 & X & 1 & 3 & 4 & 4 & 3 \\
+   \hline
+   \textbf{H} & 2 & 2 & 3 & 1 & 3 & 2 & 1 & X & 4 & 4 & 4 & 3 \\
+   \hline
+   \textbf{I} & 3 & 2 & 1 & 3 & 1 & 2 & 3 & 4 & X & 1 & 2 & 2 \\
+   \hline
+   \textbf{J} & 3 & 2 & 1 & 3 & 2 & 3 & 4 & 4 & 1 & X & 1 & 2 \\
+   \hline
+   \textbf{K} & 2 & 2 & 1 & 3 & 2 & 3 & 4 & 4 & 2 & 1 & X & 1 \\
+   \hline
+   \textbf{L} & 1 & 1 & 1 & 2 & 2 & 2 & 3 & 3 & 2 & 2 & 1 & X \\
+   \hline
+  \end{tabular}
+  \caption{\ac{AN} distances matrix}
+  \label{tab:neighborsmatrix}
+ \end{center}
+\end{table}
+To fill this matrix, first all the ones have to be filled in (neighbors). Once this is done, all the twos, then all the threes \ldots. For 
+example if A - B is 1 and B - C is 1, and A - C was left empty, then A - C will be 2.
+ \item After the matrix is completely filled in, it begins slot assignation. First slot is assigned to first row \ac{AN}, in our case A. To 
+make it easier, the algorithm will be explained based in the example as it is complicate enough to show all circumstances.
+\begin{quote}
+ Slot 1 - A
+\end{quote}
+Then, A row is covered from left to right until a number 3 or bigger is found, then this \ac{AN} gets the same slot as A, in this case I.
+\begin{quote}
+ Slot 1 - A, I
+\end{quote}
+Continuing the row, it is found that also J has a number 3, but as I and J have only a 1, they are not compatible and thus J is left out. 
+Then, next row is analyzed and B gets a slot.
+\begin{quote}
+ Slot 1 - A, I \\ Slot 2 - B
+\end{quote}
+It can be seen that B row has no numbers above 2, this means B cannot share a slot with any other \ac{AN} as it is so close to all of them, 
+this makes sense, because as it can be seen in Figure \ref{fig:ejemplonetslots}, B is in the middle of the network. Next row C, gets another
+slot and shares it with G but not with H for the same reason as A, I and J.
+\begin{quote}
+ Slot 1 - A, I \\ Slot 2 - B \\ Slot 3 - C, G
+\end{quote}
+Next row is D, this \ac{AN} gets its own slot, and covering the row, it is found that I can share the slot with it. But as I was already 
+assigned and to allow other \acp{AN} to get also a slot, I is skipped and left for the end. This way, J is the next with number 3 or more 
+and that was not assigned yet, so it gets to share slot with J. There is still K with 3 or more, but K and J are not compatible, so K is left out.
+We had still I to recheck, in this case it is no more compatible with J and it is hence left out, but if it were compatible with all the 
+\acp{AN} in the slot list, then I would get another slot, this would make that an \ac{AN} could get more than one slot if possible, and 
+this way idle listening would get reduced.
+ \begin{quote}
+  Slot 1 - A, I \\ Slot 2 - B \\ Slot 3 - C, G \\ Slot 4 - D, J
+ \end{quote}
+The matrix analysis continues as described until G row is reached, as G was already assigned, G is skipped and it does not get an extra 
+slot like all the \acp{AN} did before. It happens the same with rows H, I, J and K. The current slot assignation is then like follows:
+ \begin{quote}
+  Slot 1 - A, I \\ Slot 2 - B \\ Slot 3 - C, G \\ Slot 4 - D, J \\ Slot 5 - E, H \\ Slot 6 - F, K
+ \end{quote}
+Row L. As L did not get a slot before, a new slot is assigned, and covering the row, the first number above 2 found is for G, but
+like it was explained before, G has already a slot so is left for the end. H has also a 3 with L, but H was also assigned before and is also 
+left for the end.
 
-Explicar importancia de distribuir bien los AN
+As the end of the row was reached, and no other \ac{AN} was found to share the slot with L that was not assigned before, the skipped list has
+to be checked. In this case the list has more than one element, to assure that all the \acp{AN} get the more slots they can, this list is 
+ordered from the \ac{AN} with less slots assigned at the first place to the \ac{AN} with more slots assigned at the last place. This way, it is
+avoid for example, that an \ac{AN} gets one slot and other three, when both could take two. In this case both G and H have only one slot 
+assigned, that is why any of the two \acp{AN} gets the slot, in this case G was chosen.
 
-Explicar que pasa cuando hay obstaculos.
+This is the final slot distribution:
+ \begin{quote}
+  Slot 1 - A, I \\ Slot 2 - B \\ Slot 3 - C, G \\ Slot 4 - D, J \\ Slot 5 - E, H \\ Slot 6 - F, K \\ Slot 7 - L, G
+ \end{quote}
+\end{itemize}
+
+From this example, it can be seen that if \textit{syncPacketsPerSyncPhase} = 3, instead of having $12 \cdot 3 = 36$ slots in every Sync Phase, the slot 
+number was reduced to $7 \cdot 3 = 21$ slots, reducing quite a lot listening time in the \acp{MN}.
+
+The word slot was mentioned quite a lot, but how long is an slot?
+
+From Figure \ref{fig:MACFrame} on page~\pageref{fig:MACFrame} and Figure \ref{fig:PPDU} on page~\pageref{fig:PPDU} it is obtained that \ac{MAC}
+Layer header has 104 bits. And \ac{PHY} Layer header has 48 bits. If the Application Layer Sync Packet has the following structure:
+\begin{itemize}
+ \item[-] 8 bit: status
+ \item[-] 32 bit: next phase start time-stamp
+ \item[-] 16 bit: X dimension from \ac{AN} position
+ \item[-] 16 bit: Y dimension from \ac{AN} position
+ \item[-] 16 bit: Z dimension from \ac{AN} position
+\end{itemize}
+Making the \ac{MAC} Layer Payload 88 bits. This together with the 104 bits and the 48 bits, make a total of 240 bits per Sync Packet to be sent.
+
+As it was commented in Chapter \ref{chap:802154standard}: \nameref{chap:802154standard}, the bit rate is 250 bits/s. This makes that the Sync
+Packet needs 0.96 s to be transmitted. To this time it has to be added the \ac{CCA} time and the \textit{aTurnaroundTime}. This together with
+a security gap in case of bad synchronization, made the slot length 1.5 s.
+
+To get good results from this technique, a good \acp{AN} distribution is of vital importance. \acp{AN} should be distributed with a density enough
+so all \acp{MN} in the network no matter where they are, can reach at least three \acp{AN}, but not so concentrated that all \acp{AN} can
+reach each other to allow this technique to reduce the slots number. Whenever a wall or obstacle is found in the network, it could be modeled as
+a reduction of the affected \acp{AN} coverage in this direction. 
+
+As all this planning process would be made the first time the network is deployed and probably not changed anymore, the effort will just happen 
+at the beginning and will get compensated with a much better network performance that for the random case, this will be proved in Chapter 
+\ref{chap:simulationandresults}: \nameref{chap:simulationandresults}.

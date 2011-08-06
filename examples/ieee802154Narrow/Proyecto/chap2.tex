@@ -2,9 +2,9 @@
 \label{chap:802154standard}
 
 Work-group \ac{IEEE} 802.15 was formed to elaborate an standard for the \ac{WPAN}. Inside this work-group, the Task Group 4 
-deals with the low binary rate ones, \ac{LR-WPAN}. First standard revision was approved in 2003 with the name of: ``Wireless 
-Medium Access Control (MAC) and Physical Layer (PHY) Specifications for Low-Rate Wireless Personal Area Networks (LR-WPANs)'' 
-\cite{IEEE802.15.4-2003}.
+deals with the low binary rate ones, \ac{LR-WPAN}. Last standard revision was approved in 2006 with the name of: ``Wireless 
+Medium Access Control (\ac{MAC}) and Physical Layer (\ac{PHY}) Specifications for Low-Rate Wireless Personal Area Networks (\acp{WPAN})'' 
+\cite{IEEE802.15.4-2006}.
 
 As it can be observed in the title, the standard defines only the Physical Layer and the \ac{MAC} Layer. Using this base, 
 this work will build the Network, Transport and Application Layers to define all network behavior according to the proposed 
@@ -19,7 +19,7 @@ has a reduced range of work.
 
 \ac{IEEE} 802.15.4 defines the protocol and device interconnection in a \ac{WPAN}, as the objective of this work is not to 
 transcribe the standard, only the main characteristics will be presented, focusing later on, just on the important aspects
-for this Final Project. To have a deeper view of the standard, refer to \cite{IEEE802.15.4-2003}.
+for this Final Project. To have a deeper view of the standard, refer to \cite{IEEE802.15.4-2006}.
 
 \begin{itemize}
  \item \ac{PHY}: works in 868 MHz (1 ch), 915 MHz (10 ch) and 2450 MHz (16 ch) bands.
@@ -54,7 +54,7 @@ movement possibility.
  \begin{center}
   \includegraphics[width=0.9\textwidth]{WPAN_Network_Topologies.eps}
  \end{center}
- \caption{Star and peer-to-peer topology examples \cite{IEEE802.15.4-2003}}
+ \caption{Star and peer-to-peer topology examples \cite{IEEE802.15.4-2006}}
  \label{fig:WPAN_Network_Topologies}
 \end{figure}
 \end{itemize}
@@ -88,7 +88,7 @@ the use of a \ac{O-QPSK} modulation with a symbol rate of 62,5 symbol/s. As this
 a 250 bit/s bit rate. This frequency range, has 16 different channels with a 5 MHz separation between them, the number of 
 this channels goes from 11 to 26.
  \item \textbf{Data transmission and reception.} According to the standard, the \ac{PHY} Layer must be able to transmit with a minimum
-power of 1 mW and it must have a sensibility of at least -85 dBm \cite{IEEE802.15.4-2003}. Figure \ref{fig:PPDU} shows the physical level frame structure.
+power of 1 mW and it must have a sensibility of at least -85 dBm \cite{IEEE802.15.4-2006}. Figure \ref{fig:PPDU} shows the physical level frame structure.
 
 \vspace*{1cm}
 
@@ -96,7 +96,7 @@ power of 1 mW and it must have a sensibility of at least -85 dBm \cite{IEEE802.1
  \begin{center}
   \includegraphics[width=0.9\textwidth]{PPDU.eps}
  \end{center}
- \caption{\ac{PHY} Layer frame \cite{IEEE802.15.4-2003}}
+ \caption{\ac{PHY} Layer frame \cite{IEEE802.15.4-2006}}
  \label{fig:PPDU}
 \end{figure}
 \end{itemize}
@@ -121,7 +121,7 @@ layer are:
 \end{itemize}
 
 As happened for the \ac{PHY} layer, the \ac{MAC} layer has some constants and attributes to be configured, which will be used later in this work.
-This parameters can be found from page 133 in \cite{IEEE802.15.4-2003}.
+This parameters can be found from page 133 in \cite{IEEE802.15.4-2006}.
 
 \subsection{Working Modes}
 
@@ -167,7 +167,7 @@ but if the maximum is reached, all process gets canceled and \ac{MAC} layer info
  \begin{center}
   \includegraphics[width=0.5\textwidth]{CSMACA.eps}
  \end{center}
- \caption{Non-Slotted \ac{CSMA/CA} Algorithm \cite{IEEE802.15.4-2003}}
+ \caption{Non-Slotted \ac{CSMA/CA} Algorithm \cite{IEEE802.15.4-2006}}
  \label{fig:CSMACA}
 \end{figure}
 
@@ -218,7 +218,7 @@ just the frames relative to this mode will be explained. Figure \ref{fig:MACFram
  \begin{center}
   \includegraphics[width=0.7\textwidth]{MACFrame.eps}
  \end{center}
- \caption{Data and \ac{ACK} \ac{MAC} Frames \cite{IEEE802.15.4-2003}}
+ \caption{Data and \ac{ACK} \ac{MAC} Frames \cite{IEEE802.15.4-2006}}
  \label{fig:MACFrame}
 \end{figure}
 

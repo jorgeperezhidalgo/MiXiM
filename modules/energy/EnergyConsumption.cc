@@ -94,7 +94,7 @@ void EnergyConsumption::finish() {
 	double totalPowerRxToIdle		= powerRxToIdle * totalTimeRxToIdle.dbl();
 	double totalPowerSleepToRx		= powerSleepToRx * totalTimeSleepToRx.dbl();
 	double totalPowerSleepToIdle	= powerSleepToIdle * totalTimeSleepToIdle.dbl();
-    double totalPower = totalPowerUControler + totalPowerSleep + totalPowerRx +
+    totalPower = totalPowerUControler + totalPowerSleep + totalPowerRx +
     		totalPowerTx + totalPowerIdle + totalPowerIdleToTx + totalPowerIdleToRx +
     		totalPowerIdleToSleep + totalPowerTxToRx + totalPowerTxToSleep + totalPowerTxToIdle +
     		totalPowerRxToTx + totalPowerRxToSleep + totalPowerRxToIdle + totalPowerSleepToRx +

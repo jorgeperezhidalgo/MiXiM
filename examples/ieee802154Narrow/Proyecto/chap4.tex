@@ -1,11 +1,45 @@
 \chapter{Protocol Implementation}
 \label{chap:protocolimplementation}
 
+This chapter details the simulation environment where the presented High Configurable Protocol was developed and tested. Simulation was chosen because
+both analytical and real networks studies, are difficult or expensive in such a complex protocol. During this chapter a deeper view into the protocol will
+be given, as all generated code will be explained in detail.
+
 \section{Used Tools}
 
+To develop this project different simulators and frameworks for this simulators where considered, choosing finally \ac{OMNeT++} 4.0 \cite{OMNeT}
+as simulator, and \ac{MiXiM} 2.0 \cite{MiXiM} as framework, due to its versatility, their short time to get to work with them for the first time and 
+their complete development of 802.15.4 standard, specially in non-beaconed mode.
+
+After all simulations are done, the results can be extracted with a tool called \textit{scavetool}. This data is than worked with \ac{MATLAB} 
+\cite{MATLAB} to obtain all results in Chapter \ref{chap:simulationandresults}: \nameref{chap:simulationandresults}.
+
+\subsection{\ac{OMNeT++} 4.0}
+
+\ac{OMNeT++} 4.0 is an object oriented discrete event simulator, based in C++ \cite{cpp}. \ac{OMNeT++} consists in several modules hierarchically
+connected and that communicate among them through messages. Modules relation is done through an own easy programming language called \ac{NED}.
+
+This software allows two kinds of simulation environments, a graphic one (Tkenv) and a command line one (Cmdenv). Working with the graphic one, 
+message interchange simulation can be done step by step, this mode is good to debug the code. Working with the command environment, allows to
+make express simulations to obtain the final results in a quicker way, in this mode it is also possible to program some
+parameter changes during the simulation or even some consecutive simulations, this is all automatically done and thus does not require user 
+intervention This mode makes all process much easier when lots of iterations must be done.
+
+Explicar la configuracion de parametros en los .ned y omnetpp.ini 
+
+Explicar la estructura de un modulo cualquiera en omnet, initialize y los tratamientos de los mensajes y finish para las variables
+
+\subsection{\ac{MiXiM} Framework}
+
+\ac{MiXiM} 2.0 framework provides \ac{OMNeT++} with many new modules, among all of them, all necessary modules to work with 802.15.4 Standard, are 
+provided. All this modules are build following \cite{IEEE802.15.4-2006}. 
+
+Explicar estructura de un nodo actual y las modificaciones realizadas
+
+\subsubsection{Mobility module modifications}
+
+\subsubsection{\ac{MAC} Layer modifications}
 
 \section{Sync Phase study development}
-
-\ac{CSMA/CA} disabled to be able to calculate the time-stamp after the random time added in application layer. 
 
 \section{Framework development}
