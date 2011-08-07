@@ -1,59 +1,59 @@
 \chapter{Introduction}
 \label{chap:introduction}
 
-We are inside the information era, it is even said that information means money. It is clear then, that acceding to this information
-everywhere and every time is an important issue. Thanks to telecommunication advances and the need of this information, it is
-possible now to be permanently connected. Technology has also made devices smaller, cheaper and more powerful
+We are in information era, it is even said that information means money. It is obvious that accessing to this information
+always and everywhere is an important issue. Due to this fact and thanks to telecommunication advances, nowadays it is
+possible to be permanently connected. Technology has also made devices smaller, cheaper and more powerful
 every day (\ac{PDA}, Mobile Telephones, \ac{MP3} Players \ldots). All this together has created the \ac{WPAN} concept, a way 
-all this devices can be interconnected, so they can complement each other to obtain applications beyond our imagination. The 
-problem in this idyllic world is an old problem, energy. All this devices are supplied with batteries, what means that their 
-lives are not so long until we must plug them in to continue working with them. This is the reason why it is necessary to build them
-a way they reduce its energy consumption.
+all these devices can be interconnected, in order to complement each other to obtain applications beyond our imagination. The 
+problem in this idyllic world is an old problem, energy. All these devices are supplied with batteries, what means that their 
+lives are not so long until we must plug them in to continue working with them. This is the reason why it is necessary to design them
+in a way that their energy consumption gets reduced.
 
-With the objective of creating an standard for this \ac{WPAN}, the \ac{IEEE}, created the 802.15 group, which created different 
-kind of networks attending to the data rate. Among this kind of networks it is found the 802.15.4, designed for low data rates but 
+With the objective of creating an standard for this \ac{WPAN}, the \ac{IEEE}, formed the 802.15 group, which created different 
+kind of networks depending on the data rate. 802.15.4 forms part of this kind of networks and it is designed for low data rates but 
 also for low consumption. This standard is the one this work is based on.
 
 \section{Why \ac{WSN}?}
 
-As a cabled technology would be unpractical for a topology where free of movement is a must, it is clear the need of a 
-wireless technology, but why did we choose 802.15.4 \ac{WSN} and not other alternatives?
+As a cabled technology would be unpractical for a topology where freedom of movement is a must, wireless technology becomes essential, 
+but why did we choose 802.15.4 \ac{WSN} and not other alternatives?
 
 One possible alternative would have been Wi-Fi. This technology is based in \ac{IEEE} 802.11 standard, and with bit rates up to
-54 Mbps and much bigger ranges, would be a good alternative, but its energy consumption is much bigger than for 802.15.4 \ac{WSN}.
+54 Mbps and much bigger ranges, it would be a good alternative, but its energy consumption is much bigger than for 802.15.4 \ac{WSN}.
 
-In the same group as \ac{WSN}, it can be found the Bluetooth (\ac{IEEE} 802.15.1), this standard has still bigger bit rates as 
+In the same group as \ac{WSN}, Bluetooth can be found (\ac{IEEE} 802.15.1). This standard has bigger bit rates than 
 802.15.4, but its energy consumption is still too big, as it is not thought for this kind of applications. Also Bluetooth scalability
 is not as good as for 802.15.4.
 
-This reasons together with the low prices of 802.15.4 compared with the other alternatives, made this work use the \ac{IEEE} 802.15.4 
-standard as the standard for building a High Configurable Protocol for localization. The idea is that using this protocol we should
+These reasons combined with the low prices of 802.15.4 nodes compared with the other alternatives, made this work use the \ac{IEEE} 802.15.4 
+as the selected standard for building a High Configurable Protocol for localization. The idea is that by using this protocol we should
 get a little node working with a couple of AA batteries for many months or even some years.
 
 \section{Applications}
 
-\ac{WSN} applications are wide and diverse, this application areas are just some examples:
+\ac{WSN} applications are wide and diverse, these application areas are just some examples:
 
 \begin{itemize}
- \item \textbf{Medicine.} As the nodes size is every time smaller, some patients with problems which should be controlled all the time,
+ \item \textbf{Medicine.} As node's size is becoming smaller and smaller, some patients with problems which should be controlled constantly,
 could find this networks really useful.
- \item \textbf{Security environments.} Places with toxic substances, where there cannot be humans, and where some parameters should be measured,
-or delicate places that need the presence of sensors 24/7 to check that there was no intruders. This could be done also by \ac{WSN}.
- \item \textbf{Environmental sensors.} Vast areas like forests, sees, coasts \ldots that need to be controlled in some parameters like
-humidity, temperature, fire, seismic activity \ldots which are impossible to be controlled by humans, are good controlled with sensors
-and at the same time they minimize the environmental impact.
+ \item \textbf{Security environments.} \ac{WSN} could be helpful in places with toxic substances' presence or places which need to be controlled
+24/7. Both cases escape to human control.
+ \item \textbf{Environmental sensors.} Vast areas like forests, sees, coasts, etc. that need to be controlled in some parameters like
+humidity, temperature, fire, seismic activity, etc. which are impossible to be watched by humans, are well controlled with sensors. At the same 
+time the environmental impact is minimized.
  \item \textbf{Industrial sensors.} The size of the sensors makes possible to access every corner of the industrial process, and it is also
 possible to control much more parameters.
- \item \textbf{Indoor positioning.} Sensor make possible to be guided inside a building we don't know, or even to people with some handicaps.
-They are also good to locate determinate objects in a building.
+ \item \textbf{Indoor positioning.} Sensors facilitate to be guided inside a building we do not know, or even help people with handicaps.
+They are also useful to locate determinate objects in a building.
  \item \textbf{Home automation.} Every element in our house could have a sensor inside, they could communicate among them and even notify us
-about some alerts or needs from the house, they could even check how we feel to prepare the house in a specific way.
+of some alerts or needs of the house, they could also check how we feel to prepare the house in a specific way.
 \end{itemize}
 
 Table \ref{tab:wsn_applications} was made from all this applications and many more. This table reflects a summary, and also divides and groups
-the applications according to the priority in energy, accuracy and emergency, and also if the involved device needs to obtain some information
+the applications according to the priority in energy, accuracy and emergency. It also shows if the involved device needs to obtain some information
 from the network. Priority in energy means that the other parameters do not matter too much, saving energy is the important task. 
-The same happens with accuracy and with emergency, where the rest does not matter, the exact position or speed are needed.
+The same happens with accuracy and with emergency, where the rest does not matter, the exact position or speed is needed.
 
 \begin{table}[ht]\footnotesize
 \begin{center}
@@ -92,7 +92,7 @@ The same happens with accuracy and with emergency, where the rest does not matte
 \end{center}
 \end{table}
 
-Later on, this kind of applications will derive in 4 different types of nodes in our network.
+Later on, this kind of applications will conclude in 4 different types of nodes in our network.
 
 \section{Challenges and Objectives}
 
@@ -122,7 +122,7 @@ The objective of this Final Project is hence, the design of a Protocol based in 
 challenges before. But the objective is also the design of a robust and complete framework where future works could add more functionalities
 or improve the existing ones without worrying about the communication or basic functionality.
 As this is a design stage, simulation was chosen instead of testing directly on real devices. The simulation will be done with the Discrete 
-Events Simulator \ac{OMNet++} 4.0 using the \ac{MiXiM} framework, and the results will be treated with \ac{MATLAB}, this tools will be commented later on.
+Events Simulator \ac{OMNeT++} 4.0 using the \ac{MiXiM} framework, and the results will be treated with \ac{MATLAB}, this tools will be commented later on.
 
 \section{Document structure}
 
