@@ -4,7 +4,7 @@ img_extIsRegExp=false
 img_extensions=.eps .jpg .jpeg .png .pdf .ps .fig .gif
 kileprversion=2
 kileversion=2.0.85
-lastDocument=chap3.tex
+lastDocument=chap5.tex
 masterDocument=
 name=final_project
 pkg_extIsRegExp=false
@@ -116,63 +116,63 @@ order=4
 
 [item:bib.bib]
 archive=true
-column=12
+column=22
 encoding=UTF-8
 highlight=BibTeX
-line=36
+line=49
 mode=BibTeX
 open=true
 order=2
 
 [item:chap1.tex]
 archive=true
-column=91
+column=0
 encoding=UTF-8
 highlight=LaTeX
-line=141
+line=0
 mode=LaTeX
 open=true
 order=4
 
 [item:chap2.tex]
 archive=true
-column=78
+column=34
 encoding=UTF-8
 highlight=LaTeX
-line=3
+line=275
 mode=LaTeX
 open=true
 order=3
 
 [item:chap3.tex]
 archive=true
-column=92
+column=27
 encoding=UTF-8
 highlight=LaTeX
-line=408
+line=240
 mode=LaTeX
 open=true
 order=5
 
 [item:chap4.tex]
 archive=true
-column=111
+column=0
 encoding=UTF-8
 highlight=LaTeX
-line=8
+line=0
 mode=LaTeX
 open=true
 order=7
 
 [item:chap5.tex]
 archive=true
-column=32
+column=0
 encoding=UTF-8
 highlight=LaTeX
-line=1
+line=448
 mode=LaTeX
-open=false
-order=3
+open=true
+order=8
 
 [item:chap6.tex]
 archive=true
@@ -216,10 +216,10 @@ order=1
 
 [item:main.tex]
 archive=true
-column=30
+column=0
 encoding=UTF-8
 highlight=LaTeX
-line=9
+line=72
 mode=LaTeX
 open=true
 order=0
@@ -229,28 +229,28 @@ CursorColumn=6
 CursorLine=2
 
 [view-settings,view=0,item:bib.bib]
-CursorColumn=12
-CursorLine=36
+CursorColumn=22
+CursorLine=49
 
 [view-settings,view=0,item:chap1.tex]
-CursorColumn=91
-CursorLine=141
+CursorColumn=0
+CursorLine=0
 
 [view-settings,view=0,item:chap2.tex]
-CursorColumn=78
-CursorLine=3
+CursorColumn=34
+CursorLine=275
 
 [view-settings,view=0,item:chap3.tex]
-CursorColumn=92
-CursorLine=408
+CursorColumn=27
+CursorLine=240
 
 [view-settings,view=0,item:chap4.tex]
-CursorColumn=111
-CursorLine=8
+CursorColumn=0
+CursorLine=0
 
 [view-settings,view=0,item:chap5.tex]
-CursorColumn=32
-CursorLine=1
+CursorColumn=0
+CursorLine=448
 
 [view-settings,view=0,item:chap6.tex]
 CursorColumn=6
@@ -265,5 +265,5 @@ CursorColumn=0
 CursorLine=1
 
 [view-settings,view=0,item:main.tex]
-CursorColumn=30
-CursorLine=9
+CursorColumn=0
+CursorLine=72

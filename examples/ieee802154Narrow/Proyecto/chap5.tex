@@ -1,6 +1,453 @@
 \chapter{Simulation and Results}
 \label{chap:simulationandresults}
 
+In this chapter, different scenarios for the simulation and their results will be exposed and commented. To make it easier to understand, and as 
+previously this two cases were also separated, first just the Sync Phase will be analyzed and then the whole protocol together.
+
+In all the scenarios, simulations are independent among them and at least 100 repetitions are going to be done, this way the confidence intervals
+shown in all figures could be calculated like in (\ref{mat:confidenceintervals}).
+
+\begin{equation}
+  x-\frac{\sigma}{\sqrt{n}}\cdot t_{\frac{\alpha}{2}} < \mu < x+\frac{\sigma}{\sqrt{n}}\cdot t_{\frac{\alpha}{2}}
+  \label{mat:confidenceintervals}
+\end{equation}
+
+Where x is the value to check, $\sigma$ is the standard deviation of the measurements, $\mu$ is the average value, n is the number of repetitions done and 
+$t_{\frac{\alpha}{2}}$ is a constant of 1.96 for a confidence interval of 95\%.
+
 \section{Sync Phase simulation and analysis}
 
+The aim of this section is to compare slotted transmission and random transmission during Sync Phase. This two approaches were already commented 
+during Chapter \ref{chap:protocoldesign}: \nameref{chap:protocoldesign}.
+
+As random transmission case is more difficult and chaotic as the slotted one, this will be studied separately first, leaving the slotted case to 
+be studied together with the comparison and finishing with a study of the number of slots depending on the \acp{AN} density.
+
+\subsection{Random Transmission}
+
+To study this case, scenarios in Figure \ref{fig:hiddenvsnohidden} were simulated. In a) can be seen that all nodes can detect all node transmissions,
+avoiding so Hidden Terminal Problem. In b), \acp{AN} can detect only some of the \ac{AN} transmissions and the \ac{MN} can detect all of them, this way
+\acp{AN} are going to start transmitting when probably another \ac{AN} will be doing so, provoking a collision at the \ac{MN}. The number of \acp{AN}
+is 6 in both cases and the number of \acp{MN} is 1.
+
+\begin{figure}[ht]
+ \begin{center}
+  \includegraphics[width=0.5\textwidth]{hiddenvsnohidden.eps}
+ \end{center}
+ \caption{Scenarios avoiding (a) and forcing (b) Hidden Terminal Problem}
+ \label{fig:hiddenvsnohidden}
+\end{figure}
+
+All errors caused by noise and random errors due to the channel, were disabled during this simulation. This is so, to have only simultaneous \acp{CCA} 
+problem and Hidden Terminal Problem. With this situation, it can be assured that if a packet is received incorrectly in the \ac{MN}, the reason would 
+be one of this two problems.
+
+As is was commented in Chapter \ref{chap:protocoldesign}: \nameref{chap:protocoldesign}, in order to avoid an unknown random time during active 
+synchronization, \ac{CSMA/CA} must be disabled. If this is done, all \acp{AN} will transmit at the same time generating lots of collisions. To solve this
+a random time is added by Application Layer before the packet is transmitted. This random time value, will be between 0 and a maximum number. In this
+section, this maximum number goes from 1 to 30 originating 30 different simulations. This value will be the X axis in all Figures. 
+
+In order to reduce the dispersion caused by random numbers, each simulation will be done 1000 times.
+
+\begin{figure}[ht]
+ \begin{center}
+  \includegraphics[width=1\textwidth]{receivedPacketsAndLastPacketArrival.eps}
+ \end{center}
+ \caption{Received packets in \ac{MN} and last packet arrival time}
+ \label{fig:receivedPacketsAndLastPacketArrival}
+\end{figure}
+
+
+First simulation, gives as result \textbf{Figure \ref{fig:receivedPacketsAndLastPacketArrival}}. Here can be seen the total received packets in the 
+\ac{MN} and the time when the last packet arrived in function of the maximum inter packet transmission time.
+
+Both received packets lines (A and B) have a rising trajectory and both tend to 24 in the infinite. This 24 packets are the total number of 
+packets sent to the network, sending each \ac{AN} four. It can be seen that, as in the case without Hidden Terminal Problem (A) the number of collisions
+is smaller, the number of received packets in the \ac{MN} is much bigger than in the Hidden Terminal Problem case.
+
+This Figure shows also the average arrival time from the last arrived packet in the \ac{MN}. This is not the 24$^{th}$ sent packet, as this could 
+possibly collide with another. As the number of arrived packets in the case avoiding Hidden Terminal Problem is bigger, the last packet takes more time 
+to arrive to the \ac{MN}. This can be seen in the Figure as C line values are always bigger than D line ones.
+
+\begin{figure}[ht]
+ \begin{center}
+  \includegraphics[width=1\textwidth]{averageTimeBetweenArrivals.eps}
+ \end{center}
+ \caption{Average time between arrivals in the \ac{MN}}
+ \label{fig:averageTimeBetweenArrivals}
+\end{figure}
+
+\textbf{Figure \ref{fig:averageTimeBetweenArrivals}} shows the average times between packet arrivals in function of the maximum inter packet 
+transmission time. This time does not represent the arrival time between two packets from the same \ac{AN}, but from any \ac{AN}. It is seen how
+for the case with Hidden Terminal Problem, the time between consecutive arrived packets is much bigger than for the case without Hidden Terminal Problem,
+consequently the number of collisions is also bigger, needing the \ac{MN} to wait more time until it gets another valid packet.
+
+It is logic to think, that the bigger the time between transmissions, the bigger the time inter arrived packets. But, why in both cases, with or 
+without Hidden Terminal Problem, for low values in X axis, the Y values start high and decrease until a certain moment where they start to grow again? 
+This is because at the beginning, when the time between transmissions is low, the number of collisions is high as all \acp{AN} are trying to send their
+packets almost at the same time. As the X value becomes bigger, the number of collisions gets reduced and thus the inter packet arrival time. But from 
+the moment where the curves make their minimum, the influence of the time between transmissions becomes important, and makes the curves go up again.
+
+\begin{figure}[ht]
+ \begin{center}
+  \includegraphics[width=1\textwidth]{averageDifferentTimes.eps}
+ \end{center}
+ \caption{Packet arrival average times}
+ \label{fig:averageDifferentTimes}
+\end{figure}
+
+\textbf{Figure \ref{fig:averageDifferentTimes}} shows the average arrival time in the \ac{MN} of the first packet, the last first packet, the last
+second packet, the last third packet and the last packet coming from any of the \acp{AN}.
+
+It is easy to see that arrival time of the first packet should be smaller than the arrival time of the last first packet, this should be smaller than
+ the arrival time of the last second packet, this should be smaller than last third and this smaller than the last. But if the case with Hidden 
+Terminal Problem is observed, it can be found that when time between transmissions is small, last second and last third received packets arrive later 
+that last received packet. How is this possible? This happens because due to the big number of collisions many times only first packets arrive or many of 
+them arrive after the last second or third packets. When conditions are better (higher time between transmitted packets or no Hidden Terminal Problem) 
+this does not happen because many more second or third packets are delivered and thus they will be the last packets.
+
+It is also interesting how unlike the right figure, for the case without Hidden Terminal Problem, the arrival time of the first packet and the arrival 
+time of the last first packet are quite separated. This is because in this case the collision number is much smaller, and as it was seen in Figure 
+\ref{fig:receivedPacketsAndLastPacketArrival}, the \ac{MN} receives much more first packets from the \acp{AN}.
+
+As comparison between the two cases, it can be seen that for the case without Hidden Terminal Problem, the arrival times are bigger, this is again because
+the \ac{MN} receives in this case much more packets due to a lower number of collisions, making the last packets arrive later. This lower number of 
+collisions makes also that the arrival time of the first packet is smaller than for the case with Hidden Terminal Problem.
+
+\begin{figure}[ht]
+ \begin{center}
+  \includegraphics[width=1\textwidth]{percentil98differentTimes.eps}
+ \end{center}
+ \caption{Percentil 98 of packet arrival times}
+ \label{fig:percentil98differentTimes}
+\end{figure}
+
+\textbf{Figure \ref{fig:percentil98differentTimes}} does not represent an average but a percentil 98, this means that if this times are taken as 
+reference, in 98\% of the situations, the times are going to be under this values. This is thus a good way to get an acceptable top limit.
+
+The analysis from this graphic is the same as the previous one with the only peculiarity that all times in Y axis are bigger, this is so because
+this graphic represents the worst cases, not the average. For the same reason, in the case with Hidden Terminal Problem when the times between
+transmissions are small, the first arrived packet time is bigger and behaves different as in Figure \ref{fig:averageDifferentTimes}.
+
+\subsection{Slotted vs. Random Transmission}
+
+The aim of this sub-section is to compare the random and the slotted transmission during the Sync Phase of the protocol. As slotted case seems to be
+much better than random case, the first thing to make is looking for the best case in random transmission. To find this best case an optimum number
+of broad-casted packets and time between transmissions should be found.
+
+The scenario has 80 \acp{MN} uniformly and randomly distributed along the playground, and 30, 40, 50, 60 and 70 \acp{AN} distributed the same way.
+There is hence Hidden Terminal Problem.
+
+In order to reduce the dispersion caused by random numbers, each simulation will be done 100 times. Data will be measured in the \acp{MN}, and as 
+they are disperse all over the playground, their values could be very different. That is why first an average of the 80 nodes will be done followed 
+by an average of the 100 repetitions.
+
+\subsubsection{Slot Number vs. \acp{AN} Number}
+
+This sub-section's aim is checking how good is the algorithm to calculate the slot distribution among the \acp{AN}. For this purpose, an scenario 
+with different number of \acp{AN} where slots will be calculated by a Computer as described in Chapter \ref{chap:protocoldesign}: 
+\nameref{chap:protocoldesign}, will be simulated 100 times. It has to be taken into account that Computer takes also its own slot, this can be seen
+like \acp{AN} number is one unit bigger.
+
+The number of slots will be also useful for the following sub-sections, as to be able to compare randomly and slotted approaches, the Sync Phases need 
+to last the same time, and this time cannot be known for random case until the number of slots is known.
+
+\begin{figure}[ht]
+ \begin{center}
+  \includegraphics[width=0.8\textwidth]{numberOfSlotsWithTheAnchorDensity.eps}
+ \end{center}
+ \caption{Slot Number for a variable \acp{AN} density}
+ \label{fig:numberOfSlotsWithTheAnchorDensity}
+\end{figure}
+
+\textbf{Figure \ref{fig:numberOfSlotsWithTheAnchorDensity}} is the result of simulating a 1 $Km^2$ playground with a number of \acp{AN} going from 
+2 to 70, as the playground is fixed and only the number of nodes increase, it could be said that \acp{AN} density increases. When \acp{AN} density 
+increases, and as \acp{AN} range stays constant, the number of neighbors for each \ac{AN} increases also. This makes the number of slots grow together
+with the number of \acp{AN}, as it can be seen in the figure.
+
+\begin{figure}[ht]
+ \begin{center}
+  \includegraphics[width=0.8\textwidth]{numberOfSlotsWithTheSameDensity.eps}
+ \end{center}
+ \caption{Slot Number for a fixed \acp{AN} density}
+ \label{fig:numberOfSlotsWithTheSameDensity}
+\end{figure}
+
+In this case, \textbf{Figure \ref{fig:numberOfSlotsWithTheSameDensity}} is obtained simulating 6 to 80 nodes with a minimum separation between them of 
+80 meters. Playground is calculated dynamically with this parameters to have always a 83 $\acp{AN}/Km^2$ density. As \acp{AN} density remains constant,
+the number of neighbors an \ac{AN} has also does. This means the re-usability of the slots will grow with the number of nodes. The re-usability can be
+observed in the figure, as when the number of \acp{AN} grow, the number of slots does not grow linearly like in Figure 
+\ref{fig:numberOfSlotsWithTheAnchorDensity}.
+
+\subsubsection{Checking the best inter packet random time}
+
+In this scenario, each \ac{AN} sends as many packets as it can during the Sync Phase time defined by the slots. First, Computer calculates the number of
+slots and multiplies it by \textit{syncPacketsPerSyncPhase} (in this case 3) to obtain the Sync Phase time. This simulation will be done for different
+number of \acp{AN} (already told) and different maximum random times between transmissions from 1 to 30 ms. After repeating each case 100 times,
+\textbf{Figure \ref{fig:randomTimeCheckingTheBestInterpacketRandomTime}} is obtained.
+
+\begin{figure}[ht]
+ \begin{center}
+  \includegraphics[width=1\textwidth]{randomTimeCheckingTheBestInterpacketRandomTime.eps}
+ \end{center}
+ \caption{Checking the best time between random transmissions}
+ \label{fig:randomTimeCheckingTheBestInterpacketRandomTime}
+\end{figure}
+
+In this figure, it can be seen how when the time between transmissions is small, the number of delivered packets is also small. This is due to the 
+collisions. When the time between transmissions grows, so does the correctly received packets until it reaches a maximum where it goes down again.
+The ground for this is that the bigger the time between transmissions is, the less the number of packets that fit in the fixed Sync Phase time. When in 
+Figure \ref{fig:receivedPacketsAndLastPacketArrival} there was no time limit, it could be seen how the received packets number did only grow.
+
+From Figure \ref{fig:randomTimeCheckingTheBestInterpacketRandomTime}, it can also be seen that the more \acp{AN} there are, the more received packets and
+the later the maximum comes. This maximum comes later because as the number of \acp{AN} is bigger, there are also more collisions, being its effect in the 
+number of delivered packets bigger compared with the time between transmissions. And as the number of slots is bigger (hence the Sync Phase time), the 
+time between transmissions influence will come later.
+
+The gray discontinuous line was drawn following the maximum points for every curve. This line gives us the optimum waiting time between transmissions to 
+be set for any number of \acp{AN}. Taking a smaller value generates more collisions and a bigger value makes the number of delivered packets smaller due
+to the lack of time in the phase.
+
+\subsubsection{Checking the best number of sent packets per \ac{AN}}
+
+In this scenario, each \ac{AN} sends a maximum number of packets from 3 to 16 during the Sync Phase time defined by the slots. First, Computer calculates 
+the number of slots and multiplies it by \textit{syncPacketsPerSyncPhase} (in this case 3) to obtain the Sync Phase time. This simulation will be done 
+for different number of \acp{AN} (already told) where the previous optimal maximum random times between transmissions will be taken (see Table
+\ref{tab:optimalTransmitTimes}). After repeating each case 100 times, \textbf{Figure \ref{fig:randomTimeCheckingTheBestNumberOfSentPacketsForAnchor}} 
+is obtained.
+
+\begin{table}
+ \begin{center}
+  \begin{tabular}{|l|c|}
+   %\noalign{\vspace*{0.5cm}}
+   \hline
+   30 \acp{AN} & 5 ms \\
+   \hline
+   40 \acp{AN} & 7 ms \\
+   \hline
+   50 \acp{AN} & 9 ms \\
+   \hline
+   60 \acp{AN} & 11 ms \\
+   \hline
+   70 \acp{AN} & 13 ms \\
+   \hline
+  \end{tabular}
+  \caption{Optimal maximal random times between \ac{AN} transmissions}
+  \label{tab:optimalTransmitTimes}
+ \end{center}
+\end{table}
+
+\begin{figure}[ht]
+ \begin{center}
+  \includegraphics[width=1\textwidth]{randomTimeCheckingTheBestNumberOfSentPacketsForAnchor.eps}
+ \end{center}
+ \caption{Checking the best number of sent packets per \ac{AN}}
+ \label{fig:randomTimeCheckingTheBestNumberOfSentPacketsForAnchor}
+\end{figure}
+
+It can be clearly seen in the figure, how the average number of received packets in the \acp{MN} increases until it reaches a maximum (approximately
+with 10 sent packets). This is so because in the fixed Sync Phase time, there is no time for more packets to arrive. Ten is hence defined as the 
+maximum number of packets to be sent. The reason to this limit is that when an \ac{AN} has already reached this maximum sent packets number per Sync Phase, 
+it will stop sending more, leaving the channel more free for the rest of the \acp{AN} to transmit.
+
+\subsubsection{Slotted vs. Best Random case comparison}
+
+Both alternatives will be compared in a first approach checking the average number of packets received by the \acp{MN} in different situations. In 
+all situations, cases with 30, 40, 50, 60 and 70 \acp{AN} will be studied. In the comparison there will be included the following situations: 
+slotted case, best random transmissions case, worst random transmissions case ($T=1 ms$) and two random transmissions cases between worst and best cases
+($T=3ms$ and $T=5ms$). Where T is the maximum random time between transmissions. In all cases the number of transmitted packet per \ac{AN} will be 10.
+
+\begin{figure}[ht]
+ \begin{center}
+  \includegraphics[width=1\textwidth]{slottedVsRandomAverageReceivedPackets.eps}
+ \end{center}
+ \caption{Slotted vs. Random cases comparison for number of received packets in \ac{MN}}
+ \label{fig:slottedVsRandomAverageReceivedPackets}
+\end{figure}
+
+\textbf{Figure \ref{fig:slottedVsRandomAverageReceivedPackets}} shows how in all situations, in the slotted case \acp{MN} received more packets as in
+any of the random cases. It can be also seen that this difference gets bigger when the number of \acp{AN} arises.
+
+As a second comparison between the bestFrom all this, it can be obtained that slotted transmission is better than even the best case of random transmission. Slotted transmission will be hence
+the one used during the Sync Phase in the complete protocol analysis. case for random transmissions and the slotted case, the number of first, second, third, fourth, \ldots, eighth
+packets from an \ac{AN} received in the \ac{MN}, will be studied. Results can be seen in \textbf{Figure \ref{fig:numberOf1st2ndPacketsReceived}}.
+
+\begin{figure}[ht]
+ \begin{center}
+  \includegraphics[width=1\textwidth]{numberOf1st2ndPacketsReceived.eps}
+ \end{center}
+ \caption{Number of $1^{st}$, $2^{nd}$, $3^{rd}$ \ldots, $8^{th}$ received packets in \acp{MN} from an \ac{AN}}
+ \label{fig:numberOf1st2ndPacketsReceived}
+\end{figure}
+
+In both graphics can be appreciated how the more \acp{AN} there are, the more received packets in the \acp{MN}. It can be seen as well, how
+for the slotted case, the number of received packets is bigger than for the random case (as it was already proved).
+
+In the graphic on the left, it can be seen how the number of first packets received is bigger than the number of second packets. How the number of 
+second packets received is bigger than the number of third packets, etc. And how this reduction occurs in a gradual way. Unlike this, in the graphic 
+on the right, a stair-shaped behavior can be appreciated.
+
+As \textit{syncPacketsPerSyncPhase} = 3, the Sync Phase will be divided into 3 identical sub phases. This means that all packets sent in one sub 
+phase, will be sent in the other two. That is why the number of first, second and third packets is the same, as well as the number of fourth, fifth 
+and sixth, and the number of seventh and eighth. Anytime a packet is sent more than \textit{syncPacketsPerSyncPhase} = 3 times, is due to slot re-using. 
+That justifies why for example for the 30 \acp{AN} case, no seventh or eighth packets where sent, re-use here was not so big.
+
+As a last comparison between slotted case and best random case, Packet arrival times in the \acp{MN} will be studied. Getting \textbf{Figure
+\ref{fig:Lastarrivalpackettimes}} as the result to be commented. For a good understanding of this figure, X axis should be clarified. X axis has numbers
+going from 1 to 11. Number from 1 to 8 represent the $1^{st}$, $2^{nd}$, $3^{rd}$ \ldots, $8^{th}$ last received packet in the \acp{MN}. Number 9 
+represents the first packet arrived in the \acp{MN}. Number 10 represents the last packet arrived in the \acp{MN}. And number 11 represents the elapsed 
+time between arrived packets in the \acp{MN}.
+
+\begin{figure}[ht]
+ \begin{center}
+  \includegraphics[width=1\textwidth]{Lastarrivalpackettimes.eps}
+ \end{center}
+ \caption{Different packet arrival times in the \acp{MN}}
+ \label{fig:Lastarrivalpackettimes}
+\end{figure}
+
+Like for case in Figure \ref{fig:numberOf1st2ndPacketsReceived}, the more the \acp{AN} in the network, the bigger the time the \acp{MN} have to wait 
+until they get the last packet.
+
+Comparing both right and left graphics, it can be seen that the arrival times for the first ($X=9$) and last packet ($X=10$) and inter the arrival 
+time ($X=11$), are very similar. This is so because this depends mainly on the duration of the Sync Phase more than on the way the packets are sent. 
+Looking at the arrival time of the last packet ($X=10$), the length of the Sync Phase can be deduced. When looking to X axis values from 1 to 8, many
+differences can be observed.
+
+In the case of the graphic on the left (best random case), it can be seen that for small X values, the time of the last $X^{th}$ received packet 
+grows with X. This is because all \acp{MN} receive many $1^{st}$, $2^{nd}$ or $3^{rd}$ packets, and the last of the $1^{st}$ packets should arrive 
+before the last of the $2^{nd}$ and so on. But, why is it not like this until the last packet? The reason is that not many \acp{AN} are able to send
+$5^{th}$, $6^{th}$, $7^{th}$ or $8^{th}$ packets being the $3^{rd}$ or $4^{th}$ the maximum packet they get to send. They are not able to send them
+because the Sync Phase is limited in time, being than the $3^{rd}$ or $4^{th}$ packet sent at the end of the phase, raising thus the average arrival time
+for this kind of packets.
+
+In the slotted case graphic (on the right), the idea is the same as expressed before. The only difference is that, like in Figure 
+\ref{fig:numberOf1st2ndPacketsReceived}, as \textit{syncPacketsPerSyncPhase} = 3, all behaviors are grouped. It can be seen that $1^{st}$, $2^{nd}$ and 
+$3^{rd}$ last packets are together in one group. $4^{th}$, $5^{th}$ and $6^{th}$ last packets together in another group, and $7^{th}$ and $8^{th}$ in
+another. Inside these groups the last $X^{th}$ arrived packet grows with X because, as the three sub phases in Sync Phase are the same, whenever a 
+$4^{th}$ packet is delivered, this means that also a $5^{th}$ and $6^{th}$ packet will be.
+
+Here it can also be observed, like in Figure \ref{fig:numberOf1st2ndPacketsReceived}, the re-usability of the slots. Seeing for example for the 
+30 \acp{AN} case, that no seventh or eighth packets where sent because the re-use here was not so big.
+
+\paragraph{Conclusion.} From all this results, it can be extracted that slotted transmission is better than even the best case of random transmission. 
+Slotted transmission will be hence the one used during the Sync Phase in the complete protocol analysis.
+
 \section{Framework simulation and analysis}
+
+The aim of this section, is to analyze through different configurations the performance of the network for parameters like traffic or energy 
+consumption among others.
+
+The proposed scenario for this simulations is formed by 25 \acp{AN} distributed forming a grid, 60 \acp{MN} randomly and uniformly distributed in the
+playground and a Computer. This scenario, with a size of 700 x 700 m, can be seen in Figure \ref{fig:finalscenario} . The \acp{AN} 
+are distributed forming a grid to avoid the necessity to make a more complex routing protocol (explained in Chapter \ref{chap:protocolimplementation}: 
+\nameref{chap:protocolimplementation}). Grid was also chosen because it was seen in many literature as a good standard way to study a network.
+
+From the proposed grid, and with the help of the algorithm to assign slots (Sub-Section \ref{subsec:slottedsyncphase}: 
+\nameref{subsec:slottedsyncphase}), it was obtained that 9 slots are the necessary ones to avoid Hidden Terminal Problem. This slots have the 
+following distribution of \acp{AN}:
+
+\begin{verbatim}
+      Slot 0: 0, 3, 15, 18
+      Slot 1: 1, 4, 16, 19
+      Slot 2: 2, 17
+      Slot 3: 5, 8, 20, 23
+      Slot 4: 6, 9, 21, 24
+      Slot 5: 7, 22
+      Slot 6: 10, 13
+      Slot 7: 11, 14
+      Slot 8: 12
+\end{verbatim}
+
+\begin{figure}[ht]
+ \begin{center}
+  \includegraphics[width=0.5\textwidth]{finalscenario.eps}
+ \end{center}
+ \caption{Proposed scenario for High Configurable Protocol analysis}
+ \label{fig:finalscenario}
+\end{figure}
+
+Considering that the period time is 1.5 s, the Com Sink Phases are 0.5 s each one and that there are $9\cdot3$ slots in each Sync Phase with 1.5 ms each one
+of them. The following phases times are obtained:
+
+\begin{verbatim}
+    Sync Phases length:     0.0405 s
+    Report Phase length:    0.2271 s
+    VIP Phase length:       0.1514 s
+    Com Sink Phases length: 0.5000 s
+\end{verbatim}
+
+To force different simulation situations and to be able to check the different \acp{MN} modes, ten configurations are going to be proposed. This 
+configurations could be changed just modifying some parameters (explained in Section \ref{sec:ProtocolDescription}: \nameref{sec:ProtocolDescription}). 
+Each one of this configurations is going to be simulated during 120 s (80 periods), and repeated 100 times to be able to compensate the dispersion 
+generated by the generated random numbers. All graphics in this section will have on X axis this configurations.
+
+The configurations are divided into two groups:
+
+\begin{itemize}
+ \item \textbf{Non distributed. }Groups the first five configurations, which are going to be the ones loading the network the most. All of this
+configurations are going to have the following parameters in common:
+\begin{verbatim}
+ activePhases = 1
+ inactivePhases = 0
+ offsetPhases = 0
+ offsetSyncPhases = 0
+ reportPhases = 4 
+ askFrequency = 2
+ offsetReportPhases = 0
+ NumberOfBroadcasts = 5
+\end{verbatim}
+As all the offsets are set to zero, all \acp{MN} will start their functionality at the beginning of the first period and all at the same
+time. This is the reason why this group is called ``non distributed''. As it can be observed, inactive periods are set to 0, this way, all \acp{MN} will 
+work every period, loading the network all the time. As \textit{reportPhases} = 4, \acp{MN} Mode 2 and 3 will report only 1 out 4 periods, loading even
+more the network during this periods. Note also that the number of broadcast per \ac{MN} Mode 3 and 4 are five.
+
+From this group, and attending to the number of \acp{MN} of each Mode (see Figure \ref{fig:ProtocolPhases}) this 5 configurations are proposed:
+\begin{itemize}
+ \item[-] \textbf{Config 1}: 15 \acp{MN} Mode 1, 15 \acp{MN} Mode 2, 15 \acp{MN} Mode 3 and 15 \acp{MN} Mode 4.
+ \item[-] \textbf{Config 2}: 6 \acp{MN} Mode 1, 6 \acp{MN} Mode 2, 15 \acp{MN} Mode 3 and 33 \acp{MN} Mode 4.
+ \item[-] \textbf{Config 3}: 6 \acp{MN} Mode 1, 6 \acp{MN} Mode 2, 33 \acp{MN} Mode 3 and 15 \acp{MN} Mode 4.
+ \item[-] \textbf{Config 4}: 33 \acp{MN} Mode 1, 15 \acp{MN} Mode 2, 6 \acp{MN} Mode 3 and 6 \acp{MN} Mode 4.
+ \item[-] \textbf{Config 5}: 15 \acp{MN} Mode 1, 33 \acp{MN} Mode 2, 6 \acp{MN} Mode 3 and 6 \acp{MN} Mode 4.
+\end{itemize}
+ \item \textbf{Distributed. }Groups the last five configurations, which are going to be the ones loading the network the less. All this
+configurations are going to have the following parameters in common:
+\begin{verbatim}
+ activePhases = 2
+ inactivePhases = 4
+ offsetSyncPhases = 1
+ reportPhases = 12
+ askFrequency = 2
+ NumberOfBroadcasts = 3
+\end{verbatim}
+This time, it can be seen that both \textit{offsetPhases} and \textit{offsetReportPhases} are not common parameters, this is because they are going to be
+used to distribute all the \acp{MN} in the time in a way that $1/3$ of the \acp{MN} will start in period 0, another $1/3$ will start in period 2 and the 
+rest $1/3$ will start in period 4. As \textit{activePhases} + \textit{inactivePhases} = 6, \acp{MN} will be perfectly distributed to load the network as 
+low as possible. Due to the different kinds of \acp{MN}, the distribution in time will be done equally for every kind of \ac{MN}.
+
+As \textit{reportPhases} = 12, \acp{MN} Mode 2 and 3 will report only 1 out 12 periods, that means they will almost not load the network. Note also that 
+the number of broadcast per \ac{MN} Mode 3 and 4 is three instead of five.
+
+From this group, and attending to the number of \acp{MN} of each Mode (see Figure \ref{fig:ProtocolPhases}) this 5 configurations are proposed:
+\begin{itemize}
+ \item[-] \textbf{Config 6}: 15 \acp{MN} Mode 1, 15 \acp{MN} Mode 2, 15 \acp{MN} Mode 3 and 15 \acp{MN} Mode 4.
+ \item[-] \textbf{Config 7}: 6 \acp{MN} Mode 1, 6 \acp{MN} Mode 2, 15 \acp{MN} Mode 3 and 33 \acp{MN} Mode 4.
+ \item[-] \textbf{Config 8}: 6 \acp{MN} Mode 1, 6 \acp{MN} Mode 2, 33 \acp{MN} Mode 3 and 15 \acp{MN} Mode 4.
+ \item[-] \textbf{Config 9}: 33 \acp{MN} Mode 1, 15 \acp{MN} Mode 2, 6 \acp{MN} Mode 3 and 6 \acp{MN} Mode 4.
+ \item[-] \textbf{Config 10}: 15 \acp{MN} Mode 1, 33 \acp{MN} Mode 2, 6 \acp{MN} Mode 3 and 6 \acp{MN} Mode 4.
+\end{itemize}
+Each of this configurations divide the number of \acp{MN} from each mode by 3, assigning the first third \textit{offsetPhases} = 0 and 
+\textit{offsetReportPhases} = 2, the second third \textit{offsetPhases} = 2 and \textit{offsetReportPhases} = 4 and the third third
+\textit{offsetPhases} = 4 and \textit{offsetReportPhases} = 6. This way all nodes will be equally distributed. That is why this group is called
+``Distributed''. 
+\end{itemize}
+
+
+
+
+
+
+
+
+Tiempos simulacion
+

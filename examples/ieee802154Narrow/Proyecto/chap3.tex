@@ -161,6 +161,7 @@ the packets so close in time would not contribute to have a better and more stab
  
 
 \section{High Configurable Protocol proposal}
+\label{sec:ProtocolDescription}
 
 From the previous section and according to the results in \cite{LPLandOLP}:
 \begin{quote}
@@ -192,11 +193,12 @@ From time to time in case it is needed, the \ac{MN} could send the estimated pos
  \item \textbf{Mode 3.} This configuration, also called \ac{VIP} mode, is used when the node is in a battery critical situation.
 This configuration is similar to \ac{LPL} where the \ac{MN} broadcasts and the \acp{AN} receive the packets and send them to a coordinator that
 will be able to estimate \ac{MN} position. When it is needed, a way for the \ac{MN} to request its position is provided, this will be explained 
-later. 
+later. The number of sent broadcasts is defined with the parameter \textit{NumberOfBroadcasts}.
  \item \textbf{Mode 4.} Unlike the previous configuration, this configuration is for nodes without battery problems, and with a high accuracy
 need. This configuration is a mix of mode 1 and 3, the \ac{MN} listens to the \acp{AN} broadcasts but also they broadcast their
 self packets to be measured by the \acp{AN}, all this information together is sent to a coordinator that will estimate \ac{MN} position.
-This Mode as well as Mode 3 load the network so much and will be used just when strictly needed.
+This Mode as well as Mode 3 load the network so much and will be used just when strictly needed. The number of sent broadcasts is also defined with 
+the parameter \textit{NumberOfBroadcasts}.
 \end{itemize}
 
 This is just a brief description of the different configurations. As the protocol is yet to be explained, a full behavior description from 
@@ -381,6 +383,7 @@ Hidden terminal problem has a high importance in this scenario, provoking collis
 \ref{chap:simulationandresults}: \nameref{chap:simulationandresults}, a scenario avoiding hidden terminal problem and another having it will be simulated.
 
 \subsection{Slotted Sync Phase}
+\label{subsec:slottedsyncphase}
 
 To make the most of Sync Phase time and avoid random times where \acp{MN} are listening without any benefit, this synchronized in slots broadcast 
 transmission is proposed.
@@ -525,9 +528,9 @@ Layer header has 104 bits. And \ac{PHY} Layer header has 48 bits. If the Applica
 \end{itemize}
 Making the \ac{MAC} Layer Payload 88 bits. This together with the 104 bits and the 48 bits, make a total of 240 bits per Sync Packet to be sent.
 
-As it was commented in Chapter \ref{chap:802154standard}: \nameref{chap:802154standard}, the bit rate is 250 bits/s. This makes that the Sync
-Packet needs 0.96 s to be transmitted. To this time it has to be added the \ac{CCA} time and the \textit{aTurnaroundTime}. This together with
-a security gap in case of bad synchronization, made the slot length 1.5 s.
+As it was commented in Chapter \ref{chap:802154standard}: \nameref{chap:802154standard}, the bit rate is 250 Kbits/s. This makes that the Sync
+Packet needs 0.96 ms to be transmitted. To this time it has to be added the \ac{CCA} time and the \textit{aTurnaroundTime}. This together with
+a security gap in case of bad synchronization, made the slot length 1.5 ms.
 
 To get good results from this technique, a good \acp{AN} distribution is of vital importance. \acp{AN} should be distributed with a density enough
 so all \acp{MN} in the network no matter where they are, can reach at least three \acp{AN}, but not so concentrated that all \acp{AN} can

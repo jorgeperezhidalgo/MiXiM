@@ -4,6 +4,7 @@ AN_Packets_with_ACK  = vec2mat(csvread('graphic1.csv', 1, 3) , 25)';
 AN_Erased_Packets  = csvread('graphic2.csv', 1, 3);
 MN_BackOff_and_ACK = csvread('graphic3.csv', 1, 3);
 Avg_Backoff = csvread('graphic4.csv',1,3);
+Energy = csvread('graphic5.csv',1,3);
  
 % Number of total recived ACKs (total received packets)
 mean_all_AN_Packets_with_ACK = vec2mat(mean(AN_Packets_with_ACK) , 100)';
@@ -300,6 +301,90 @@ g_ci_mean_M3 = g_desv_mean_M3/sqrt(100)*norminv(.05/2);
 g_ci_mean_M4 = g_desv_mean_M4/sqrt(100)*norminv(.05/2);
 
 
+% Energy consumption per mobile node
+h = vec2mat(Energy, 6000)'; % energy
+
+hConf1 = vec2mat(h(:,1), 60)'; % each column has each 100 repetitions
+hConf2 = vec2mat(h(:,2), 60)'; % each column has each 100 repetitions
+hConf3 = vec2mat(h(:,3), 60)'; % each column has each 100 repetitions
+hConf4 = vec2mat(h(:,4), 60)'; % each column has each 100 repetitions
+hConf5 = vec2mat(h(:,5), 60)'; % each column has each 100 repetitions
+hConf6 = vec2mat(h(:,6), 60)'; % each column has each 100 repetitions
+hConf7 = vec2mat(h(:,7), 60)'; % each column has each 100 repetitions
+hConf8 = vec2mat(h(:,8), 60)'; % each column has each 100 repetitions
+hConf9 = vec2mat(h(:,9), 60)'; % each column has each 100 repetitions
+hConf10 = vec2mat(h(:,10), 60)'; % each column has each 100 repetitions
+
+hConf1M1 = hConf1(1:15,:);
+hConf1M2 = hConf1(16:30,:);
+hConf1M3 = hConf1(31:45,:);
+hConf1M4 = hConf1(46:60,:);
+
+hConf2M1 = hConf2(1:6,:);
+hConf2M2 = hConf2(7:12,:);
+hConf2M3 = hConf2(13:27,:);
+hConf2M4 = hConf2(28:60,:);
+
+hConf3M1 = hConf3(1:6,:);
+hConf3M2 = hConf3(7:12,:);
+hConf3M3 = hConf3(28:60,:);
+hConf3M4 = hConf3(13:27,:);
+
+hConf4M1 = hConf4(28:60,:);
+hConf4M2 = hConf4(13:27,:);
+hConf4M3 = hConf4(1:6,:);
+hConf4M4 = hConf4(7:12,:);
+
+hConf5M1 = hConf5(13:27,:);
+hConf5M2 = hConf5(28:60,:);
+hConf5M3 = hConf5(1:6,:);
+hConf5M4 = hConf5(7:12,:);
+
+hConf6M1 = hConf6(1:15,:);
+hConf6M2 = hConf6(16:30,:);
+hConf6M3 = hConf6(31:45,:);
+hConf6M4 = hConf6(46:60,:);
+
+hConf7M1 = hConf7(1:6,:);
+hConf7M2 = hConf7(7:12,:);
+hConf7M3 = hConf7(13:27,:);
+hConf7M4 = hConf7(28:60,:);
+
+hConf8M1 = hConf8(1:6,:);
+hConf8M2 = hConf8(7:12,:);
+hConf8M3 = hConf8(28:60,:);
+hConf8M4 = hConf8(13:27,:);
+
+hConf9M1 = hConf9(28:60,:);
+hConf9M2 = hConf9(13:27,:);
+hConf9M3 = hConf9(1:6,:);
+hConf9M4 = hConf9(7:12,:);
+
+hConf10M1 = hConf10(13:27,:);
+hConf10M2 = hConf10(28:60,:);
+hConf10M3 = hConf10(1:6,:);
+hConf10M4 = hConf10(7:12,:);
+
+h_mean_M1 = [mean(hConf1M1)' mean(hConf2M1)' mean(hConf3M1)' mean(hConf4M1)' mean(hConf5M1)' mean(hConf6M1)' mean(hConf7M1)' mean(hConf8M1)' mean(hConf9M1)' mean(hConf10M1)'];
+h_mean_M2 = [mean(hConf1M2)' mean(hConf2M2)' mean(hConf3M2)' mean(hConf4M2)' mean(hConf5M2)' mean(hConf6M2)' mean(hConf7M2)' mean(hConf8M2)' mean(hConf9M2)' mean(hConf10M2)'];
+h_mean_M3 = [mean(hConf1M3)' mean(hConf2M3)' mean(hConf3M3)' mean(hConf4M3)' mean(hConf5M3)' mean(hConf6M3)' mean(hConf7M3)' mean(hConf8M3)' mean(hConf9M3)' mean(hConf10M3)'];
+h_mean_M4 = [mean(hConf1M4)' mean(hConf2M4)' mean(hConf3M4)' mean(hConf4M4)' mean(hConf5M4)' mean(hConf6M4)' mean(hConf7M4)' mean(hConf8M4)' mean(hConf9M4)' mean(hConf10M4)'];
+ 
+h_mean_mean_M1 = mean(h_mean_M1);
+h_mean_mean_M2 = mean(h_mean_M2);
+h_mean_mean_M3 = mean(h_mean_M3);
+h_mean_mean_M4 = mean(h_mean_M4);
+h_desv_mean_M1 = std(h_mean_M1);
+h_desv_mean_M2 = std(h_mean_M2);
+h_desv_mean_M3 = std(h_mean_M3);
+h_desv_mean_M4 = std(h_mean_M4);
+h_ci_mean_M1 = h_desv_mean_M1/sqrt(100)*norminv(.05/2);
+h_ci_mean_M2 = h_desv_mean_M2/sqrt(100)*norminv(.05/2);
+h_ci_mean_M3 = h_desv_mean_M3/sqrt(100)*norminv(.05/2);
+h_ci_mean_M4 = h_desv_mean_M4/sqrt(100)*norminv(.05/2);
+
+
+
 %%%%%%%%%%%%
 % PLOTTING %
 %%%%%%%%%%%%
@@ -346,4 +431,13 @@ errorbar([0.845 1.845 2.845 3.845 4.845 5.845 6.845 7.845 8.845 9.845],g_mean_me
 errorbar(g_mean_mean_M2, g_ci_mean_M2,'.k');
 errorbar([1.155 2.155 3.155 4.155 5.155 6.155 7.155 8.155 9.155 10.155],g_mean_mean_M3, g_ci_mean_M3,'.k');
 errorbar([1.31 2.31 3.31 4.31 5.31 6.31 7.31 8.31 9.31 10.31],g_mean_mean_M4, g_ci_mean_M4,'.k');
+colormap summer
+
+figure(5);
+bar([h_mean_mean_M1' h_mean_mean_M2' h_mean_mean_M3' h_mean_mean_M4'],'hist');
+hold on
+errorbar([0.7275 1.7275 2.7275 3.7275 4.7275 5.7275 6.7275 7.7275 8.7275 9.7275],h_mean_mean_M1, h_ci_mean_M1,'.k');
+errorbar([0.91 1.91 2.91 3.91 4.91 5.91 6.91 7.91 8.91 9.91],h_mean_mean_M2, h_ci_mean_M2,'.k');
+errorbar([1.09 2.09 3.09 4.09 5.09 6.09 7.09 8.09 9.09 10.09],h_mean_mean_M3, h_ci_mean_M3,'.k');
+errorbar([1.2725 2.2725 3.2725 4.2725 5.2725 6.2725 7.2725 8.2725 9.2725 10.2725],h_mean_mean_M4, h_ci_mean_M4,'.k');
 colormap summer

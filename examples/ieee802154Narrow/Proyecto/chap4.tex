@@ -60,7 +60,7 @@ handleLowerControl and handleUpperControl}.
  \caption{Basic \ac{OMNeT++} module structure}
  \label{fig:omnetmodule}
 \end{figure}
- \item \textbf{sendDown/sendUp/sendControDown/sendControlUp }This methods send a message from a module through the already commented gates.
+ \item \textbf{sendDown/sendUp/sendControlDown/sendControlUp }This methods send a message from a module through the already commented gates.
  \item \textbf{scheduleAt - }As the name says, it schedules a self message in a certain time in the future.
  \item \textbf{decapsMsg/encapsMsg - }Usually before a message is sent from one layer in a device to another, it should be encapsulated or 
 decapsulated. When this is done, instead of message, it is talked about a packet. Packet is a class that inherits from class message. It is 
@@ -104,18 +104,20 @@ Comentar aqui tambien los cambios en NicEntry
 
 Hablar algo sobre los mensajes .msg y para que se usan y que parametros he anadido
 
+When we disabled the CSMA, we have to add a LIFS time to respect the standard time between the end of transmision of a packet to the beggining of the next packet. This time was previously not necesary as the first backoff time was bigger.
+
+
 \section{Sync Phase study development}
 
 Before constructing all the protocol framework, it had to be decided if during the Sync Phase the \acp{AN} would transmit synchronized in 
 slots or randomly. For this purpose, it was done a special small framework where just the Application Layer was added to the nodes.
 
-Decir que se deshabilitaron los fallos de paquete aleatorios, y se quito el ruido y todo para que solo fallara por CCA o hidden terminal problem
 
 \subsection{\ac{MN}}
 
 El nodo movil solo contaba el numero de paquetes recibidos en App
 
-\subsection{\ac{Computer}}
+\subsection{Computer}
 
 Solo calcula los slots
 
@@ -129,3 +131,5 @@ usaba en transmisiones aleatorias para ver cuantos paquetes daba tiempo en este 
 
 
 \section{Framework development}
+
+Comentar que el routing es fijo para facilitarlo y hablar de la estructura de grid y del enrutamiento.
