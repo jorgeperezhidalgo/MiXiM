@@ -1,20 +1,20 @@
 \chapter{802.15.4 Standard}
 \label{chap:802154standard}
 
-Work-group \ac{IEEE} 802.15 was formed to elaborate an standard for the \ac{WPAN}. Inside this work-group, the Task Group 4 
+Work-group \ac{IEEE} 802.15 was formed to elaborate a standard for the \ac{WPAN}. Inside this work-group, the Task Group 4 
 deals with the low binary rate ones, \ac{LR-WPAN}. Last standard revision was approved in 2006 with the name of: ``Wireless 
 Medium Access Control (\ac{MAC}) and Physical Layer (\ac{PHY}) Specifications for Low-Rate Wireless Personal Area Networks (\acp{WPAN})'' 
 \cite{IEEE802.15.4-2006}.
 
-As it can be observed in the title, the standard defines only the Physical Layer and the \ac{MAC} Layer. Using this base, 
-this work will build the Network, Transport and Application Layers to define all network behavior according to the proposed 
+As it can be observed in the title, the standard defines only the Physical Layer and the \ac{MAC} Layer. Using this basis, 
+this work will build the Network, Transport and Application Layers to define the entire network behavior according to the proposed 
 High Configurable Protocol.
 
 \section{General Aspects of 802.15.4}
 
 A \ac{LR-WPAN} is a low cost and easy communication network, it allows wireless connection for low binary rate and reduced 
-energy consumption applications. This network must provide easy installation, low cost and low energy consumption, it should
-also provide a good and reliable data transfer but staying flexible and simple. It cannot be forgotten that as a \ac{WPAN}, it
+energy consumption applications. This network must provide easy installation, low cost and low energy consumption. It should
+also provide a good and reliable data transfer but staying flexible and simple. It must not be forgotten that as a \ac{WPAN}, it
 has a reduced range of work.
 
 \ac{IEEE} 802.15.4 defines the protocol and device interconnection in a \ac{WPAN}, as the objective of this work is not to 
@@ -36,16 +36,16 @@ for this Final Project. To have a deeper view of the standard, refer to \cite{IE
 Depending to the device functionality, they can be classified in 2 kinds:
 
 \begin{itemize}
- \item \acl{FFD}, this devices have full capacity and functionality, they are the framework of the network. They can connect 
-among them but also with other \ac{RFD}. They are usually plugged in, so energy here will not be a problem. They can provide 
+ \item \acl{FFD}. These devices have full capacity and functionality and are the framework of the network. They can connect 
+among themselves but also with other \ac{RFD}. \ac{FFD} are usually plugged in, so energy here will not be a problem. They can provide 
 information or act as routers to redirect this information. In every network, there should be one \ac{FFD} who works as \ac{WPAN}
-Coordinator, depending on the topology (see Figure \ref{fig:WPAN_Network_Topologies}) all communications must go through the 
-Coordinator or not. This Coordinator is usually connected to a central computer that deals with the complexer tasks in the system 
-and distributes all the information to the rest of the devices. This devices will be refered as \ac{AN} during this work, as they
+Coordinator. Depending on the topology (see Figure \ref{fig:WPAN_Network_Topologies}) all communications must go through this 
+Coordinator or not. The Coordinator is usually connected to a central computer that deals with the complexer tasks in the system 
+and distributes all the information to the rest of the devices. This devices will be referred as \ac{AN} during this work, as they
 are the ones which would be fixed.
- \item \acl{RFD}, this devices have a reduce capacity and functionality as they are thought for easy tasks. This devices are
+ \item \acl{RFD}. These devices have a reduce capacity and functionality as they are thought for easy tasks. This devices are
 usually powered with battery and that is why the energy consumption reduction must be focused on them. They can connect only
-\ac{FFD} and cannot handle high traffic loads. This devices will be refered as \ac{MN} during this work, as they are the ones with 
+\ac{FFD} and cannot handle high traffic loads. This devices will be referred as \ac{MN} during this work, as they are the ones with 
 movement possibility.
 
 \vspace*{1cm}
@@ -62,31 +62,30 @@ This work will use the peer-to-peer topology as it is more flexible and scalable
 complexer, that is why a simpler case of peer-to-peer topology is selected, the tree topology. In this case all devices are
 structured hierarchically and all of them have a father with whom they communicate, excepting the \ac{WPAN} Coordinator who is on the top of the network.
 
-For this topology, a Network Layer (not provided in 802.15.4) is needed. For routing purposes only the short address (16 bits),
-from the 2 kinds already commented, will be used. This is to make packets as short as possible (this happens only when the packet goes from and 
-to a \ac{FFD}).
+For making this topology work, a Network Layer (not provided in 802.15.4) is needed for routing purposes. To make packets as short as possible,
+and only in communicaton among \acp{FFD}, short addresses (16 bits) will be used.
 
 \section{Physic Layer}
 
 Although for this work \ac{PHY} Layer has not as much importance as the \ac{MAC} Layer, there are some aspects that are important and 
-that are good to know. This section will focus just on this aspects.
+that are good to know. This section will focus just on these aspects.
 
 Some of the tasks developed by the \ac{PHY} Layer are:
 
 \begin{itemize}
- \item \textbf{Switches on and off the radio transceiver.} Transceiver has 3 operation modes, \ac{Tx}, \ac{Rx} and sleeping, \ac{PHY}
-layer must commute among this modes by \ac{MAC} layer petition. The standard defines that the change time between \ac{Rx} and 
-\ac{Tx} and vice versa cannot be bigger as 12 symbols (\textit{aTurnaroundTime} = 12 symbols = 192 $\mu$s at 2.4 GHz).
- \item \textbf{Performs the \ac{ED} of the channel.} \ac{PHY} layer measures the power level of the channels to choose the best one
-to transmit, this measurement lasts exactly 8 symbols.
+ \item \textbf{Switches on and off the radio transceiver.} The transceiver has three operation modes: \ac{Tx}, \ac{Rx} and sleeping. \ac{PHY}
+layer must commute among these modes by \ac{MAC} layer petitions. The standard defines that the change time between \ac{Rx} and 
+\ac{Tx} and vice versa must not be bigger as 12 symbols (\textit{aTurnaroundTime} = 12 symbols = 192 $\mu$s at 2.4 GHz).
+ \item \textbf{Performs the \ac{ED} of the channel.} \ac{PHY} layer measures the power level of the channels in order to choose the best one
+to transmit. This measurement lasts exactly 8 symbols.
  \item \textbf{Performs \ac{CCA} to check the channel.} This indicator is a part of \ac{CSMA/CA} algorithm as it will be seen later. The
 \ac{CCA} is requested by the \ac{MAC} Layer and the \ac{PHY} Layer returns IDLE or BUSY depending on the channel situation. This \ac{CCA}
 period lasts exactly like the \ac{ED}, 8 symbols (128 $\mu$s at 2.4 GHz).
  \item \textbf{Channel frequency selection.} As it was already commented, the 802.15.4 standard contemplates 3 different frequency 
 ranges, although only the 2450 MHz will be used in this work. At this frequency, the standard stipulates 
-the use of a \ac{O-QPSK} modulation with a symbol rate of 62,5 symbol/s. As this modulation makes 4 bit per symbol, we get 
-a 250 Kbit/s bit rate. This frequency range, has 16 different channels with a 5 MHz separation between them, the number of 
-this channels goes from 11 to 26.
+the use of a \ac{O-QPSK} modulation with a symbol rate of 62,5 symbols/s. As this modulation makes 4 bit per symbol, we get 
+a 250 Kbit/s bit rate. This frequency range has 16 different channels with a 5 MHz separation between them. The number of 
+these channels goes from 11 to 26.
  \item \textbf{Data transmission and reception.} According to the standard, the \ac{PHY} Layer must be able to transmit with a minimum
 power of 1 mW and it must have a sensibility of at least -85 dBm \cite{IEEE802.15.4-2006}. Figure \ref{fig:PPDU} shows the physical level frame structure.
 
@@ -103,8 +102,8 @@ power of 1 mW and it must have a sensibility of at least -85 dBm \cite{IEEE802.1
 
 \section{\ac{MAC} Layer}
 
-\ac{MAC} layer is the responsible for connecting the node with all the other nodes in a reachable distance. Although this layer has a reduced
-primitive set (26 primitives), its really versatile and assures the minimum necessary to work. Some of the responsibilities of \ac{MAC}
+\ac{MAC} layer is responsible for connecting the node with all the other nodes in a reachable distance. Although this layer has a reduced
+primitive set (26 primitives), it is really versatile and assures the minimum necessary instructions to work. Some of the responsibilities of \ac{MAC}
 layer are:
 
 \begin{itemize}
@@ -113,33 +112,32 @@ layer are:
  \item Beacon synchronization.
  \item Nodes association and dissociation.
  \item Security mechanisms.
- \item Controls channel access through \ac{CSMA/CA}.
+ \item Channel access control through \ac{CSMA/CA}.
  \item Definition of \ac{GTS}.
  \item Frame validation.
  \item Duplicated received packets control.
- \item \ac{ACK} generation, this mechanism assures retransmission in \ac{MAC} layer, it is a transmission protection mechanism.
+ \item \ac{ACK} generation to assure retransmission in \ac{MAC} layer. This is a transmission protection mechanism.
 \end{itemize}
 
 As happened for the \ac{PHY} layer, the \ac{MAC} layer has some constants and attributes to be configured, which will be used later in this work.
-This parameters can be found from page 133 in \cite{IEEE802.15.4-2006}.
+These parameters can be found from page 133 in \cite{IEEE802.15.4-2006}.
 
 \subsection{Working Modes}
 
-\ac{MAC} protocol supports 2 working modes, the coordinator is the one responsible to choose a mode when initializing the network:
+\ac{MAC} protocol supports two working modes. The coordinator is the one responsible to choose a mode when initializing the network:
 
 \begin{itemize}
- \item \textbf{Beaconed mode.} In this mode, the coordinator generates a beacon and this is transmitted along the network thanks to the routers,
-this beacon synchronizes all the devices in the network so they can sleep all the time and just wake up when they know the data will come. 
- \item \textbf{Non-Beaconed mode.} In this mode, the devices are not synchronized through beacons, that is why the routers and coordinator must
+ \item \textbf{Beaconed mode.} In this mode, the coordinator generates a beacon which is transmitted along the network thanks to the routers.
+This beacon synchronizes all the devices in the network so they can sleep all the time and just wake up when they know the data will come. 
+ \item \textbf{Non-Beaconed mode.} In this mode, the devices are not synchronized by beacons. For this reason, the routers and the coordinator must
 be awake all the time and the end devices are the only ones that can sleep. This is not a problem, as we assumed that \ac{FFD} would be plugged 
-in and only \ac{RFD} would work with batteries. There is also the problem that end devices doesn't know when the data from the routers will come,
-this will be solved through the proposed High Configurable Protocol.
+in and only \ac{RFD} would work with batteries. Furthermore, the problem that end devices do not know when the data from the router will come, 
+will be solved with the help of the proposed High Configurable Protocol.
 \end{itemize}
 
-Non-Beacon mode was selected for this work as it is more flexible for our purposes as Beaconed mode, this is too complex. But
-this election has a problem, with beaconed mode all the sleep processes were automatically administrated by \ac{MAC} layer, now all the sleep 
-and wake-up processes are still to be done by the Application Layer. From now on, all references will be assuming we are working with non-beaconed
-mode.
+Non-Beacon mode was selected for this work as it is more flexible for our purposes than Beaconed mode. The challenge of this choice is to 
+define in Application Layer all the sleep and wake-up processes, which would have been automatically administrated in the rejected Beaconed
+mode by \ac{MAC} Layer. From now on, all explanations will refer only to Non-Beaconed mode.
 
 \subsection{\ac{CSMA/CA} Algorithm}
 

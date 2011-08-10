@@ -96,33 +96,34 @@ Later on, this kind of applications will conclude in 4 different types of nodes 
 
 \section{Challenges and Objectives}
 
-The market demands low cost devices, able to build a network in a easy way, and capable to measure different parameters and react to them
+The market demands low cost devices, able to build a network in an easy way, and capable to measure different parameters and react to them
 or answer to determinate orders received from a central computer. As it was already said, the ability to move is an important issue, so is 
 also localization, as the position is needed to be able to communicate with a device and to provide it the best information possible.
 
-This standard nodes have not a big range, that is why all the end devices cannot connect directly with a central computer and a routers network 
-is needed. This, makes necessary again a system to locate where the end devices are, as a routing path is needed to send the information.
+These standard nodes do not have a big range, that is why end devices cannot connect directly with a central computer and a routers network 
+is needed. This makes necessary again a system to locate where the end devices are, as a routing path is needed to send the information.
 
-All this, and the reasons stated before, are the reasons why the 802.15.4 standard was chosen to build up a High Configurable Protocol for 
-localization with \ac{WSN}. But this is not just perfect, some challenges are still to solve:
+All these reasons make 802.15.4 standard to be the chosen one to build up a High Configurable Protocol for localization with \ac{WSN}. 
+But this is not just perfect, some challenges are still to solve:
 
 \begin{itemize}
  \item \textbf{Energy.} End devices with movement capability are supplied with batteries, and unless we want to change the battery often,
 a good protocol making the battery life longer is needed.
  \item \textbf{Scalability.} Networks can be small at the beginning, but they can grow rapidly and decrease again. A network that adapts 
 dynamically to new conditions is also needed.
- \item \textbf{Adaptability.} Routers and above all end devices might be configured to save energy but an emergency could happen where they 
-must communicate immediately and with reliability with a central computer, this is incompatible with energy saving. Hence, devices must be
-adaptable to the circumstances.
- \item \textbf{Simplicity.} Devices must remain low cost and small, this means usually that hardware components have not a good performance
+ \item \textbf{Adaptability.} Routers and above all, end devices, might be configured to save energy. But if an emergency occurs, and suddenly
+nodes must communicate immediately and with reliability with a central computer, this situation would be incompatible with energy saving. 
+Hence, devices must be adaptable to the circumstances.
+ \item \textbf{Simplicity.} Devices must remain low cost and small. That means usually that hardware components do not have a good performance
 or big memory capacities. This is a strong constraint in the design, and that is why the protocol must remain simple.
 \end{itemize}
 
-The objective of this Final Project is hence, the design of a Protocol based in \ac{IEEE} 802.15.4 standard, able to deal with all the 
-challenges before. But the objective is also the design of a robust and complete framework where future works could add more functionalities
-or improve the existing ones without worrying about the communication or basic functionality.
+The objective of this Final Project is hence, the design of a Protocol based on \ac{IEEE} 802.15.4 standard, able to deal with all the 
+challenges stated before. But the objective is also the design of a robust and complete framework where future works could add more 
+functionalities or improve the existing ones without worrying about the communication or basic functionality.
 As this is a design stage, simulation was chosen instead of testing directly on real devices. The simulation will be done with the Discrete 
-Events Simulator \ac{OMNeT++} 4.0 using the \ac{MiXiM} framework, and the results will be treated with \ac{MATLAB}, this tools will be commented later on.
+Events Simulator \ac{OMNeT++} 4.0 using the \ac{MiXiM} framework. The results will be treated with \ac{MATLAB}. All these tools will be 
+commented later on.
 
 \section{Document structure}
 
@@ -130,11 +131,12 @@ This Final Project tries to explain in a detailed way the design and test of a H
 fulfill this, the following document structure will be used:
 
 \begin{itemize}
- \item \textbf{Chapter \ref{chap:introduction}: \nameref{chap:introduction}.} In the current chapter, different wireless solutions, applications
+ \item \textbf{Chapter \ref{chap:introduction}: \nameref{chap:introduction}.} In the current chapter different wireless solutions, applications
 for \ac{WSN}, challenges and objectives were exposed.
- \item \textbf{Chapter \ref{chap:802154standard}: \nameref{chap:802154standard}.} In this chapter, aspects of the 802.15.4 standard needed
-in the following chapters are presented. This chapter does not mean to be a detailed explanation of the standard.
- \item \textbf{Chapter \ref{chap:protocoldesign}: \nameref{chap:protocoldesign}.} This chapter comments briefly, existing solutions for the
+ \item \textbf{Chapter \ref{chap:802154standard}: \nameref{chap:802154standard}.} In this chapter, main aspects of the 802.15.4 standard, which
+are needed for the understanding of the following chapters, are presented. This chapter does not mean to be a detailed explanation of the 
+standard.
+ \item \textbf{Chapter \ref{chap:protocoldesign}: \nameref{chap:protocoldesign}.} This chapter comments briefly existing solutions for the
 presented challenges and proposes and explains a new protocol.
  \item \textbf{Chapter \ref{chap:protocolimplementation}: \nameref{chap:protocolimplementation}.} Here a detailed description of the protocol 
 implementation is presented, preceded by an explanation of the tools, the functionalities they already implemented and how they were
@@ -143,9 +145,10 @@ improved.
 simulation, give some results that will be analyzed. The whole protocol will be simulated, but this chapter will also focus on one of the 
 phases where deeper results will be obtained.
  \item \textbf{Chapter \ref{chap:conclusionsandfuture}: \nameref{chap:conclusionsandfuture}.} Conclusions from previous chapters will be 
-exposed followed by possible new paths to follow after this work and improvements that could be done.
- \item \textbf{Appendix \ref{chap:installation}: \nameref{chap:installation}.} Detailed manual how to install and configure the source code in 
-the \ac{CD}, to make easier a new person to continue working with it. Introduction to the version control system GIT, used in the development of 
-this Final Project.
+presented. This chapter will also include some possible future work and improvements that this protocol could have.
+ \item \textbf{Appendix \ref{chap:installation}: \nameref{chap:installation}.} Contains a detailed manual about how to install and configure 
+the source code burnt in the \ac{CD}. This chapter tries to make easier the first contact with the source code, to a new person who pretends
+to continue working with it. Here, an introduction to the version control system GIT, used in the development of this Final Project, is also 
+given.
 \end{itemize}
 

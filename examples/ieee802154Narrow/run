@@ -3,16 +3,17 @@
 #mkdir results
 #rm -f csv/scalar*
 #rm -f csv/vector*
-./ieee802154Narrow -f omnetpp.ini -c Config1 -u Cmdenv
-./ieee802154Narrow -f omnetpp.ini -c Config2 -u Cmdenv
-./ieee802154Narrow -f omnetpp.ini -c Config3 -u Cmdenv
-./ieee802154Narrow -f omnetpp.ini -c Config4 -u Cmdenv
-./ieee802154Narrow -f omnetpp.ini -c Config5 -u Cmdenv
-./ieee802154Narrow -f omnetpp.ini -c Config6 -u Cmdenv
-./ieee802154Narrow -f omnetpp.ini -c Config7 -u Cmdenv
-./ieee802154Narrow -f omnetpp.ini -c Config8 -u Cmdenv
-./ieee802154Narrow -f omnetpp.ini -c Config9 -u Cmdenv
-./ieee802154Narrow -f omnetpp.ini -c Config10 -u Cmdenv
+#./ieee802154Narrow -f omnetpp.ini -c Config1 -u Cmdenv
+#./ieee802154Narrow -f omnetpp.ini -c Config2 -u Cmdenv
+#./ieee802154Narrow -f omnetpp.ini -c Config3 -u Cmdenv
+#./ieee802154Narrow -f omnetpp.ini -c Config4 -u Cmdenv
+#./ieee802154Narrow -f omnetpp.ini -c Config5 -u Cmdenv
+#./ieee802154Narrow -f omnetpp.ini -c Config6 -u Cmdenv
+#./ieee802154Narrow -f omnetpp.ini -c Config7 -u Cmdenv
+#./ieee802154Narrow -f omnetpp.ini -c Config8 -u Cmdenv
+#./ieee802154Narrow -f omnetpp.ini -c Config9 -u Cmdenv
+#./ieee802154Narrow -f omnetpp.ini -c Config10 -u Cmdenv
+./ieee802154Narrow -f omnetpp.ini -c ConfigA -u Cmdenv
 
 #T='$T'
 
