@@ -53,6 +53,10 @@ void AppLayer::initialize(int stage)
 		nbBroadcastPacketsReceived 	= 0;
 		nbReportsReceived 			= 0;
 		nbReportsForMeReceived 		= 0;
+		nbReportsGeneratedDueToBcast = 0;
+		nbReportsResent				= 0;
+		nbReportsRoutedCS1			= 0;
+		nbReportsRoutedCS2			= 0;
 		guardTimeReportPhase 		= 0.020; 	// 20 ms
 		guardTimeVIPPhase 			= 0.020;	// 20 ms
 		guardTimeComSinkPhase 		= 0.080; 	// 80 ms

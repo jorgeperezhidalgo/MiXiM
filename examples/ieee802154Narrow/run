@@ -8,7 +8,7 @@
 #./ieee802154Narrow -f omnetpp.ini -c Config3 -u Cmdenv
 #./ieee802154Narrow -f omnetpp.ini -c Config4 -u Cmdenv
 #./ieee802154Narrow -f omnetpp.ini -c Config5 -u Cmdenv
-#./ieee802154Narrow -f omnetpp.ini -c Config6 -u Cmdenv
+./ieee802154Narrow -f omnetpp.ini -c Config6 -u Cmdenv
 #./ieee802154Narrow -f omnetpp.ini -c Config7 -u Cmdenv
 #./ieee802154Narrow -f omnetpp.ini -c Config8 -u Cmdenv
 #./ieee802154Narrow -f omnetpp.ini -c Config9 -u Cmdenv
@@ -22,3 +22,4 @@ scavetool scalar -p "module(**anchor**) AND ((Erased*) OR (Dropped*Packets*Time*
 scavetool scalar -p "module(**node**) AND ((nbBackoffs) OR (nbMissedAcks))" -O ./csv/graphic3.csv -F csv ./results/Config*-*.sca
 scavetool scalar -p "(module(**node**) OR module(**anchor**)) AND (meanBackoff)" -O ./csv/graphic4.csv -F csv ./results/Config*-*.sca
 scavetool scalar -p "module(**node**) AND (totalPower)" -O ./csv/graphic5.csv -F csv ./results/Config*-*.sca
+scavetool scalar -p "module(**anchor**) AND ((Number*Reports*AN*sent*received*) OR (Number*Reports*AN*routed))" -O ./csv/graphic6.csv -F csv ./results/Config*-*.sca

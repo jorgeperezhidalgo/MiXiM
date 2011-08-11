@@ -65,6 +65,10 @@ void AnchorAppLayer::finish()
 	recordScalar("Number of Broadcasts received in AN", nbBroadcastPacketsReceived);
 	recordScalar("Number of Reports received in AN", nbReportsReceived);
 	recordScalar("Number of Reports really for me received in AN", nbReportsForMeReceived);
+	recordScalar("Number of Reports AN sent from received MN bcast", nbReportsGeneratedDueToBcast);
+	recordScalar("Number of Reports AN sent from received MN report", nbReportsResent);
+	recordScalar("Number of Reports AN routed in Com Sink 1", nbReportsRoutedCS1);
+	recordScalar("Number of Reports AN routed in Com Sink 2", nbReportsRoutedCS2);
 }
 
 void AnchorAppLayer::handleSelfMsg(cMessage *msg)
@@ -176,6 +180,7 @@ void AnchorAppLayer::handleSelfMsg(cMessage *msg)
 					if (packetsQueue.length() < maxQueueElements) { // There is still place in the queue for more packets
 						EV << "Enqueing broadcast RSSI values from Mobile Node " << i << endl;
 						packetsQueue.insert(pkt);
+						nbReportsGeneratedDueToBcast++;
 					} else {
 						EV << "Queue full, discarding packet" << endl;
 						nbPacketDroppedAppQueueFull++;
@@ -356,6 +361,7 @@ void AnchorAppLayer::handleLowerMsg(cMessage *msg)
 						if (packetsQueue.length() < maxQueueElements) { // There is still place in the queue for more packets
 							EV << "The packet is not really for me, is for the computer, I put it in the queue to send it in next Com Sink 1 to the computer" << endl;
 							packetsQueue.insert(pkt);
+							nbReportsResent++;
 						} else {
 							EV << "The packet is not really for me, is for the computer, but Queue full, discarding packet" << endl;
 							nbPacketDroppedAppQueueFull++;
@@ -436,6 +442,12 @@ void AnchorAppLayer::handleLowerMsg(cMessage *msg)
 						EV << "CSMA: " << pkt->getCSMA() << endl;
 						transfersQueue.insert(pkt->dup()); // Make a copy of the sent packet till the MAC says it's ok or to retransmit it when something fails
 						sendDown(pkt);
+						if (phase == AppLayer::COM_SINK_PHASE_1) {
+							nbReportsRoutedCS1++;
+						} else {
+							nbReportsRoutedCS2++;
+						}
+
 						break;
 				}
 	    	}

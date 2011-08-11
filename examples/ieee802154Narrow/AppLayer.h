@@ -98,6 +98,11 @@ protected:
 	long nbErasedPacketsNoACKMax;		// Variable to count the number of definitely erased packets due to maximum No ACK received retransmissions in App Layer
 	long nbErasedPacketsMacQueueFull;	// Variable to count the number of definitely erased packets due to maximum Mac Queue Full
 
+	long nbReportsGeneratedDueToBcast;	// Variable to count the number of reports an AN sends due to the broadcasts received from MNs
+	long nbReportsResent;				// Variable to count the number or reports received in an AN resent to computer
+	long nbReportsRoutedCS1;			// Variable to count the number of reports routed from an AN when received from another AN in Com Sink 1
+	long nbReportsRoutedCS2;			// Variable to count the number of reports routed from an AN when received from another AN in Com Sink 2
+
 	long nbBroadcastPacketsSent;		// Variable to count the number of broadcast packets successfully sent in the air, broadcast for MN or sync for AN
 	long nbReportsWithACK;				// Variable to count the number of Reports successfully sent -> ACK received
 	long nbBroadcastPacketsReceived;	// Variable to count the number of broadcast packets successfully received
