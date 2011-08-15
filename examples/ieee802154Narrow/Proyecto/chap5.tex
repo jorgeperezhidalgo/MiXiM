@@ -20,15 +20,18 @@ $t_{\frac{\alpha}{2}}$ is a constant of 1.96 for a confidence interval of 95\%.
 The aim of this section is to compare slotted transmission and random transmission during Sync Phase. This two approaches were already commented 
 during Chapter \ref{chap:protocoldesign}: \nameref{chap:protocoldesign}.
 
-As random transmission case is more difficult and chaotic as the slotted one, this will be studied separately first, leaving the slotted case to 
-be studied together with the comparison and finishing with a study of the number of slots depending on the \acp{AN} density.
+As random transmission case is more difficult and chaotic than the slotted one, this will be studied separately first, leaving the slotted case 
+to be studied together with the comparison with the random case. This sub-section will also study the number of slots depending on the \acp{AN} 
+density.
 
 \subsection{Random Transmission}
 
-To study this case, scenarios in Figure \ref{fig:hiddenvsnohidden} were simulated. In a) can be seen that all nodes can detect all node transmissions,
-avoiding so Hidden Terminal Problem. In b), \acp{AN} can detect only some of the \ac{AN} transmissions and the \ac{MN} can detect all of them, this way
-\acp{AN} are going to start transmitting when probably another \ac{AN} will be doing so, provoking a collision at the \ac{MN}. The number of \acp{AN}
-is 6 in both cases and the number of \acp{MN} is 1.
+To study this case, scenarios in Figure \ref{fig:hiddenvsnohidden} were simulated. In a) can be seen that all nodes can detect all node 
+transmissions, avoiding this way the Hidden Terminal Problem. In b), \acp{AN} can detect only some of the \ac{AN} transmissions and the 
+\ac{MN} can detect all of them, this way Hidden Terminal Problem is forced to happen. This scenario will make the \acp{AN} to transmit when 
+probably another \ac{AN} will be doing so, provoking a collision at the \ac{MN}.
+
+The number of \acp{AN} is 6 in both cases and the number of \acp{MN} is 1.
 
 \begin{figure}[ht]
  \begin{center}
@@ -38,16 +41,17 @@ is 6 in both cases and the number of \acp{MN} is 1.
  \label{fig:hiddenvsnohidden}
 \end{figure}
 
-All errors caused by noise and random errors due to the channel, were disabled during this simulation. This is so, to have only simultaneous \acp{CCA} 
-problem and Hidden Terminal Problem. With this situation, it can be assured that if a packet is received incorrectly in the \ac{MN}, the reason would 
-be one of this two problems.
+All errors caused by noise and random errors due to the channel, were disabled during this simulation. This is so, to have only errors due to 
+simultaneous \acp{CCA} problem and due to Hidden Terminal Problem. With this situation, it can be assured that if a packet is received 
+incorrectly in the \ac{MN}, the reason would be one of this two problems.
 
 As is was commented in Chapter \ref{chap:protocoldesign}: \nameref{chap:protocoldesign}, in order to avoid an unknown random time during active 
-synchronization, \ac{CSMA/CA} must be disabled. If this is done, all \acp{AN} will transmit at the same time generating lots of collisions. To solve this
-a random time is added by Application Layer before the packet is transmitted. This random time value, will be between 0 and a maximum number. In this
-section, this maximum number goes from 1 to 30 originating 30 different simulations. This value will be the X axis in all Figures. 
+synchronization, \ac{CSMA/CA} must be disabled. If this is done, all \acp{AN} will transmit at the same time generating lots of collisions. 
+To solve this situation, a random time is added by Application Layer before the packet is transmitted. This random time, will get a value
+between 0 and a maximum number. In this sub-section, this maximum number goes from 1 to 30 originating 30 different simulations. This value will 
+be the X axis in almost all Figures. 
 
-In order to reduce the dispersion caused by random numbers, each simulation will be done 1000 times.
+In order to reduce the error introduced by random numbers, each simulation will be done 1000 times.
 
 \begin{figure}[ht]
  \begin{center}
@@ -63,7 +67,7 @@ First simulation, gives as result \textbf{Figure \ref{fig:receivedPacketsAndLast
 
 Both received packets lines (A and B) have a rising trajectory and both tend to 24 in the infinite. This 24 packets are the total number of 
 packets sent to the network, sending each \ac{AN} four. It can be seen that, as in the case without Hidden Terminal Problem (A) the number of collisions
-is smaller, the number of received packets in the \ac{MN} is much bigger than in the Hidden Terminal Problem case.
+is smaller, the number of received packets in the \ac{MN} is much bigger than for the Hidden Terminal Problem case.
 
 This Figure shows also the average arrival time from the last arrived packet in the \ac{MN}. This is not the 24$^{th}$ sent packet, as this could 
 possibly collide with another. As the number of arrived packets in the case avoiding Hidden Terminal Problem is bigger, the last packet takes more time 
@@ -102,17 +106,17 @@ second packet, the last third packet and the last packet coming from any of the 
 It is easy to see that arrival time of the first packet should be smaller than the arrival time of the last first packet, this should be smaller than
  the arrival time of the last second packet, this should be smaller than last third and this smaller than the last. But if the case with Hidden 
 Terminal Problem is observed, it can be found that when time between transmissions is small, last second and last third received packets arrive later 
-that last received packet. How is this possible? This happens because due to the big number of collisions many times only first packets arrive or many of 
+that last received packet. How is this possible? This happens because, due to the big number of collisions, many times only first packets arrive or many of 
 them arrive after the last second or third packets. When conditions are better (higher time between transmitted packets or no Hidden Terminal Problem) 
 this does not happen because many more second or third packets are delivered and thus they will be the last packets.
 
-It is also interesting how unlike the right figure, for the case without Hidden Terminal Problem, the arrival time of the first packet and the arrival 
+It is also interesting how, unlike the right figure, for the case without Hidden Terminal Problem, the arrival time of the first packet and the arrival 
 time of the last first packet are quite separated. This is because in this case the collision number is much smaller, and as it was seen in Figure 
 \ref{fig:receivedPacketsAndLastPacketArrival}, the \ac{MN} receives much more first packets from the \acp{AN}.
 
-As comparison between the two cases, it can be seen that for the case without Hidden Terminal Problem, the arrival times are bigger, this is again because
-the \ac{MN} receives in this case much more packets due to a lower number of collisions, making the last packets arrive later. This lower number of 
-collisions makes also that the arrival time of the first packet is smaller than for the case with Hidden Terminal Problem.
+As comparison between the two cases, it can be seen that for the case without Hidden Terminal Problem, all last packets arrive later than for the
+case with Hidden Terminal Problem. This is because the \ac{MN} receives in this case much more packets due to a lower number of collisions, 
+making the last packets arrive later. This lower number of collisions makes also the arrival time of the first packet smaller.
 
 \begin{figure}[ht]
  \begin{center}
@@ -122,10 +126,11 @@ collisions makes also that the arrival time of the first packet is smaller than 
  \label{fig:percentil98differentTimes}
 \end{figure}
 
-\textbf{Figure \ref{fig:percentil98differentTimes}} does not represent an average but a percentil 98, this means that if this times are taken as 
-reference, in 98\% of the situations, the times are going to be under this values. This is thus a good way to get an acceptable top limit.
+\textbf{Figure \ref{fig:percentil98differentTimes}} does not represent an average but a percentil 98 of the previous times. This means that 
+if this times are taken as reference, in 98\% of the situations, the times are going to be under this values. This is thus a good way to get 
+an acceptable top limit.
 
-The analysis from this graphic is the same as the previous one with the only peculiarity that all times in Y axis are bigger, this is so because
+The analysis from this graphic is the same as the previous one with the only peculiarity that all times in Y axis are bigger. This is so because
 this graphic represents the worst cases, not the average. For the same reason, in the case with Hidden Terminal Problem when the times between
 transmissions are small, the first arrived packet time is bigger and behaves different as in Figure \ref{fig:averageDifferentTimes}.
 
@@ -138,52 +143,15 @@ of broad-casted packets and time between transmissions should be found.
 The scenario has 80 \acp{MN} uniformly and randomly distributed along the playground, and 30, 40, 50, 60 and 70 \acp{AN} distributed the same way.
 There is hence Hidden Terminal Problem.
 
-In order to reduce the dispersion caused by random numbers, each simulation will be done 100 times. Data will be measured in the \acp{MN}, and as 
-they are disperse all over the playground, their values could be very different. That is why first an average of the 80 nodes will be done followed 
-by an average of the 100 repetitions.
-
-\subsubsection{Slot Number vs. \acp{AN} Number}
-
-This sub-section's aim is checking how good is the algorithm to calculate the slot distribution among the \acp{AN}. For this purpose, an scenario 
-with different number of \acp{AN} where slots will be calculated by a Computer as described in Chapter \ref{chap:protocoldesign}: 
-\nameref{chap:protocoldesign}, will be simulated 100 times. It has to be taken into account that Computer takes also its own slot, this can be seen
-like \acp{AN} number is one unit bigger.
-
-The number of slots will be also useful for the following sub-sections, as to be able to compare randomly and slotted approaches, the Sync Phases need 
-to last the same time, and this time cannot be known for random case until the number of slots is known.
-
-\begin{figure}[ht]
- \begin{center}
-  \includegraphics[width=0.8\textwidth]{numberOfSlotsWithTheAnchorDensity.eps}
- \end{center}
- \caption{Slot Number for a variable \acp{AN} density}
- \label{fig:numberOfSlotsWithTheAnchorDensity}
-\end{figure}
-
-\textbf{Figure \ref{fig:numberOfSlotsWithTheAnchorDensity}} is the result of simulating a 1 $Km^2$ playground with a number of \acp{AN} going from 
-2 to 70, as the playground is fixed and only the number of nodes increase, it could be said that \acp{AN} density increases. When \acp{AN} density 
-increases, and as \acp{AN} range stays constant, the number of neighbors for each \ac{AN} increases also. This makes the number of slots grow together
-with the number of \acp{AN}, as it can be seen in the figure.
-
-\begin{figure}[ht]
- \begin{center}
-  \includegraphics[width=0.8\textwidth]{numberOfSlotsWithTheSameDensity.eps}
- \end{center}
- \caption{Slot Number for a fixed \acp{AN} density}
- \label{fig:numberOfSlotsWithTheSameDensity}
-\end{figure}
-
-In this case, \textbf{Figure \ref{fig:numberOfSlotsWithTheSameDensity}} is obtained simulating 6 to 80 nodes with a minimum separation between them of 
-80 meters. Playground is calculated dynamically with this parameters to have always a 83 $\acp{AN}/Km^2$ density. As \acp{AN} density remains constant,
-the number of neighbors an \ac{AN} has also does. This means the re-usability of the slots will grow with the number of nodes. The re-usability can be
-observed in the figure, as when the number of \acp{AN} grow, the number of slots does not grow linearly like in Figure 
-\ref{fig:numberOfSlotsWithTheAnchorDensity}.
+In order to reduce the error introduced by random numbers, each simulation will be done 100 times. Data will be measured in the \acp{MN}, which
+are disperse all over the playground. This will make their values very different depending on the load of every network part. That is why first 
+an average of the 80 nodes will be done to get the average situation of a node, and this will be followed by the average of the 100 repetitions.
 
 \subsubsection{Checking the best inter packet random time}
 
 In this scenario, each \ac{AN} sends as many packets as it can during the Sync Phase time defined by the slots. First, Computer calculates the number of
 slots and multiplies it by \textit{syncPacketsPerSyncPhase} (in this case 3) to obtain the Sync Phase time. This simulation will be done for different
-number of \acp{AN} (already told) and different maximum random times between transmissions from 1 to 30 ms. After repeating each case 100 times,
+number of \acp{AN} and different maximum random times between transmissions from 1 to 30 ms. After repeating each case 100 times,
 \textbf{Figure \ref{fig:randomTimeCheckingTheBestInterpacketRandomTime}} is obtained.
 
 \begin{figure}[ht]
@@ -201,7 +169,7 @@ Figure \ref{fig:receivedPacketsAndLastPacketArrival} there was no time limit, it
 
 From Figure \ref{fig:randomTimeCheckingTheBestInterpacketRandomTime}, it can also be seen that the more \acp{AN} there are, the more received packets and
 the later the maximum comes. This maximum comes later because as the number of \acp{AN} is bigger, there are also more collisions, being its effect in the 
-number of delivered packets bigger compared with the time between transmissions. And as the number of slots is bigger (hence the Sync Phase time), the 
+number of delivered packets bigger, compared with the time between transmissions. As the number of slots is bigger and hence the Sync Phase time, the 
 time between transmissions influence will come later.
 
 The gray discontinuous line was drawn following the maximum points for every curve. This line gives us the optimum waiting time between transmissions to 
@@ -212,7 +180,7 @@ to the lack of time in the phase.
 
 In this scenario, each \ac{AN} sends a maximum number of packets from 3 to 16 during the Sync Phase time defined by the slots. First, Computer calculates 
 the number of slots and multiplies it by \textit{syncPacketsPerSyncPhase} (in this case 3) to obtain the Sync Phase time. This simulation will be done 
-for different number of \acp{AN} (already told) where the previous optimal maximum random times between transmissions will be taken (see Table
+for different number of \acp{AN} where the previous optimal maximum random times between transmissions will be taken (see Table
 \ref{tab:optimalTransmitTimes}). After repeating each case 100 times, \textbf{Figure \ref{fig:randomTimeCheckingTheBestNumberOfSentPacketsForAnchor}} 
 is obtained.
 
@@ -247,7 +215,7 @@ is obtained.
 
 It can be clearly seen in the figure, how the average number of received packets in the \acp{MN} increases until it reaches a maximum (approximately
 with 10 sent packets). This is so because in the fixed Sync Phase time, there is no time for more packets to arrive. Ten is hence defined as the 
-maximum number of packets to be sent. The reason to this limit is that when an \ac{AN} has already reached this maximum sent packets number per Sync Phase, 
+maximum number of packets to be sent by an \ac{AN}. The reason to this limit is that when an \ac{AN} has already reached this maximum sent packets number per Sync Phase, 
 it will stop sending more, leaving the channel more free for the rest of the \acp{AN} to transmit.
 
 \subsubsection{Slotted vs. Best Random case comparison}
@@ -268,8 +236,7 @@ slotted case, best random transmissions case, worst random transmissions case ($
 \textbf{Figure \ref{fig:slottedVsRandomAverageReceivedPackets}} shows how in all situations, in the slotted case \acp{MN} received more packets as in
 any of the random cases. It can be also seen that this difference gets bigger when the number of \acp{AN} arises.
 
-As a second comparison between the bestFrom all this, it can be obtained that slotted transmission is better than even the best case of random transmission. Slotted transmission will be hence
-the one used during the Sync Phase in the complete protocol analysis. case for random transmissions and the slotted case, the number of first, second, third, fourth, \ldots, eighth
+As a second comparison between the best case for random transmissions and the slotted case, the number of first, second, third, fourth, \ldots, eighth
 packets from an \ac{AN} received in the \ac{MN}, will be studied. Results can be seen in \textbf{Figure \ref{fig:numberOf1st2ndPacketsReceived}}.
 
 \begin{figure}[ht]
@@ -284,16 +251,18 @@ In both graphics can be appreciated how the more \acp{AN} there are, the more re
 for the slotted case, the number of received packets is bigger than for the random case (as it was already proved).
 
 In the graphic on the left, it can be seen how the number of first packets received is bigger than the number of second packets. How the number of 
-second packets received is bigger than the number of third packets, etc. And how this reduction occurs in a gradual way. Unlike this, in the graphic 
-on the right, a stair-shaped behavior can be appreciated.
+second packets received is bigger than the number of third packets, etc. It can be also seen how this reduction occurs in a gradual way unlike 
+in the graphic on the right, where a stair-shaped behavior can be appreciated.
 
 As \textit{syncPacketsPerSyncPhase} = 3, the Sync Phase will be divided into 3 identical sub phases. This means that all packets sent in one sub 
 phase, will be sent in the other two. That is why the number of first, second and third packets is the same, as well as the number of fourth, fifth 
-and sixth, and the number of seventh and eighth. Anytime a packet is sent more than \textit{syncPacketsPerSyncPhase} = 3 times, is due to slot re-using. 
+and sixth, and the number of seventh and eighth.
+
+In the graphic, slot reuse can also be appreciated. Anytime a packet is sent more than 3 times (\textit{syncPacketsPerSyncPhase}), is due to slot re-using. 
 That justifies why for example for the 30 \acp{AN} case, no seventh or eighth packets where sent, re-use here was not so big.
 
-As a last comparison between slotted case and best random case, Packet arrival times in the \acp{MN} will be studied. Getting \textbf{Figure
-\ref{fig:Lastarrivalpackettimes}} as the result to be commented. For a good understanding of this figure, X axis should be clarified. X axis has numbers
+As a last comparison between slotted case and best random case, Packet arrival times in the \acp{MN} will be studied, getting \textbf{Figure
+\ref{fig:Lastarrivalpackettimes}}. For a good understanding of this figure, X axis should be clarified. X axis has numbers
 going from 1 to 11. Number from 1 to 8 represent the $1^{st}$, $2^{nd}$, $3^{rd}$ \ldots, $8^{th}$ last received packet in the \acp{MN}. Number 9 
 represents the first packet arrived in the \acp{MN}. Number 10 represents the last packet arrived in the \acp{MN}. And number 11 represents the elapsed 
 time between arrived packets in the \acp{MN}.
@@ -310,25 +279,63 @@ Like for case in Figure \ref{fig:numberOf1st2ndPacketsReceived}, the more the \a
 until they get the last packet.
 
 Comparing both right and left graphics, it can be seen that the arrival times for the first ($X=9$) and last packet ($X=10$) and inter the arrival 
-time ($X=11$), are very similar. This is so because this depends mainly on the duration of the Sync Phase more than on the way the packets are sent. 
-Looking at the arrival time of the last packet ($X=10$), the length of the Sync Phase can be deduced. When looking to X axis values from 1 to 8, many
-differences can be observed.
+time ($X=11$), are very similar. This is because this depends mainly on the duration of the Sync Phase more than on the way the packets are sent. 
+Looking at the arrival time of the last packet ($X=10$), the length of the Sync Phase can be deduced.
 
-In the case of the graphic on the left (best random case), it can be seen that for small X values, the time of the last $X^{th}$ received packet 
-grows with X. This is because all \acp{MN} receive many $1^{st}$, $2^{nd}$ or $3^{rd}$ packets, and the last of the $1^{st}$ packets should arrive 
+When looking to X axis values from 1 to 8, many differences can be observed.
+
+In the case of the graphic on the left (best random case), it can be seen that for small last $X^{th}$ received packet, the times grow with X. 
+This is because all \acp{MN} receive many $1^{st}$, $2^{nd}$ or $3^{rd}$ packets, and the last of the $1^{st}$ packets should arrive 
 before the last of the $2^{nd}$ and so on. But, why is it not like this until the last packet? The reason is that not many \acp{AN} are able to send
-$5^{th}$, $6^{th}$, $7^{th}$ or $8^{th}$ packets being the $3^{rd}$ or $4^{th}$ the maximum packet they get to send. They are not able to send them
-because the Sync Phase is limited in time, being than the $3^{rd}$ or $4^{th}$ packet sent at the end of the phase, raising thus the average arrival time
-for this kind of packets.
+$5^{th}$, $6^{th}$, $7^{th}$ or $8^{th}$ packets. This way, as the $3^{rd}$ or $4^{th}$ packets are the maximum packets \acp{AN} get to send, 
+this packets will be delivered at the end of the Sync Phase, raising hence the average arrival time for this kind of packets.
 
 In the slotted case graphic (on the right), the idea is the same as expressed before. The only difference is that, like in Figure 
-\ref{fig:numberOf1st2ndPacketsReceived}, as \textit{syncPacketsPerSyncPhase} = 3, all behaviors are grouped. It can be seen that $1^{st}$, $2^{nd}$ and 
-$3^{rd}$ last packets are together in one group. $4^{th}$, $5^{th}$ and $6^{th}$ last packets together in another group, and $7^{th}$ and $8^{th}$ in
-another. Inside these groups the last $X^{th}$ arrived packet grows with X because, as the three sub phases in Sync Phase are the same, whenever a 
-$4^{th}$ packet is delivered, this means that also a $5^{th}$ and $6^{th}$ packet will be.
+\ref{fig:numberOf1st2ndPacketsReceived}, as \textit{syncPacketsPerSyncPhase} = 3, all behaviors are grouped, and it can be seen that $1^{st}$, 
+$2^{nd}$ and $3^{rd}$ last packets are together in one group. $4^{th}$, $5^{th}$ and $6^{th}$ last packets are together in another group, and 
+$7^{th}$ and $8^{th}$ are in another. In each group, whenever the \ac{AN} sends the first of the packets ($1^{st}$, $4^{th}$ or $7^{th}$), the 
+next two will be also sent. As Sync Phase is divided in 3 identical sub phases which come one after another in time, the arrival time from 
+each packet in each group grows with X.
 
-Here it can also be observed, like in Figure \ref{fig:numberOf1st2ndPacketsReceived}, the re-usability of the slots. Seeing for example for the 
+Here, like in Figure \ref{fig:numberOf1st2ndPacketsReceived}, the re-usability of the slots can also be observed. Seeing for example for the 
 30 \acp{AN} case, that no seventh or eighth packets where sent because the re-use here was not so big.
+
+\subsubsection{Slot Number vs. \acp{AN} Number}
+
+This sub-section's aim is checking how good the algorithm to calculate the slot distribution among the \acp{AN} is. For this purpose, an scenario 
+with different number of \acp{AN} will be used. In this scenario, the slots will be calculated by a Computer as described in Chapter 
+\ref{chap:protocoldesign} (\nameref{chap:protocoldesign}). Like in previous simulations, this scenario will be simulated 100 times. It has to
+be taken into account that Computer takes also its own slot, this can be seen like \acp{AN} number is one unit bigger.
+
+The number of slots was needed for the previous sub-sections, as to be able to compare randomly and slotted approaches, the Sync Phases need 
+to last the same time, and this time cannot be known for random case until the number of slots is known.
+
+\begin{figure}[ht]
+ \begin{center}
+  \includegraphics[width=0.8\textwidth]{numberOfSlotsWithTheAnchorDensity.eps}
+ \end{center}
+ \caption{Slot Number for a variable \acp{AN} density}
+ \label{fig:numberOfSlotsWithTheAnchorDensity}
+\end{figure}
+
+\textbf{Figure \ref{fig:numberOfSlotsWithTheAnchorDensity}} is the result of simulating a 1 $Km^2$ playground with a number of \acp{AN} going from 
+2 to 70, as the playground is fixed and only the number of nodes increase, it could be said that \acp{AN} density increases. When \acp{AN} density 
+increases, and as \acp{AN} range stays constant, the number of neighbors for each \ac{AN} increases also. This makes the number of slots grow together
+with the number of \acp{AN}, as it can be seen in the figure.
+
+\begin{figure}[ht]
+ \begin{center}
+  \includegraphics[width=0.8\textwidth]{numberOfSlotsWithTheSameDensity.eps}
+ \end{center}
+ \caption{Slot Number for a fixed \acp{AN} density}
+ \label{fig:numberOfSlotsWithTheSameDensity}
+\end{figure}
+
+\textbf{Figure \ref{fig:numberOfSlotsWithTheSameDensity}} is obtained simulating 6 to 80 nodes with a minimum separation between them of 
+80 meters. Playground is calculated dynamically with this parameters to have always a 83 $\acp{AN}/Km^2$ density. As \acp{AN} density remains constant,
+the number of neighbors an \ac{AN} has also does. This means the re-usability of the slots will grow with the number of nodes. The re-usability can be
+observed in the figure, as when the number of \acp{AN} grow, the number of slots does not grow linearly like in Figure 
+\ref{fig:numberOfSlotsWithTheAnchorDensity}.
 
 \paragraph{Conclusion.} From all this results, it can be extracted that slotted transmission is better than even the best case of random transmission. 
 Slotted transmission will be hence the one used during the Sync Phase in the complete protocol analysis.
@@ -339,7 +346,7 @@ The aim of this section, is to analyze through different configurations the perf
 consumption among others.
 
 The proposed scenario for this simulations is formed by 25 \acp{AN} distributed forming a grid, 60 \acp{MN} randomly and uniformly distributed in the
-playground and a Computer. This scenario, with a size of 700 x 700 m, can be seen in Figure \ref{fig:finalscenario} . The \acp{AN} 
+playground and a Computer. An example for this scenario, with a size of 700 x 700 m, can be seen in Figure \ref{fig:finalscenario} . The \acp{AN} 
 are distributed forming a grid to avoid the necessity to make a more complex routing protocol (explained in Chapter \ref{chap:protocolimplementation}: 
 \nameref{chap:protocolimplementation}). Grid was also chosen because it was seen in many literature as a good standard way to study a network.
 
@@ -367,19 +374,19 @@ following distribution of \acp{AN}:
  \label{fig:finalscenario}
 \end{figure}
 
-Considering that the period time is 1.5 s, the Com Sink Phases are 0.5 s each one and that there are $9\cdot3$ slots in each Sync Phase with 1.5 ms each one
-of them. The following phases times are obtained:
+Considering that the period time is 1.5 s, the ComSink Phases are 0.5 s each one and that there are $9\cdot3$ slots in each Sync Phase with 
+1.5 ms each one of them. The following phase times are obtained:
 
 \begin{verbatim}
     Sync Phases length:     0.0405 s
     Report Phase length:    0.2271 s
     VIP Phase length:       0.1514 s
-    Com Sink Phases length: 0.5000 s
+    ComSink Phases length: 0.5000 s
 \end{verbatim}
 
-To force different simulation situations and to be able to check the different \acp{MN} modes, ten configurations are going to be proposed. This 
+To force different situations and to be able to check the different \acp{MN} modes, ten configurations are going to be proposed. This 
 configurations could be changed just modifying some parameters (explained in Section \ref{sec:ProtocolDescription}: \nameref{sec:ProtocolDescription}). 
-Each one of this configurations is going to be simulated during 120 s (80 periods), and repeated 100 times to be able to compensate the dispersion 
+Each one of this configurations is going to be simulated during 120 s (80 periods), and repeated 100 times to be able to compensate the error 
 generated by the generated random numbers. All graphics in this section will have on X axis this configurations.
 
 The configurations are divided into two groups:
@@ -424,11 +431,10 @@ configurations are going to have the following parameters in common:
 This time, it can be seen that both \textit{offsetPhases} and \textit{offsetReportPhases} are not common parameters, this is because they are going to be
 used to distribute all the \acp{MN} in the time in a way that $1/3$ of the \acp{MN} will start in period 0, another $1/3$ will start in period 2 and the 
 rest $1/3$ will start in period 4. As \textit{activePhases} + \textit{inactivePhases} = 6, \acp{MN} will be perfectly distributed to load the network as 
-low as possible. Due to the different kinds of \acp{MN}, the distribution in time will be done equally for every kind of \ac{MN}.
+uniformly as possible. Due to the different kinds of \acp{MN}, the distribution in time will be done equally for every kind of \ac{MN}.
 
 As \textit{reportPhases} = 12, \acp{MN} Mode 2 and 3 will report only 1 out 12 periods, that means they will almost not load the network. Note also that 
-the number of broadcast per \ac{MN} Mode 3 and 4 is three instead of five. This five configurations are a possible normal way of loading the network, and
-they will be compared with the worst case to see if performance gets improved.
+the number of broadcast per \ac{MN} Mode 3 and 4 is three instead of five. This five configurations are a possible normal way of loading the network.
 
 From this group, and attending to the number of \acp{MN} of each Mode (see Figure \ref{fig:ProtocolPhases}) this 5 configurations are proposed:
 \begin{itemize}
@@ -439,7 +445,7 @@ From this group, and attending to the number of \acp{MN} of each Mode (see Figur
  \item[-] \textbf{Config 10}: 15 \acp{MN} Mode 1, 33 \acp{MN} Mode 2, 6 \acp{MN} Mode 3 and 6 \acp{MN} Mode 4.
 \end{itemize}
 Each of this configurations divide the number of \acp{MN} from each mode by 3, assigning the first third \textit{offsetPhases} = 0 and 
-\textit{offsetReportPhases} = 2, the second third \textit{offsetPhases} = 2 and \textit{offsetReportPhases} = 4 and the third third
+\textit{offsetReportPhases} = 2, the second third \textit{offsetPhases} = 2 and \textit{offsetReportPhases} = 4 and the third
 \textit{offsetPhases} = 4 and \textit{offsetReportPhases} = 6. This way all nodes will be equally distributed. That is why this group is called
 ``Distributed''. 
 \end{itemize}
@@ -459,6 +465,16 @@ The same could be obtained for configurations 6 to 10:
  \item Each \ac{MN} in Mode 3, sends 9 reports and 78 broadcasts (three broadcasts each active period).
  \item Each \ac{MN} in Mode 4, sends 22 reports and 78 broadcasts (13 + 6 + 3 reports, three broadcasts each active period).
 \end{itemize}
+
+It can be easily seen that the number of sent packets is not the same during the 120 s for the ``non-distributed'' and ``distributed'' case. This 
+means that both cases cannot be directly compared, and this difference has to be taken into account when comparing both cases in the following 
+graphics.
+
+To make possible an easier 
+comparison, at the end of the chapter, Config 6 will be named Config A and will be compared with Config B. Config B will have exactly the same
+parameters as Config A excepting the offsets. In Config B, \textit{offsetPhases} = 0 and \textit{offsetReportPhases} = 2, this way all nodes are
+together in the same active periods, making this way a ``non-distributed'' case to compare to.
+
 
 As a first orientation result and trying to depict what the following analysis will show, in Table \ref{tab:simulationtimes}, it could be seen the times 
 the computer took to simulate each one of the configurations. This gives a first idea of the different network loads, meaning more load more simulation
@@ -499,8 +515,8 @@ time.
 
 To give an idea of the traffic in the network for the different configurations, \acp{AN} must be studied. All reports or broadcasts generated by the
 \acp{MN} are later on retransmitted to the coordinator (in all cases a centralized schema was used). \acp{AN} are the ones in charge of distributing this
-information as well as routing the information coming from and to the computer. This is why Com Sink phases are going to be the ones loaded
-the most and hence their study the most interesting to be studied.
+information as well as routing the information coming from and to the computer. This is why ComSink phases are going to be the most loaded
+phases and hence their case the most interesting to be studied.
 
 \begin{figure}[ht]
  \begin{center}
@@ -512,7 +528,7 @@ the most and hence their study the most interesting to be studied.
 
 In \textbf{Figure \ref{fig:packetsSentErasedNoTimeAN}}. Erased packet due to maximum number of retransmissions are more in non-distributed 
 configurations than in the distributed ones. This is because in non-distributed ones, all \acp{MN} transmit in every period, generating much more traffic
-that in distributed ones. This makes the \acp{AN} traffic in Com Sink phases bigger than the one the channel can absorb, eliminating thus many packets 
+that in distributed ones. This makes the \acp{AN} traffic in ComSink phases bigger than the one the channel can absorb, eliminating hence many packets 
 due to the high number of collisions they had.
 
 When a \ac{MN} sends a broadcast, unlike for reports, this packet reaches more than one \ac{AN} generating X times the traffic of a report (X = number of \acp{AN}
@@ -520,15 +536,15 @@ who received the broadcast). This is the reason why in the figure it can be obse
 \acp{MN} who broadcast are increased, the number of erased packets due to maximum number of retransmissions is increased respecting configurations
 1, 4 and 5 or 6, 9 and 10.
 
-In the case of configurations 1, 2 and 3, there are many erased packets, some times even more than correctly sent packets. All this deletions, motivate
-that for configurations 6, 7 and 8, as the number of collisions is smaller, the number of successfully delivered packets is bigger even when for 
-distributed configurations, the total number of sent packets by the \acp{MN} is smaller.
+In the case of configurations 1, 2 and 3, there are many erased packets, some times even more than correctly sent packets. This makes possible 
+for configurations 6, 7 and 8, as the number of collisions is smaller, to achieve a bigger number of successfully delivered packets, even 
+when for distributed configurations, the total number of sent packets by the \acp{MN} is smaller.
 
-Erased packets due to a lack of time in the phase, are the erased packets when the end of Com Sink phases is approaching (10 ms of guard time is left
+Erased packets due to a lack of time in the phase, are the erased packets when the end of ComSink phases is approaching (10 ms of guard time is left
 before the end of the phase). When a change of phase comes, all scheduled packets to be sent, must be deleted or postponed, otherwise they will be 
 transmitted during the next Sync Phase, provoking non desired collisions.
 
-As for the deleted packets before, erased packets are more in the non-distributed case. In configurations 1, 2 and 3 can be seen how this value
+As for the deleted packets before, erased packets are more in the non-distributed case. In configurations 1, 2 and 3, it can be seen how this value
 reaches a maximum, being the same in the three cases. If this is compared with the distributed case, as this value does not saturate, the logic behavior 
 can be seen, where for configuration 1, the deleted packets are less than for the configurations where there are more \acp{MN} in Modes 3 and 4 and hence 
 more broadcasts. This saturation value is reached because there are so many collisions, that the \acp{AN} do not receive more packets to be routed.
@@ -552,7 +568,7 @@ In \textbf{Figure \ref{fig:BackoffNumberInMN}} can be easily seen how for the co
 average Backoffs is bigger than for the normal case in configurations 6 to 10. This is due to the total sent packets number.
 
 It is in general seen that \acp{MN} in modes 3 and 4, which send broadcasts, have a bigger number of Backoffs than \acp{MN} in modes 1 and 2. The same 
-happens between \acp{MN} in mode 1, which have more than \acp{MN} in mode 2. As each packet needs at least one Backoff independently of the type of 
+happens between \acp{MN} in mode 1, which sends more reports than \acp{MN} in mode 2. As each packet needs at least one Backoff independently of the type of 
 packet, this difference is caused by the total number of sent packets by each \ac{MN} in each mode. This difference is bigger for the configurations 1 
 to 5 because, as the number of packets sent to channel is bigger, the \acp{MN} find more often the channel busy and thus they need at least another Backoff
 period.
@@ -565,10 +581,10 @@ In configuration 2 for example, it can be observed how as the number of \acp{MN}
 Backoff periods needed by \acp{MN} in modes 1, 2 and 4 will grow in comparison with configuration 1 (equilibrated configuration), specially for \acp{MN} in
 mode 4. \acp{MN} in mode 3 do not get affected so much because they have their own phase to transmit.
 
-In configurations 4 and 5, when the number of only transmitting reports \acp{MN} is arisen, the average number of Backoff periods goes down in general,
+In configurations 4 and 5, when the number of \acp{MN} who transmit only reports is arisen, the average number of Backoff periods goes down in general,
 this is because reports do not charge the network like broadcasts do.
 
-It is interesting also to see that for configuration 3, where \acp{MN} in mode 3 are predominant, almost only \acp{MN} in mode 3 are affected. This is so
+It is interesting also to see that for configuration 3, where \acp{MN} in mode 3 are predominant, almost only \acp{MN} in mode 3 are affected. This is
 because they have their own phase (\ac{VIP} Phase) to transmit, and their transmissions do not affect the other modes.
 
 \begin{figure}[ht]
@@ -585,10 +601,10 @@ the first Backoff time in average is 1.12 ms.
   rand(0;  2^3-1)\cdot aUnitBackoffPeriod = rand(0; 2^3-1)\cdot 320\mu s\ \cite{IEEE802.15.4-2006}
   \label{mat:backoffexpression}
 \end{equation}
-With this data in mind, it can be seen in the figure that excepting for the \acp{AN}, where (as it was already said in previous sub-section) the 
+With this data in mind, it can be seen in the figure that, excepting for the \acp{AN} where (as it was already said in previous sub-section) the 
 number of deletions and thus retransmissions is high, all average Backoff times are not much bigger that this minimum average value. That shows that for
-all configurations, even from 1 to 5 where average Backoff time is a little bit bigger, the number of Backoffs due to channel 
-busy is not that high and thus the average Backoff time. The data from this figure, together with the one from Figure \ref{fig:BackoffNumberInMN} give
+all configurations, even from 1 to 5 where average Backoff time is a little bit bigger, the number of Backoffs due to a busy channel,
+is not that high and thus the average Backoff time. The data from this figure, together with the one from Figure \ref{fig:BackoffNumberInMN} gives
 also an idea of the idle listening necessary for each mode to be able to transmit a packet.
 
 From the figure can also be extracted that in configuration 2, as the network load grows, also does the average Backoff time for \acp{MN} in modes 1, 2 
@@ -603,8 +619,8 @@ Last but not least, there is an strange detail in the figure. Why if \acp{MN} in
 average Backoff time the biggest in all configurations? This happens because the way the network is configured, all extra report periods, match up in time
 with other active periods, in configurations 1 to 5 all periods are active for all \acp{MN} and in configurations 6 to 10 all periods are active for 
 some \ac{MN} (they are distributed in time). This means that, as \acp{MN} in mode 2, transmit their packets only in extra report periods, they are going to 
-find always a more loaded network and thus its average Backoff time will be bigger. The other \acp{MN} in modes 1, 3 and 4 are finding also extra report 
-periods loaded and are getting high Backoff time values, but, as they transmit also in calmer periods, their average Backoff time will be reduced.
+find always a more loaded network and thus its average Backoff time will be bigger. The other \acp{MN} in modes 1, 3 and 4 are transmitting  
+also during the loaded extra report periods and are getting high Backoff time values, but, as they transmit also in calmer periods, their average Backoff time will be reduced.
 
 \begin{figure}[ht]
  \begin{center}
@@ -625,17 +641,17 @@ values as they send almost the same number of reports.
 As in configuration 2, there is a bigger number of broadcasts loading the Report Phase with much more traffic, the number of retransmissions due to 
 the lack of \ac{ACK} gets much bigger.
 
-\paragraph{Conclusion.} Number of Backoffs together with the number of retransmitted packets due to the lack of ACK, show us that \acp{MN} transmissions 
+\paragraph{Conclusion.} The number of Backoffs together with the number of retransmitted packets due to the lack of ACK, show us that \acp{MN} transmissions 
 are quite efficient for this configurations, at least compared with \acp{AN} transmissions. From this results can directly be extracted that, while 
-Report and VIP Phase times are good enough, the Com Sink phases times should be bigger for some of the configurations.
+Report and VIP Phase times are good enough, the ComSink phases times should be bigger for some of the configurations.
 
 \subsection{Energy consumption in \acp{MN}}
 
 As it was already said during this work, all \acp{MN} have different working states: sleep all, sleep but $\mu C$ working, idle, transmission and 
 reception. Each of this states have a different energy consumption (Table \ref{tab:NodeEnergyConsumption}), and transitions between states take 
 different times (Table \ref{tab:NodeTiming}). During the simulation, all \acp{MN} changed their states as explained in Section 
-\ref{sec:frameworkdevelopment}: \nameref{sec:frameworkdevelopment}. Times in different state and in all possible transitions between states were stored
-during 120 s. This times multiplied by the energy consumed for each case and added together, result in \textbf{Figure \ref{fig:energyConsumptionPerMN}}.
+\ref{sec:frameworkdevelopment}: \nameref{sec:frameworkdevelopment}. The times in the different states and in all possible transitions between states were stored
+during the 120 s of simulation. This times multiplied by the energy consumed for each case and added together, result in \textbf{Figure \ref{fig:energyConsumptionPerMN}}.
 
 \begin{figure}[ht]
  \begin{center}
@@ -653,7 +669,7 @@ in previous sub-section and it is also confirmed here.
 In configuration 3, a light growth in energy can be appreciated for \acp{MN} in mode 3. This is caused by the increment of broadcasts number to share the 
 \ac{VIP} Phase. Anyway, this increment is not that big. This shows that even this mode, with a shorter in time \ac{VIP} Phase, is not very much affected
 by collisions. In configuration 8, this effect is even not appreciable because instead of 5 broadcasts per \ac{MN} only 3 are sent, and also because
-\acp{MN} are distributed in time, being found transmitting at the same period only $1/3$ of the \acp{MN} in mode 3.
+\acp{MN} are distributed in time, being possible to find transmitting at the same period only $1/3$ of the \acp{MN} in mode 3.
 
 In configuration 2, a light growth in energy for \acp{MN} in mode 4 can be also appreciated. The reason is exactly the same as for \acp{MN} in mode 3.
 
@@ -666,4 +682,50 @@ listening to Sync Phases and transmitting reports, transmit also broadcasts. Thi
 modes, represents the energy consumed transmitting the broadcasts. To assert this affirmation, it can be seen that for configurations 1 to 5, where
 5 broadcasts per \ac{MN} in mode 4 are sent, the energy consumption difference between \acp{MN} in mode 1 and in mode 4 is bigger than for configurations
 6 to 10 where the number of broadcasts per \ac{MN} in mode 4 is just 3.
+
+\subsection{Fair comparison}
+
+As it was said, to be able to easily compare a ``distributed'' configuration and a ``non-distributed'' one, they must transmit in overall the same
+number of packets during the same time. To achieve this, the already introduced, Configurations A and B were created.
+
+A first comparison, in this case about the \acp{MN}, can be seen in \textbf{Figure \ref{fig:MNsAverageValuesin120s}}. Comparing both
+configuration values and looking at the previous sub-sections figures, it can be seen that in this case, when the total sent packets are the 
+same, the values for ``distributed`` and ``non-distributed`` cases, do not differ so much like before. Anyway, higher values can be observed 
+for Configuration B than for A. This is because, as in Configuration B all packets concentrate in the same periods, the network load is 
+bigger causing more collisions in Configuration B than in A.
+
+\begin{figure}[ht]
+ \begin{center}
+  \includegraphics[width=0.9\textwidth]{MNsAverageValuesin120s.eps}
+ \end{center}
+ \caption{\acp{MN} average values comparison}
+ \label{fig:MNsAverageValuesin120s}
+\end{figure}
+
+For the previous figure, almost no difference between configurations could be seen. This is because, as it was already said, the performance
+during the Report and \ac{VIP} Phases is really good. When comparing the \acp{AN} performance, a more different behavior can be seen. 
+\textbf{Figure \ref{fig:ANsConparison}} shows this differences. 
+
+\begin{figure}[ht]
+ \begin{center}
+  \includegraphics[width=0.9\textwidth]{ANsConparison.eps}
+ \end{center}
+ \caption{\acp{AN} average values comparison}
+ \label{fig:ANsConparison}
+\end{figure}
+
+As the network traffic is more concentrated for Configuration B than for A, in the graphic on the left can be seen how the number of erased 
+packets due to maximum number of retransmissions is higher, and hence the number of successfully transmitted packets is smaller. But the 
+strange aspect is, why the addition of successfully sent packets, and all the erased packets is not the same for both configurations if the 
+number of generated packets in the \acp{MN} is the same? 
+
+Previous question gets explained in the graphic on the right. In this graphic can be seen how the total number of generated packets from an 
+\ac{AN}, due to generated packets in \acp{MN} (broadcasts and reports), is the same for both configurations. The only difference can be 
+found in the packets an \ac{AN} routes to or from the computer, in this case the number for Configuration B is much smaller. But, how can it 
+be the difference so high, if the difference in erased packets is not? This is because every time a route packet is deleted, this does not only
+mean that a packet less will be transmitted, but also that in the following steps until computer (ComSink 1) or until selected \ac{AN} (ComSink
+2) new packets will not even created. According to the routing diagram showed in Figure \ref{fig:routetree} (page \pageref{fig:routetree}), it is
+obtained that a packet from an \ac{AN} has to jump an average of 2.88 steps to reach its destination. This means that a deleted 
+route packet means in average reducing generated traffic in 2.88 packets more. This ratio can hence prove the difference between erased packets
+and the number of generated packets between configurations.
 

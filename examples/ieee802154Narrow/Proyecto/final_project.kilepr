@@ -126,62 +126,62 @@ order=2
 
 [item:chap1.tex]
 archive=true
-column=82
+column=27
 encoding=UTF-8
 highlight=LaTeX
-line=150
+line=60
 mode=LaTeX
 open=true
 order=5
 
 [item:chap2.tex]
 archive=true
-column=78
+column=144
 encoding=UTF-8
 highlight=LaTeX
-line=139
+line=240
 mode=LaTeX
 open=true
 order=1
 
 [item:chap3.tex]
 archive=true
-column=33
+column=36
 encoding=UTF-8
 highlight=LaTeX
-line=524
+line=295
 mode=LaTeX
 open=true
 order=6
 
 [item:chap4.tex]
 archive=true
-column=0
+column=36
 encoding=UTF-8
 highlight=LaTeX
-line=151
+line=725
 mode=LaTeX
 open=true
 order=7
 
 [item:chap5.tex]
 archive=true
-column=49
+column=0
 encoding=UTF-8
 highlight=LaTeX
-line=341
+line=0
 mode=LaTeX
 open=true
 order=8
 
 [item:chap6.tex]
 archive=true
-column=0
+column=29
 encoding=UTF-8
 highlight=LaTeX
-line=0
+line=3
 mode=LaTeX
-open=false
+open=true
 order=9
 
 [item:cover.tex]
@@ -219,7 +219,7 @@ archive=true
 column=0
 encoding=UTF-8
 highlight=LaTeX
-line=72
+line=71
 mode=LaTeX
 open=true
 order=0
@@ -233,28 +233,28 @@ CursorColumn=22
 CursorLine=49
 
 [view-settings,view=0,item:chap1.tex]
-CursorColumn=82
-CursorLine=150
+CursorColumn=27
+CursorLine=60
 
 [view-settings,view=0,item:chap2.tex]
-CursorColumn=78
-CursorLine=139
+CursorColumn=144
+CursorLine=240
 
 [view-settings,view=0,item:chap3.tex]
-CursorColumn=33
-CursorLine=524
+CursorColumn=36
+CursorLine=295
 
 [view-settings,view=0,item:chap4.tex]
-CursorColumn=0
-CursorLine=151
+CursorColumn=36
+CursorLine=725
 
 [view-settings,view=0,item:chap5.tex]
-CursorColumn=49
-CursorLine=341
+CursorColumn=0
+CursorLine=0
 
 [view-settings,view=0,item:chap6.tex]
-CursorColumn=102
-CursorLine=10
+CursorColumn=29
+CursorLine=3
 
 [view-settings,view=0,item:cover.tex]
 CursorColumn=10
@@ -266,4 +266,4 @@ CursorLine=41
 
 [view-settings,view=0,item:main.tex]
 CursorColumn=0
-CursorLine=72
+CursorLine=71

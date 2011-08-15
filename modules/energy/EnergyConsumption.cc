@@ -133,7 +133,7 @@ void EnergyConsumption::updateStateStatus(bool transmitting, int macState, int p
 		//- If we want to transmit directly from sleeping add the case here depending on the MAC state probably -
 		//-------------------------------------------------------------------------------------------------------
 		totalTimeSleep = totalTimeSleep + timeStampsDifference; // Done at the end as till now the state was sleep but in the transittion
-		totalTimeOff = totalTimeOff + timeStampsDifference; // Microcontroller Sleep time
+		totalTimeOff = totalTimeOff + timeStampsDifference; // Micro-controller Sleep time
 		break;
 	case RX:
 		if (phyState == RADIO_SLEEP) {
@@ -150,11 +150,11 @@ void EnergyConsumption::updateStateStatus(bool transmitting, int macState, int p
 			}
 		}
 		if (previousMacState == MAC_CCA_3) {
-			totalTimeCCA = totalTimeCCA + timeStampsDifference; // Done at the end as till now the state was sleep but in the transittion
+			totalTimeCCA = totalTimeCCA + timeStampsDifference; // Done at the end as till now the state was sleep but in the transition
 		} else {
-			totalTimeRx = totalTimeRx + timeStampsDifference; // Done at the end as till now the state was sleep but in the transittion
+			totalTimeRx = totalTimeRx + timeStampsDifference; // Done at the end as till now the state was sleep but in the transition
 		}
-		totalTimeOn = totalTimeOn + timeStampsDifference; // Microcontroller On time
+		totalTimeOn = totalTimeOn + timeStampsDifference; // Micro-controller On time
 		break;
 	case TX:
 		if (phyState == RADIO_SLEEP) {
@@ -167,8 +167,8 @@ void EnergyConsumption::updateStateStatus(bool transmitting, int macState, int p
 					state = IDLE;
 			}
 		}
-		totalTimeTx = totalTimeTx + timeStampsDifference; // Done at the end as till now the state was sleep but in the transittion
-		totalTimeOn = totalTimeOn + timeStampsDifference; // Microcontroller On time
+		totalTimeTx = totalTimeTx + timeStampsDifference; // Done at the end as till now the state was sleep but in the transition
+		totalTimeOn = totalTimeOn + timeStampsDifference; // Micro-controller On time
 		break;
 	case IDLE:
 		if (phyState == RADIO_SLEEP) {
@@ -187,11 +187,11 @@ void EnergyConsumption::updateStateStatus(bool transmitting, int macState, int p
 			}
 		}
 		if (previousMacState == MAC_BACKOFF_2) {
-			totalTimeBackOff = totalTimeBackOff + timeStampsDifference; // Done at the end as till now the state was sleep but in the transittion
+			totalTimeBackOff = totalTimeBackOff + timeStampsDifference; // Done at the end as till now the state was sleep but in the transition
 		} else {
-			totalTimeIdle = totalTimeIdle + timeStampsDifference; // Done at the end as till now the state was sleep but in the transittion
+			totalTimeIdle = totalTimeIdle + timeStampsDifference; // Done at the end as till now the state was sleep but in the transition
 		}
-		totalTimeOn = totalTimeOn + timeStampsDifference; // Microcontroller On time
+		totalTimeOn = totalTimeOn + timeStampsDifference; // Micro-controller On time
 		break;
 	}
 
@@ -202,15 +202,15 @@ void EnergyConsumption::updateStateStatus(bool transmitting, int macState, int p
 		if (previousState == RX) {
 			previousTimeStamp = simTime() + timeRxToSleep;
 			totalTimeRxToSleep = totalTimeRxToSleep + timeRxToSleep;
-			totalTimeOnToSleep = totalTimeOnToSleep + timeRxToSleep; // Microcontroller Transition time
+			totalTimeOnToSleep = totalTimeOnToSleep + timeRxToSleep; // Micro-controller Transition time
 		} else if (previousState == TX) {
 			previousTimeStamp = simTime() + timeTxToSleep;
 			totalTimeTxToSleep = totalTimeTxToSleep + timeTxToSleep;
-			totalTimeOnToSleep = totalTimeOnToSleep + timeTxToSleep; // Microcontroller Transition time
+			totalTimeOnToSleep = totalTimeOnToSleep + timeTxToSleep; // Micro-controller Transition time
 		} else if (previousState == IDLE) {
 			previousTimeStamp = simTime() + timeIdleToSleep;
 			totalTimeIdleToSleep = totalTimeIdleToSleep + timeIdleToSleep;
-			totalTimeOnToSleep = totalTimeOnToSleep + timeIdleToSleep; // Microcontroller Transition time
+			totalTimeOnToSleep = totalTimeOnToSleep + timeIdleToSleep; // Micro-controller Transition time
 		} else { // SLEEP
 			previousTimeStamp = simTime();
 		}
@@ -219,15 +219,15 @@ void EnergyConsumption::updateStateStatus(bool transmitting, int macState, int p
 		if (previousState == SLEEP) {
 			previousTimeStamp = simTime() + timeSleepToRx;
 			totalTimeSleepToRx = totalTimeSleepToRx + timeSleepToRx;
-			totalTimeSLeepToOn = totalTimeSLeepToOn + timeSleepToRx; // Microcontroller Transition time
+			totalTimeSLeepToOn = totalTimeSLeepToOn + timeSleepToRx; // Micro-controller Transition time
 		} else if (previousState == TX) {
 			previousTimeStamp = simTime() + timeTxToRx;
 			totalTimeTxToRx = totalTimeTxToRx + timeTxToRx;
-			totalTimeOn = totalTimeOn + timeTxToRx; // Microcontroller On time
+			totalTimeOn = totalTimeOn + timeTxToRx; // Micro-controller On time
 		} else if (previousState == IDLE) {
 			previousTimeStamp = simTime() + timeIdleToRx;
 			totalTimeIdleToRx = totalTimeIdleToRx + timeIdleToRx;
-			totalTimeOn = totalTimeOn + timeIdleToRx; // Microcontroller On time
+			totalTimeOn = totalTimeOn + timeIdleToRx; // Micro-controller On time
 		} else { // RX
 			previousTimeStamp = simTime();
 		}
@@ -238,11 +238,11 @@ void EnergyConsumption::updateStateStatus(bool transmitting, int macState, int p
 		} else if (previousState == RX) {
 			previousTimeStamp = simTime() + timeRxToTx;
 			totalTimeRxToTx = totalTimeRxToTx + timeRxToTx;
-			totalTimeOn = totalTimeOn + timeRxToTx; // Microcontroller On time
+			totalTimeOn = totalTimeOn + timeRxToTx; // Micro-controller On time
 		} else if (previousState == IDLE) {
 			previousTimeStamp = simTime() + timeIdleToTx;
 			totalTimeIdleToTx = totalTimeIdleToTx + timeIdleToTx;
-			totalTimeOn = totalTimeOn + timeIdleToTx; // Microcontroller On time
+			totalTimeOn = totalTimeOn + timeIdleToTx; // Micro-controller On time
 		} else { // TX
 			previousTimeStamp = simTime();
 		}
@@ -251,15 +251,15 @@ void EnergyConsumption::updateStateStatus(bool transmitting, int macState, int p
 		if (previousState == SLEEP) {
 			previousTimeStamp = simTime() + timeSleepToIdle;
 			totalTimeSleepToIdle = totalTimeSleepToIdle + timeSleepToIdle;
-			totalTimeSLeepToOn = totalTimeSLeepToOn + timeSleepToIdle; // Microcontroller Transition time
+			totalTimeSLeepToOn = totalTimeSLeepToOn + timeSleepToIdle; // Micro-controller Transition time
 		} else if (previousState == TX) {
 			previousTimeStamp = simTime() + timeTxToIdle;
 			totalTimeTxToIdle = totalTimeTxToIdle + timeTxToIdle;
-			totalTimeOn = totalTimeOn + timeTxToIdle; // Microcontroller On time
+			totalTimeOn = totalTimeOn + timeTxToIdle; // Micro-controller On time
 		} else if (previousState == RX) {
 			previousTimeStamp = simTime() + timeRxToIdle;
 			totalTimeRxToIdle = totalTimeRxToIdle + timeRxToIdle;
-			totalTimeOn = totalTimeOn + timeRxToIdle; // Microcontroller On time
+			totalTimeOn = totalTimeOn + timeRxToIdle; // Micro-controller On time
 		} else { // IDLE
 			previousTimeStamp = simTime();
 		}

@@ -141,24 +141,24 @@ mode by \ac{MAC} Layer. From now on, all explanations will refer only to Non-Bea
 
 \subsection{\ac{CSMA/CA} Algorithm}
 
-When \ac{MAC} Layer receives a message to be sent, before sending it, asks the \ac{PHY} Layer to check if the channel is free and if so, it 
-orders the \ac{PHY} Layer to transmit this message. This is all controlled by an algorithm, this algorithm is called \ac{CSMA/CA}, in this 
+When \ac{MAC} Layer receives a message to be sent, before sending it, asks the \ac{PHY} Layer to check if the channel is free. In this case, it 
+orders the \ac{PHY} Layer to transmit this message. The whole process is controlled by an algorithm which is called \ac{CSMA/CA}. In this 
 case as a non-beaconed mode is used, the \ac{CSMA/CA} algorithm corresponds to the non-slotted one, where the random time a device waits 
 before transmitting is not synchronized with the beacons. A graphic approach to this algorithm is given in Figure \ref{fig:CSMACA}, where the
-processes to be commented are signaled with number between brackets.
+processes to be commented are signaled with a number in brackets.
 
 \begin{itemize}
- \item \textbf{(1)} - Restarts the parameters to its initial values. \ac{NB} is a counter of the number of times the process was done. \ac{BE}
-is the exponent for the BackOff Random time calculation. At the beginning takes the minimum defined by the user (macMinBE), usually 3.
- \item \textbf{(2)} - In this step a random number between 0 and $2^{\ac{BE}}$ - 1 is generated and multiplied by the unit BackOff period, defined
-by aUnitBackoffPeriod in the standard which default value is 20 symbols = 320 $\mu$s.
- \item \textbf{(3)} - After this waiting period where node is in IDLE mode, \ac{MAC} orders \ac{PHY} to sense the channel performing the \ac{CCA} 
-(8 symbols = 128 $\mu$s) and if the channel is free, the \ac{MAC} proceed to transmit the packet and if not, the algorithm proceeds with the 
+ \item \textbf{(1)} - Restarts the parameters to their initial values. \ac{NB} is a counter of the number of times the process was done. \ac{BE}
+is the exponent for the Backoff Random time calculation. At the beginning it takes the minimum defined by the user (\textit{macMinBE}), usually 3.
+ \item \textbf{(2)} - In this step a random number between 0 and $2^{\ac{BE}}$ - 1 is generated and multiplied by the unit Backoff period, defined
+by \textit{aUnitBackoffPeriod} in the standard whose default value is 20 symbols = 320 $\mu$s.
+ \item \textbf{(3)} - After this waiting period while the node is in IDLE mode, \ac{MAC} orders \ac{PHY} to sense the channel performing the \ac{CCA} 
+(8 symbols = 128 $\mu$s). If the channel is free, the \ac{MAC} proceeds to transmit the packet and if not, the algorithm proceeds with the 
 step (4).
- \item \textbf{(4)} - If the channel was busy, first \ac{NB} and \ac{BE} are raised in 1 unit, then if the new \ac{BE} is bigger than the maximum
-(macMaxBE), usually 5, \ac{BE} is assigned this maximum value.
- \item \textbf{(5)} - Then maximum number of tries (macMaxCSMABackOffs) is checked, if the maximum is not reached, the process starts again from (2),
-but if the maximum is reached, all process gets canceled and \ac{MAC} layer informs upper layers about the failure (\ac{CAF}).
+ \item \textbf{(4)} - If the channel was busy, first \ac{NB} and \ac{BE} are raised in one unit. Afterward, if the new \ac{BE} is bigger than the maximum
+(\textit{macMaxBE}), usually 5, \ac{BE} is assigned this maximum value.
+ \item \textbf{(5)} - Then maximum number of tries (\textit{macMaxCSMABackOffs}) is checked. If the maximum is not reached, the process starts again from (2),
+but if it is reached, the entire process gets canceled and \ac{MAC} layer informs upper layers about the failure (\ac{CAF}).
 \end{itemize}
 
 \begin{figure}[!ht]
@@ -169,14 +169,14 @@ but if the maximum is reached, all process gets canceled and \ac{MAC} layer info
  \label{fig:CSMACA}
 \end{figure}
 
-This algorithm helps to reduce the so called collisions. This collisions could occur when a node starts transmitting without looking the 
-channel, and if another node next to it has already sent some packet, then a collision is produced.
+This algorithm helps to reduce the so called collisions. These collisions could occur when a node starts transmitting without checking the 
+channel, and if another node next to it has already sent some packet.
 
-But using \ac{CSMA/CA} algorithm does not make things perfect, it could also happen that two packets have a collision in the air. One 
-reason could be that while one node is performing the \ac{CCA}, another node does the same, in this case, both of them will start transmitting 
-producing a collision. The other reason is the well known Hidden Terminal Problem, to explain this phenomena, Figure \ref{fig:HiddenTerminalProblem}
-will be used. Node A wants to communicate with node B, but node C is already transmitting something to node B, as we can see with the doted line,
-A range does not cover node C, that is why when it performs the \ac{CCA}, does not get any signal from C. Then node A starts transmitting, and 
+But using \ac{CSMA/CA} algorithm does not solve this problem. It could also happen that two packets have a collision in the air. One 
+reason could be that while one node is performing the \ac{CCA}, another node does the same. In this case, both of them will start transmitting 
+producing a collision. The other reason is the well known Hidden Terminal Problem. To explain this phenomena, Figure \ref{fig:HiddenTerminalProblem}
+will be used. Node A wants to communicate with node B, but node C is already transmitting something to node B. As we can see with the dotted line,
+the range of A does not cover node C. Because of this, when A performs the \ac{CCA}, it does not get any signal from C. Then node A starts transmitting, and 
 node B takes at the same time a message from A and C, having a collision.
 
 \begin{figure}[!ht]
@@ -188,9 +188,9 @@ node B takes at the same time a message from A and C, having a collision.
 \end{figure}
 
 \ac{CSMA/CA} algorithm makes also possible a situation where a node could transmit without collision but it detects a packet in the air and does
-not transmit. To explain this case, Figure \ref{fig:ExposedNodeProblem} will be used. Suppose C is already transmitting something to D, 
-then B wants to transmit something to A, and as B performs the \ac{CCA}, it detects the channel is busy with C to D packet. Then B waits another
-BackOff random time and does not transmit, although it could, as its packet would have reached A and would have not disturbed D.
+not transmit. To explain this case, Figure \ref{fig:ExposedNodeProblem} will be used. In this situation, C is already transmitting something to D and B 
+wants to transmit some information to A. When B performs the \ac{CCA}, it detects the channel as busy with C to D packet. Therefore B waits another
+Backoff random time and does not transmit, although it could, as its packet would have reached A and would not have disturbed D.
 
 \begin{figure}[!ht]
  \begin{center}
@@ -200,17 +200,17 @@ BackOff random time and does not transmit, although it could, as its packet woul
  \label{fig:ExposedNodeProblem}
 \end{figure}
 
-Apart from the times already commented like \ac{CCA} or BackOff, there are other important times. \ac{SIFS} is the time to leave between two 
-consecutive frames when the frame was short $(\le 18 bytes)$ and its value is 12 symbols = 192 $\mu$s. \ac{LIFS} is the same as \ac{SIFS} but
-to use with long frames (40 symbols = 640 $\mu$s). Usually this two times are included in \ac{CSMA/CA} process, and they are important not to
-collapse the system and loose data. Another important time is 
-aTurnaroundTime, this time is 192 $\mu$s and corresponds to the time needed to switch between \ac{Rx} and \ac{Tx} modes and vice versa, it is
-also the time to leave between the end of a packet reception and the start of the \ac{ACK} transmission.
+Apart from the times already commented like \ac{CCA} or Backoff, there are other important times to be taken into account. \ac{SIFS} is the 
+time to leave between two consecutive frames when the frame was short $(\le 18 bytes)$ and its value is 12 symbols = 192 $\mu$s. \ac{LIFS} 
+is the same as \ac{SIFS} but to use with long frames (40 symbols = 640 $\mu$s). Usually these two times are included in \ac{CSMA/CA} process, 
+and they are important not to collapse the system and lose data. Another important time is \textit{aTurnaroundTime}, this time is 192 $\mu$s 
+and corresponds to the time needed to switch between \ac{Rx} and \ac{Tx} modes and vice versa. It is also the time to leave between the end 
+of a packet reception and the start of the \ac{ACK} transmission.
 
 \subsection{Frame Format}
 
-\ac{MAC} packets use different frames depending if the network is beaconed or non-beaconed, as this work is using just the non-beaconed mode,
-just the frames relative to this mode will be explained. Figure \ref{fig:MACFrame} contains the structure that will be explained now.
+\ac{MAC} packets use different frames depending if the network is beaconed or non-beaconed. As this work is using just the non-beaconed mode,
+only the frames related to this mode will be explained. Figure \ref{fig:MACFrame} contains the structure that will be explained now.
 
 \begin{figure}[!ht]
  \begin{center}
@@ -225,9 +225,9 @@ just the frames relative to this mode will be explained. Figure \ref{fig:MACFram
   \begin{itemize}
    \item Frame Control: 16 bits to define the frame type, security code, \ac{ACK} required, etc.
    \item Sequence Number: 8 bits to identify the frame.
-   \item Destination \ac{PAN} Identifier: 16 bits to indicate the \ac{PAN} we are communicating with. 0xFFFF if any network is selected.
-   \item Destination Address: 16 or 64 bits depending if it is a short or long address, end devices use always long address and routers short.
-   \item Source PAN Identifier: 16 bits to indicate the \ac{PAN} that is communicating with us.
+   \item Destination \ac{PAN} Identifier: 16 bits to indicate the \ac{PAN} communicating with. 0xFFFF if any network is selected.
+   \item Destination Address: 16 or 64 bits depending if it is a short or long address. End devices use always a long address and routers a short one.
+   \item Source PAN Identifier: 16 bits to indicate the source \ac{PAN}.
    \item Source Address: 16 or 64 bits depending if it is a short or long address, end devices use always long address and routers short.
   \end{itemize}
  \item \textbf{Payload.} Data from upper layer.
@@ -236,10 +236,10 @@ just the frames relative to this mode will be explained. Figure \ref{fig:MACFram
 
 \subsection{Hardware}
 
-Although this work is based in a simulation, all the needed physical parameters to simulate are obtained from the commercial hardware 
-RCB230 V3.2 as is the one available in the department. This node has a AT86RF230 transceiver and a ATmega1281V \ac{uC}. According 
-to \cite{LPLandOLP} the consumption values of this node can be seen in Table \ref{tab:NodeEnergyConsumption}, and transition times not defined
-in 802.15.4 standard in Table \ref{tab:NodeTiming}.
+Although this work is based on a simulation, all the needed physical parameters to simulate are obtained from the commercial hardware 
+RCB230 V3.2 as it is the one available in the department. This node has a AT86RF230 transceiver and a ATmega1281V \ac{uC}. According 
+to \cite{LPLandOLP}, the consumption values of this node are the ones shown in Table \ref{tab:NodeEnergyConsumption}. Transition times that are not defined
+in 802.15.4 standard are in Table \ref{tab:NodeTiming}.
 
 
 \begin{table}
