@@ -2,7 +2,7 @@
 \label{chap:simulationandresults}
 
 In this chapter, different scenarios for the simulation and their results will be exposed and commented. To make it easier to understand, and as 
-previously this two cases were also separated, first just the Sync Phase will be analyzed and then the whole protocol together.
+previously these two cases were also separated, first just the Sync Phase will be analyzed and then the whole protocol together.
 
 In all the scenarios, simulations are independent among them and at least 100 repetitions are going to be done, this way the confidence intervals
 shown in all figures could be calculated like in (\ref{mat:confidenceintervals}).
@@ -17,7 +17,7 @@ $t_{\frac{\alpha}{2}}$ is a constant of 1.96 for a confidence interval of 95\%.
 
 \section{Sync Phase simulation and analysis}
 
-The aim of this section is to compare slotted transmission and random transmission during Sync Phase. This two approaches were already commented 
+The aim of this section is to compare slotted transmission and random transmission during Sync Phase. These two approaches were already commented 
 during Chapter \ref{chap:protocoldesign}: \nameref{chap:protocoldesign}.
 
 As random transmission case is more difficult and chaotic than the slotted one, this will be studied separately first, leaving the slotted case 
@@ -43,7 +43,7 @@ The number of \acp{AN} is 6 in both cases and the number of \acp{MN} is 1.
 
 All errors caused by noise and random errors due to the channel, were disabled during this simulation. This is so, to have only errors due to 
 simultaneous \acp{CCA} problem and due to Hidden Terminal Problem. With this situation, it can be assured that if a packet is received 
-incorrectly in the \ac{MN}, the reason would be one of this two problems.
+incorrectly in the \ac{MN}, the reason would be one of these two problems.
 
 As is was commented in Chapter \ref{chap:protocoldesign}: \nameref{chap:protocoldesign}, in order to avoid an unknown random time during active 
 synchronization, \ac{CSMA/CA} must be disabled. If this is done, all \acp{AN} will transmit at the same time generating lots of collisions. 
@@ -65,7 +65,7 @@ In order to reduce the error introduced by random numbers, each simulation will 
 First simulation, gives as result \textbf{Figure \ref{fig:receivedPacketsAndLastPacketArrival}}. Here can be seen the total received packets in the 
 \ac{MN} and the time when the last packet arrived in function of the maximum inter packet transmission time.
 
-Both received packets lines (A and B) have a rising trajectory and both tend to 24 in the infinite. This 24 packets are the total number of 
+Both received packets lines (A and B) have a rising trajectory and both tend to 24 in the infinite. These 24 packets are the total number of 
 packets sent to the network, sending each \ac{AN} four. It can be seen that, as in the case without Hidden Terminal Problem (A) the number of collisions
 is smaller, the number of received packets in the \ac{MN} is much bigger than for the Hidden Terminal Problem case.
 
@@ -127,7 +127,7 @@ making the last packets arrive later. This lower number of collisions makes also
 \end{figure}
 
 \textbf{Figure \ref{fig:percentil98differentTimes}} does not represent an average but a percentil 98 of the previous times. This means that 
-if this times are taken as reference, in 98\% of the situations, the times are going to be under this values. This is thus a good way to get 
+if these times are taken as reference, in 98\% of the situations, the times are going to be under these values. This is thus a good way to get 
 an acceptable top limit.
 
 The analysis from this graphic is the same as the previous one with the only peculiarity that all times in Y axis are bigger. This is so because
@@ -288,7 +288,7 @@ In the case of the graphic on the left (best random case), it can be seen that f
 This is because all \acp{MN} receive many $1^{st}$, $2^{nd}$ or $3^{rd}$ packets, and the last of the $1^{st}$ packets should arrive 
 before the last of the $2^{nd}$ and so on. But, why is it not like this until the last packet? The reason is that not many \acp{AN} are able to send
 $5^{th}$, $6^{th}$, $7^{th}$ or $8^{th}$ packets. This way, as the $3^{rd}$ or $4^{th}$ packets are the maximum packets \acp{AN} get to send, 
-this packets will be delivered at the end of the Sync Phase, raising hence the average arrival time for this kind of packets.
+these packets will be delivered at the end of the Sync Phase, raising hence the average arrival time for this kind of packets.
 
 In the slotted case graphic (on the right), the idea is the same as expressed before. The only difference is that, like in Figure 
 \ref{fig:numberOf1st2ndPacketsReceived}, as \textit{syncPacketsPerSyncPhase} = 3, all behaviors are grouped, and it can be seen that $1^{st}$, 
@@ -332,12 +332,12 @@ with the number of \acp{AN}, as it can be seen in the figure.
 \end{figure}
 
 \textbf{Figure \ref{fig:numberOfSlotsWithTheSameDensity}} is obtained simulating 6 to 80 nodes with a minimum separation between them of 
-80 meters. Playground is calculated dynamically with this parameters to have always a 83 $\acp{AN}/Km^2$ density. As \acp{AN} density remains constant,
+80 meters. Playground is calculated dynamically with these parameters to have always a 83 $\acp{AN}/Km^2$ density. As \acp{AN} density remains constant,
 the number of neighbors an \ac{AN} has also does. This means the re-usability of the slots will grow with the number of nodes. The re-usability can be
 observed in the figure, as when the number of \acp{AN} grow, the number of slots does not grow linearly like in Figure 
 \ref{fig:numberOfSlotsWithTheAnchorDensity}.
 
-\paragraph{Conclusion.} From all this results, it can be extracted that slotted transmission is better than even the best case of random transmission. 
+\paragraph{Conclusion.} From all these results, it can be extracted that slotted transmission is better than even the best case of random transmission. 
 Slotted transmission will be hence the one used during the Sync Phase in the complete protocol analysis.
 
 \section{Framework simulation and analysis}
@@ -345,13 +345,13 @@ Slotted transmission will be hence the one used during the Sync Phase in the com
 The aim of this section, is to analyze through different configurations the performance of the network for parameters like traffic or energy 
 consumption among others.
 
-The proposed scenario for this simulations is formed by 25 \acp{AN} distributed forming a grid, 60 \acp{MN} randomly and uniformly distributed in the
+The proposed scenario for these simulations is formed by 25 \acp{AN} distributed forming a grid, 60 \acp{MN} randomly and uniformly distributed in the
 playground and a Computer. An example for this scenario, with a size of 700 x 700 m, can be seen in Figure \ref{fig:finalscenario} . The \acp{AN} 
 are distributed forming a grid to avoid the necessity to make a more complex routing protocol (explained in Chapter \ref{chap:protocolimplementation}: 
 \nameref{chap:protocolimplementation}). Grid was also chosen because it was seen in many literature as a good standard way to study a network.
 
 From the proposed grid, and with the help of the algorithm to assign slots (Sub-Section \ref{subsec:slottedsyncphase}: 
-\nameref{subsec:slottedsyncphase}), it was obtained that 9 slots are the necessary ones to avoid Hidden Terminal Problem. This slots have the 
+\nameref{subsec:slottedsyncphase}), it was obtained that 9 slots are the necessary ones to avoid Hidden Terminal Problem. These slots have the 
 following distribution of \acp{AN}:
 
 \begin{verbatim}
@@ -384,15 +384,15 @@ Considering that the period time is 1.5 s, the ComSink Phases are 0.5 s each one
     ComSink Phases length: 0.5000 s
 \end{verbatim}
 
-To force different situations and to be able to check the different \acp{MN} modes, ten configurations are going to be proposed. This 
+To force different situations and to be able to check the different \acp{MN} modes, ten configurations are going to be proposed. These 
 configurations could be changed just modifying some parameters (explained in Section \ref{sec:ProtocolDescription}: \nameref{sec:ProtocolDescription}). 
-Each one of this configurations is going to be simulated during 120 s (80 periods), and repeated 100 times to be able to compensate the error 
-generated by the generated random numbers. All graphics in this section will have on X axis this configurations.
+Each one of these configurations is going to be simulated during 120 s (80 periods), and repeated 100 times to be able to compensate the error 
+generated by the generated random numbers. All graphics in this section will have on X axis these configurations.
 
 The configurations are divided into two groups:
 
 \begin{itemize}
- \item \textbf{Non distributed. }Groups the first five configurations, which are going to be the ones loading the network the most. All of this
+ \item \textbf{Non distributed. }Groups the first five configurations, which are going to be the ones loading the network the most. All of these
 configurations are going to have the following parameters in common:
 \begin{verbatim}
  activePhases = 1
@@ -407,10 +407,10 @@ configurations are going to have the following parameters in common:
 As all the offsets are set to zero, all \acp{MN} will start their functionality at the beginning of the first period and all at the same
 time. This is the reason why this group is called ``non distributed''. As it can be observed, inactive periods are set to 0, this way, all \acp{MN} will 
 work every period, loading the network all the time. As \textit{reportPhases} = 4, \acp{MN} Mode 2 and 3 will report only 1 out 4 periods, loading even
-more the network during this periods. Note also that the number of broadcast per \ac{MN} Mode 3 and 4 are five. This five configurations are taken as
+more the network during these periods. Note also that the number of broadcast per \ac{MN} Mode 3 and 4 are five. These five configurations are taken as
  worst case and will be used to have a worst limit to compare with the other ones.
 
-From this group, and attending to the number of \acp{MN} of each Mode (see Figure \ref{fig:ProtocolPhases}) this 5 configurations are proposed:
+From this group, and attending to the number of \acp{MN} of each Mode (see Figure \ref{fig:ProtocolPhases}) these 5 configurations are proposed:
 \begin{itemize}
  \item[-] \textbf{Config 1}: 15 \acp{MN} Mode 1, 15 \acp{MN} Mode 2, 15 \acp{MN} Mode 3 and 15 \acp{MN} Mode 4.
  \item[-] \textbf{Config 2}: 6 \acp{MN} Mode 1, 6 \acp{MN} Mode 2, 15 \acp{MN} Mode 3 and 33 \acp{MN} Mode 4.
@@ -418,7 +418,7 @@ From this group, and attending to the number of \acp{MN} of each Mode (see Figur
  \item[-] \textbf{Config 4}: 33 \acp{MN} Mode 1, 15 \acp{MN} Mode 2, 6 \acp{MN} Mode 3 and 6 \acp{MN} Mode 4.
  \item[-] \textbf{Config 5}: 15 \acp{MN} Mode 1, 33 \acp{MN} Mode 2, 6 \acp{MN} Mode 3 and 6 \acp{MN} Mode 4.
 \end{itemize}
- \item \textbf{Distributed. }Groups the last five configurations, which are going to be the ones loading the network the less. All this
+ \item \textbf{Distributed. }Groups the last five configurations, which are going to be the ones loading the network the less. All these
 configurations are going to have the following parameters in common:
 \begin{verbatim}
  activePhases = 2
@@ -434,9 +434,9 @@ rest $1/3$ will start in period 4. As \textit{activePhases} + \textit{inactivePh
 uniformly as possible. Due to the different kinds of \acp{MN}, the distribution in time will be done equally for every kind of \ac{MN}.
 
 As \textit{reportPhases} = 12, \acp{MN} Mode 2 and 3 will report only 1 out 12 periods, that means they will almost not load the network. Note also that 
-the number of broadcast per \ac{MN} Mode 3 and 4 is three instead of five. This five configurations are a possible normal way of loading the network.
+the number of broadcast per \ac{MN} Mode 3 and 4 is three instead of five. These five configurations are a possible normal way of loading the network.
 
-From this group, and attending to the number of \acp{MN} of each Mode (see Figure \ref{fig:ProtocolPhases}) this 5 configurations are proposed:
+From this group, and attending to the number of \acp{MN} of each Mode (see Figure \ref{fig:ProtocolPhases}) these 5 configurations are proposed:
 \begin{itemize}
  \item[-] \textbf{Config 6}: 15 \acp{MN} Mode 1, 15 \acp{MN} Mode 2, 15 \acp{MN} Mode 3 and 15 \acp{MN} Mode 4.
  \item[-] \textbf{Config 7}: 6 \acp{MN} Mode 1, 6 \acp{MN} Mode 2, 15 \acp{MN} Mode 3 and 33 \acp{MN} Mode 4.
@@ -444,7 +444,7 @@ From this group, and attending to the number of \acp{MN} of each Mode (see Figur
  \item[-] \textbf{Config 9}: 33 \acp{MN} Mode 1, 15 \acp{MN} Mode 2, 6 \acp{MN} Mode 3 and 6 \acp{MN} Mode 4.
  \item[-] \textbf{Config 10}: 15 \acp{MN} Mode 1, 33 \acp{MN} Mode 2, 6 \acp{MN} Mode 3 and 6 \acp{MN} Mode 4.
 \end{itemize}
-Each of this configurations divide the number of \acp{MN} from each mode by 3, assigning the first third \textit{offsetPhases} = 0 and 
+Each of these configurations divide the number of \acp{MN} from each mode by 3, assigning the first third \textit{offsetPhases} = 0 and 
 \textit{offsetReportPhases} = 2, the second third \textit{offsetPhases} = 2 and \textit{offsetReportPhases} = 4 and the third
 \textit{offsetPhases} = 4 and \textit{offsetReportPhases} = 6. This way all nodes will be equally distributed. That is why this group is called
 ``Distributed''. 
@@ -514,7 +514,7 @@ time.
 \subsection{Traffic in the network}
 
 To give an idea of the traffic in the network for the different configurations, \acp{AN} must be studied. All reports or broadcasts generated by the
-\acp{MN} are later on retransmitted to the coordinator (in all cases a centralized schema was used). \acp{AN} are the ones in charge of distributing this
+\acp{MN} are later on retransmitted to the coordinator (in all cases a centralized schema was used). \acp{AN} are the ones in charge of distributing these
 information as well as routing the information coming from and to the computer. This is why ComSink phases are going to be the most loaded
 phases and hence their case the most interesting to be studied.
 
@@ -574,7 +574,7 @@ to 5 because, as the number of packets sent to channel is bigger, the \acp{MN} f
 period.
 
 In configurations 6 to 10 can be seen that all values are very similar independently of the configuration. As all packets to be transmitted have at least
-one Backoff period, this constant values are showing the minimum number of Backoffs. As this configurations almost do not load the network, this values 
+one Backoff period, these constant values are showing the minimum number of Backoffs. As these configurations almost do not load the network, these values 
 depend basically on the number of packets to be sent.
 
 In configuration 2 for example, it can be observed how as the number of \acp{MN} in mode 4 was arisen, the Report Phase will be more loaded, and average
@@ -642,16 +642,16 @@ As in configuration 2, there is a bigger number of broadcasts loading the Report
 the lack of \ac{ACK} gets much bigger.
 
 \paragraph{Conclusion.} The number of Backoffs together with the number of retransmitted packets due to the lack of ACK, show us that \acp{MN} transmissions 
-are quite efficient for this configurations, at least compared with \acp{AN} transmissions. From this results can directly be extracted that, while 
+are quite efficient for these configurations, at least compared with \acp{AN} transmissions. From these results can directly be extracted that, while 
 Report and VIP Phase times are good enough, the ComSink phases times should be bigger for some of the configurations.
 
 \subsection{Energy consumption in \acp{MN}}
 
 As it was already said during this work, all \acp{MN} have different working states: sleep all, sleep but $\mu C$ working, idle, transmission and 
-reception. Each of this states have a different energy consumption (Table \ref{tab:NodeEnergyConsumption}), and transitions between states take 
+reception. Each of these states have a different energy consumption (Table \ref{tab:NodeEnergyConsumption}), and transitions between states take 
 different times (Table \ref{tab:NodeTiming}). During the simulation, all \acp{MN} changed their states as explained in Section 
 \ref{sec:frameworkdevelopment}: \nameref{sec:frameworkdevelopment}. The times in the different states and in all possible transitions between states were stored
-during the 120 s of simulation. This times multiplied by the energy consumed for each case and added together, result in \textbf{Figure \ref{fig:energyConsumptionPerMN}}.
+during the 120 s of simulation. These times multiplied by the energy consumed for each case and added together, result in \textbf{Figure \ref{fig:energyConsumptionPerMN}}.
 
 \begin{figure}[ht]
  \begin{center}
@@ -704,7 +704,7 @@ bigger causing more collisions in Configuration B than in A.
 
 For the previous figure, almost no difference between configurations could be seen. This is because, as it was already said, the performance
 during the Report and \ac{VIP} Phases is really good. When comparing the \acp{AN} performance, a more different behavior can be seen. 
-\textbf{Figure \ref{fig:ANsConparison}} shows this differences. 
+\textbf{Figure \ref{fig:ANsConparison}} shows these differences. 
 
 \begin{figure}[ht]
  \begin{center}

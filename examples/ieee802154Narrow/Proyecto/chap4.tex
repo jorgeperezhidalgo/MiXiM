@@ -2,7 +2,7 @@
 \label{chap:protocolimplementation}
 
 This chapter details the simulation environment where the presented High Configurable Protocol was developed and tested. Simulation was chosen 
-instead of analytical study or real networks, because this are difficult or expensive for such a complex protocol. During this chapter a 
+instead of analytical study or real networks, because these are difficult or expensive for such a complex protocol. During this chapter a 
 deeper view into the protocol will be given, as all generated code will be explained in detail.
 
 \section{Used Tools}
@@ -18,7 +18,7 @@ After all simulations were done, the results were extracted with a tool called \
 
 \ac{OMNeT++} 4.0 is an object oriented discrete event simulator, based in C++ \cite{cpp}. \ac{OMNeT++} consists in several modules hierarchically
 connected and that communicate among them through messages. Modules relation is done through an own easy programming language called \ac{NED}.
-This language is written in the \textit{.ned} files. This files, apart from relations among modules, contain parameters about them. The value for this
+This language is written in the \textit{.ned} files. These files, apart from relations among modules, contain parameters about them. The value for these
 parameters can be given directly in the \textit{.ned} file or also in a file called \textit{omnetpp.ini}, that is the network configuration file.
 This file's contain is basically simulation configuration parameters and module parameter values.
 
@@ -37,7 +37,7 @@ practically possible. Anyway, it should be kept in mind that when a module depen
 later moment, if it is done at the same moment, data might not be ready.
 
 All \ac{OMNeT++} modules have the same structure as they inherit all from the same class \textit{cSimpleModule}, later on, some modules could 
-implement new methods, but they all have this basic ones:
+implement new methods, but they all have these basic ones:
 
 \begin{itemize}
  \item \textbf{initialize - }This method is executed for every module by the \ac{OMNeT++} core  at the beginning of the simulation, and only there 
@@ -52,12 +52,12 @@ specific order, this should be done separating code among all the different \tex
 
 During this phase, it should be sent at least a message in at least one of the modules of the network, otherwise, the network will not start doing 
 anything.
- \item \textbf{finish - }This method stores all the desired results at the end of the simulation. This results could be any of the variables during the 
+ \item \textbf{finish - }This method stores all the desired results at the end of the simulation. These results could be any of the variables during the 
 simulation. This method should not delete the variables, that should be done in the class destructor.
  \item \textbf{handleMessage - }This method is the one executed each time a message arrives to a module. All modules are connected through gates,
 being in this work usually the ones showed in Figure \ref{fig:omnetmodule}. Messages who arrived to a module, could come from one of the gates or be a self
 message. Usually this method calls another methods that take care of the message depending if it is a self message (usually used to schedule 
-tasks in a future time), a data message or a control message. This methods are: \textit{handleSelfMsg, handleUpperMsg, handleLowerMsg, 
+tasks in a future time), a data message or a control message. These methods are: \textit{handleSelfMsg, handleUpperMsg, handleLowerMsg, 
 handleLowerControl and handleUpperControl}.
 \begin{figure}[ht]
  \begin{center}
@@ -66,7 +66,7 @@ handleLowerControl and handleUpperControl}.
  \caption{Basic \ac{OMNeT++} module structure}
  \label{fig:omnetmodule}
 \end{figure}
- \item \textbf{sendDown/sendUp/sendControlDown/sendControlUp }This methods send a message from a module through the already commented gates.
+ \item \textbf{sendDown/sendUp/sendControlDown/sendControlUp }These methods send a message from a module through the already commented gates.
  \item \textbf{scheduleAt - }This method schedules a self message in a certain time in the future. This is useful when programming timers or when a
 message should be sent with a delay.
  \item \textbf{decapsMsg/encapsMsg - }Usually before a message is sent from one layer to another in the same device, it should be encapsulated or 
@@ -74,17 +74,17 @@ decapsulated. When this is done, instead of message, it is talked about packet. 
 is also possible to define a custom packet (check \cite{manualomnet} for this).
 \end{itemize}
 
-This methods and no others, were commented because they are going to be used many times during the work. For more information about \ac{OMNeT++}, 
+These methods and no others, were commented because they are going to be used many times during the work. For more information about \ac{OMNeT++}, 
 refer to the user manual \cite{manualomnet}.
 
 \subsection{\ac{MiXiM} Framework}
 
 \ac{MiXiM} 2.0 framework provides \ac{OMNeT++} with many new modules. Among them, all necessary modules to work with 802.15.4 Standard. 
-All this modules are build following \cite{IEEE802.15.4-2006}.
+All these modules are build following \cite{IEEE802.15.4-2006}.
 
 The basic structure of a node in \ac{MiXiM} is like shown in Figure \ref{fig:miximmodule}. This figure shows already some new modules added by
 this work to the basic \ac{MiXiM} node. Depending on the kind of node: Computer, \ac{AN} or \ac{MN}, the \textit{.ned} files will load 
-different modules to describe each behavior. This files should be also checked if a complete list of parameters is needed.
+different modules to describe each behavior. These files should be also checked if a complete list of parameters is needed.
 
 \begin{figure}[ht]
  \begin{center}
@@ -100,24 +100,24 @@ In this sub-section, only modified \ac{MiXiM} original modules will be commented
 \label{sec:packetstructure}
 
 In \ac{OMNeT++}, there are special files (\textit{.msg}) that define messages types. When the project is compiled, a class is automatically 
-generated from every \textit{.msg} file. \ac{MiXiM} contributes \ac{OMNeT++} with many different message files. One of this files is the 
+generated from every \textit{.msg} file. \ac{MiXiM} contributes \ac{OMNeT++} with many different message files. One of these files is the 
 \textit{ApplPkt.msg}. This packet will be generated in the Application Layer and encapsulated in every layer until it gets transmitted into the 
 air. For this work, this packet should include the following information that it did not before:
 \begin{itemize}
- \item \textit{realDestAddr} and \textit{realSrcAddr}. This values are better explained with an example. When a \ac{MN} sends a report to the 
+ \item \textit{realDestAddr} and \textit{realSrcAddr}. These values are better explained with an example. When a \ac{MN} sends a report to the 
 computer, the first step is sending the report to the selected \ac{AN}, this will be the \textit{destAddr} but the report is really intended
 to go until the computer, this is the \textit{realDestAddr}. When this report arrives at the computer, for it, the \textit{srcAddr} is the 
 address of the selected \ac{AN}, and the address of the \ac{MN} would be the \textit{realSrcAddr}.
  \item \textit{retransmisionCounterBO} and \textit{retransmisionCounterACK}. Whenever the \ac{MAC} Layer informs the Application Layer that a 
 packet was dropped, Application Layer checks if there are still more retransmission available for this packet. Counter
 \textit{retransmisionCounterBO} is used to check the case when packet was dropped due to a maximum number of Backoffs, and counter 
-\textit{retransmisionCounterACK} is used to check the case where the packet was dropped because no \ac{ACK} was received. This counters are
+\textit{retransmisionCounterACK} is used to check the case where the packet was dropped because no \ac{ACK} was received. These counters are
 increased by Applicaton Layer whenever a packet is retransmitted.
  \item \textit{CSMA}. This variable is a boolean, and if it is true, indicates the \ac{MAC} Layer that \ac{CSMA/CA} has to be disabled for 
 this packet.
- \item \textit{askForRequest} and \textit{requestPacket}. This two variables are also booleans. When \textit{askForRequest} is true, it means
+ \item \textit{askForRequest} and \textit{requestPacket}. These two variables are also booleans. When \textit{askForRequest} is true, it means
 that \ac{MN} wants to notify the selected \ac{AN} that in the next period a data will be asked for. When \textit{requestPacket} is true, it
-measn that \ac{MN} requests some information to the selected \ac{AN}. This flags are here to help the selected \ac{AN} to know what kind of 
+measn that \ac{MN} requests some information to the selected \ac{AN}. These flags are here to help the selected \ac{AN} to know what kind of 
 report is receiving.
 \end{itemize}
 
@@ -139,7 +139,7 @@ Its size is hence $56 + 2\cdot X$ bits, where X is the number of \acp{AN} where 
 bytes for each position calculated (maximum five). This report exists only for \acp{MN} in mode 2. As the source address is a \ac{MN}, 6 bytes 
 have to be added. Its size is hence $56 + 6\cdot X$ bits, where X is the number of calculated positions to transmit.
  \item \underline{Ask Report}. Report or extra report with the ASK flag activated. In this case, 10 bytes are added to the report where the
-flag is activated. This 10 bytes represent the information needed by the selected \ac{AN} to know which data the \ac{MN} is asking for.
+flag is activated. These 10 bytes represent the information needed by the selected \ac{AN} to know which data the \ac{MN} is asking for.
  \item \underline{Request}. Report or extra report with the Request flag activated. In this case, 1 byte is added to the report where the
 flag is activated. This byte shows which information was requested.
  \item \underline{\ac{MN}'s broadcast}. Broadcast packet sent by \acp{MN} in modes 3 and 4. It has 1 byte for the status and 1 byte information.
@@ -165,7 +165,7 @@ This class was modified to store also the following data:
 2 for \ac{MN} and 3 for Computer. Its value is assigned when initializing the node. As defining this variable here, it can be read from all modules in the 
 network. This is useful to make lists of the different types of nodes.
  \item \underline{Slot Information}. Through variables \textit{transmisionSlot} and \textit{numSlots}, the \ac{AN} knows which slots of the 
-\textit{numTotalSlots} are the ones reserved for it to transmit. All this three variables are assigned by the Computer in its \textit{initialize} method.
+\textit{numTotalSlots} are the ones reserved for it to transmit. All these three variables are assigned by the Computer in its \textit{initialize} method.
 \end{itemize}
 
 \subsubsection{Mobility module modifications}
@@ -184,7 +184,7 @@ this class, refer precisely to the node's initial position assignment.
  \item \underline{Uniform random distribution}. It was already seen that assigning ``-1'' as value for a node's coordinate, this coordinate will be 
 randomly assigned. But if all coordinates are ``-1'', a new peace of code at \textit{stage} = 2 during \textit{initialize} method is executed. This 
 code distributes \acp{AN} and \acp{MN} uniformly and randomly in the playground according to \textit{minimumDistanceAnchor} and 
-\textit{minimumDistanceNode} parameter respectively. This two variables represent, as their names show, the minimum distance to leave among \acp{AN} 
+\textit{minimumDistanceNode} parameter respectively. These two variables represent, as their names show, the minimum distance to leave among \acp{AN} 
 and the minimum distance to leave among \acp{MN}.
  \item \underline{Grid distribution}. When ``-2'' is assigned to all \ac{AN}'s coordinate values in \textit{omnetpp.ini}, all \acp{AN} will be 
 distributed all over the playground forming a grid. The dimensions of the grid will depend on the number of \acp{AN}, resulting for example for 25 
@@ -229,7 +229,7 @@ class called \textit{energy} has to be warned.
  \item \underline{New control messages}. Before the modifications, \textit{csma} class informed upper layers whenever a sent report received an
 \ac{ACK}, now, it informs also when broadcasts and \acp{ACK} were successfully sent to the channel. This class was also modified to 
 report when a packet is dropped due to maximum number of Backoff retries, or to maximum number of ``no \ac{ACK} received`` retries, or when
-\ac{MAC} Queue is full. Before it was only informing about packet dropped but without any reason. All this control messages will be treated 
+\ac{MAC} Queue is full. Before it was only informing about packet dropped but without any reason. All these control messages will be treated 
 in the Application Layer and they will be studied in following sections.
 \end{itemize}
 
@@ -243,7 +243,7 @@ Before constructing all the protocol framework, it had to be decided if during t
 synchronized in slots or randomly. For this purpose, a special and small framework was done, where just a simple Application Layer was added to 
 the nodes. As this was just a temporary Application Layer, just the main aspects of it will be given.
 
-\textit{Decider802154Narrow} class was modified to disable errors caused by noise and random errors due to the channel, this features were 
+\textit{Decider802154Narrow} class was modified to disable errors caused by noise and random errors due to the channel, these features were 
 again enabled for the protocol framework development. This way whenever there is a fail, it can be known that it is due to simultaneous \ac{CCA}
 or Hidden Terminal Problem.
 
@@ -268,7 +268,7 @@ behavior changes:
  \item \underline{Random}. The first random broadcast gets scheduled at \textit{stage} 4 during \textit{initialize} method in \textit{AnchorAppLayer}
 class. It gets scheduled a random time after starting the simulation. This random time has a maximum value defined in 
 \textit{syncFirstMaxRandomTime}. Every time a message is sent, the next one is scheduled in a random time from this moment. This random 
-time has also a maximum, but this time defined in \textit{syncRestMaxRandomTimes}. To make simulation easier, this two variables are going to get
+time has also a maximum, but this time defined in \textit{syncRestMaxRandomTimes}. To make simulation easier, these two variables are going to get
 always the same values.
 
 The retransmission is done in \textit{handleLowerControl}
@@ -286,7 +286,7 @@ packets would be sent into the channel without problems. The number of slots per
 \section{Framework development}
 \label{sec:frameworkdevelopment}
 
-Apart from the modules already commented, the only ones to be introduced yet are the relatives to the node structure. This are the ones marked
+Apart from the modules already commented, the only ones to be introduced yet are the relatives to the node structure. These are the ones marked
 with ''NEW$!$`` in Figure \ref{fig:miximmodule}. Due to their similarity among types of nodes and their simplicity, the modules 
 \textit{Energy}, Transport Layer and Network Layer are going to be explained altogether. However, all Application Layers are going to be 
 explained separately for \acp{AN}, \acp{MN} and Computer.
@@ -314,7 +314,7 @@ states.
 \end{figure}
 
 Whenever there is a transition between two states, the three values between brackets on the figure (A, B, C), go also as argument of the 
-\textit{updateStateStatus} method. When one of this values in the figure takes the \_ value, that means that the value sent
+\textit{updateStateStatus} method. When one of these values in the figure takes the \_ value, that means that the value sent
 in this position is not important.
 
 First value (A, \_, \_), is a boolean indicating true if the \ac{MN} is in a packet transmission process or false if it is in a IDLE or packet 
@@ -369,7 +369,7 @@ are able to know which next jump the packet should make to reach its final desti
 \end{figure}
 
 Network Layer is present in the Computer, \acp{AN} and \acp{MN}, being the classes describing its functionality \textit{ComputerNetLayer},
-\textit{AnchorNetLayer} and \textit{NodeNetLayer} respectively. All this classes have the same structure and their main methods are the following:
+\textit{AnchorNetLayer} and \textit{NodeNetLayer} respectively. All these classes have the same structure and their main methods are the following:
 \begin{itemize}
  \item \textit{handleLowerControl}: this method receives a control message from \ac{MAC} Layer through Transport Layer and redirects it to the
 Application Layer.
@@ -399,9 +399,9 @@ reception of this packet. Thanks to this attachment, this information will be av
   \begin{tabular}{|c|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|p{0.1cm}|}
    %\noalign{\vspace*{0.5cm}}
    \hline
-    \textbf{\acp{AN}} & \textbf{0} & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & 
-    \textbf{9} & \textbf{10} & \textbf{11} & \textbf{12} & \textbf{13} & \textbf{14} & \textbf{15} & \textbf{16} & \textbf{17} & \textbf{18} & 
-    \textbf{19} & \textbf{20} & \textbf{21} & \textbf{22} & \textbf{23} & \textbf{24} & \textbf{C} \\
+   \textbf{\acp{AN}} & \textbf{0} & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & 
+   \textbf{9} & \textbf{10} & \textbf{11} & \textbf{12} & \textbf{13} & \textbf{14} & \textbf{15} & \textbf{16} & \textbf{17} & \textbf{18} & 
+   \textbf{19} & \textbf{20} & \textbf{21} & \textbf{22} & \textbf{23} & \textbf{24} & \textbf{C} \\
    \hline
    \textbf{0} & 0 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 \\
    \hline
@@ -458,99 +458,126 @@ reception of this packet. Thanks to this attachment, this information will be av
   \end{tabular}
   \caption{Routing Matrix for \acp{AN} and Computer}
   \label{tab:routingmatrix}
- \end{center}
+  \end{center}
 \end{table}
 
 \subsection{Computer Application Layer}
 
-Computer Application Layer functionality is contained in the class \textit{ComputerAppLayer}. The diagram in Figure \ref{fig:Computerschema} 
-shows a general overview of this Layer functionality together with the Network Layer. A \textit{AppLayer} class from which this class inherits,
+The functionality of the Computer Application Layer is contained in the class \textit{ComputerAppLayer}. The diagram in Figure \ref{fig:Computerschema} 
+shows a general overview of this functionality together with the Network Layer's one. A \textit{AppLayer} class from which this class inherits,
 was created to cover all the common variables and characteristics in all the Application Layers not to repeat everything for Computer, \ac{AN}
-and \ac{MN}.
+and \ac{MN}. At \textit{stage} 4 in \textit{initialize} method from this class, the length of the different phases in the period is calculated. 
+Also at this stage, a self message is scheduled at the beginning of the first Sync Phase (simulation time = 0). This self message will be rescheduled 
+at the beginning of every phase during the simulation to configure the phases and periods. This makes the protocol start working.
 
 \begin{figure}[ht]
- \begin{center}
-  \includegraphics[width=0.9\textwidth]{Computerschema.eps}
- \end{center}
- \caption{Computer functionality diagram}
- \label{fig:Computerschema}
+  \begin{center}
+    \includegraphics[width=0.9\textwidth]{Computerschema.eps}
+  \end{center}
+  \caption{Computer functionality diagram}
+  \label{fig:Computerschema}
 \end{figure}
 
 All methods and elements in the figure will be described next:
 
 \begin{itemize}
- \item \textbf{Scheduled Messages \& Timers}. This is like a big register where modules can store messages associated with a time. Whenever 
-simulation time reaches one of this message's times, the message would be recovered from the register and received as self message in the 
-module. Usually this message is handled by \textit{handleSelfMsg} method, which will filter the message according to its kind to decide
-which action should be done. This register is used to program actions in a future time, send messages with delay or just to have timers
-for any other use. To schedule a new message, the method \textit{scheduleAt} has to be used.
+  \item \textbf{Scheduled Messages \& Timers}. This element is actually a register where modules can store messages. These messages are associated 
+  with a time when the messages should be rescued from the register. Every time that simulation time reaches one of these message's times, the 
+  message would be recovered from the register and received as self message in the module. This message is handled by \textit{handleSelfMsg} method, 
+  which will filter the message according to its kind to decide which action should be carried out. This register is used to program actions in a 
+  future time, send messages with delay or just to have timers for any other use. To schedule a new message, the method \textit{scheduleAt} has 
+  to be used.
  
- \item \textbf{\textit{initialize}}. In this method, apart from initializing some variables, Computer calculates the slot distribution among the 
-\acp{AN}. Slot calculation is done according to the algorithm showed in Section \ref{subsec:slottedsyncphase} (\nameref{subsec:slottedsyncphase}),
-and it is done at \textit{stage} 3. At \textit{stage} 4 the length of the different phases in the period is calculated and the begin of the first
-Sync Phase of the first period is scheduled to make the protocol start working.
+  \item \textbf{\textit{initialize}}. In this method, apart from initializing some variables, Computer calculates the slot distribution among the 
+  \acp{AN}. Slot calculation is done at \textit{stage} 3 and according to the algorithm showed in Section \ref{subsec:slottedsyncphase} 
+  (\nameref{subsec:slottedsyncphase}). 
 
- \item \textbf{\textit{finish}}. Records the number of dropped and erased packets due to different reasons, as well as the number of packets
-correctly received and sent. It is executed at the end of the simulation.
+  \item \textbf{\textit{finish}}. Records the number of dropped and erased packets due to different reasons, as well as the number of packets
+  correctly received and sent. It is executed at the end of the simulation.
 
- \item \textbf{\textit{sendDown}}. This method sends application packets to the \ac{MAC} going through the Transport and Network layers.
+  \item \textbf{\textit{sendDown}}. This method sends application packets to the \ac{MAC} Layer. These packets will go first through the Transport 
+  and Network layers.
 
- \item \textbf{\textit{transfersQueue}}. This queue was created to store in Application Layer an exact copy of the \ac{MAC} queue. Whenever a packet
-is sent down, a copy is stored in the \textit{transfersQueue}. This way, the packet trying to be sent by \ac{MAC} Layer, will be always on the
-first position of the queue. In case the transmission fails or succeeds this will be notified from \ac{MAC} to Application Layer. Method
-\textit{handleLowerControl} will handle this control message acting over the first position in \textit{transfersQueue} (will be explained later).
+  \item \textbf{\textit{transfersQueue}}. This queue was created to store in Application Layer an exact copy of the \ac{MAC} queue. Whenever a packet
+  is sent down, a copy is stored in the \textit{transfersQueue}. This way, the packet trying to be sent by \ac{MAC} Layer, will be always on the
+  first position of the queue. In case the transmission fails or succeeds this will be notified from \ac{MAC} to Application Layer. Method
+  \textit{handleLowerControl} will handle this control message acting over the first position in \textit{transfersQueue} in different ways (will 
+  be explained later).
 
- \item \textbf{\textit{packetsQueue}}. Computer can receive only packets from \acp{AN} and never directly from \acp{MN}. The phases where \acp{AN}
-and Computer communicate between them are ComSink 1 and 2. During ComSink Phase 1, the traffic goes direction computer (up-links), and during
-ComSink Phase 2 the traffic goes direction selected \acp{AN} (down-links). This means that during ComSink 1, the Computer only receives messages
-and during ComSink 2, it only sends messages. Therefore, a queue is needed to store all messages received during ComSink 1 until they are
-transmitted during ComSink 2. This queue is the \textit{packetsQueue}.
+  \item \textbf{\textit{packetsQueue}}. Computer can receive only packets from \acp{AN} and never directly from \acp{MN}. The phases where \acp{AN}
+  and Computer communicate among them are ComSink 1 and 2. During ComSink Phase 1, the traffic goes direction computer (up-links), and during
+  ComSink Phase 2 the traffic goes direction selected \acp{AN} (down-links). This means that during ComSink 1, the Computer only receives messages
+  and during ComSink 2, it only sends messages. Therefore, a queue is needed to store all messages received during ComSink 1 until they are
+  transmitted during ComSink 2. This queue is the \textit{packetsQueue}.
 
- \item \textbf{\textit{handleLowerControl}}. When \ac{MAC} Layer wants to communicate to the Application Layer that some event occurred, it can do 
-it using control messages. Possible control messages were commented in sub-section \ref{sec:macmodifications} (page \pageref{sec:macmodifications}),
-and this method is the one in Application Layer in charge of handling them. Depending on the received control message, the following actions will
-be done by the method:
+  \item \textbf{\textit{handleLowerControl}}. When \ac{MAC} Layer wants to communicate to the Application Layer that some event occurred, it can do 
+  it using control messages. Possible control messages were commented in sub-section \ref{sec:macmodifications} (page \pageref{sec:macmodifications}).
+  These control messages, are handled in Application Layer by this method. Depending on the received control message, the following actions will
+  be done by the method:
   \begin{itemize}
-    \item[-] \textit{PACKET\_DROPPED\_BACKOFF}. This control message is received when the transmitting packet in the \ac{MAC} Layer was dropped because
-    the maximum number of Backoff tries in \ac{MAC} Layer was fulfilled (\textit{macMaxCSMABackoffs}). If this happens, the method extracts the first 
-    message in \textit{transfersQueue} and increases the number of application retries due to Backoff for this message. If the maximum retries in 
-    application is not yet reached, the message is transmitted again (and inserted into the queue), and if it is reached, the packet gets erased. 
-    Dropped and erased packets are counted to be recorded with the \textit{finish} method.
+    \item[-] \textit{PACKET\_DROPPED\_BACKOFF}. This control message is received, when the transmitting packet in the \ac{MAC} Layer was dropped 
+    because the maximum number of Backoff tries in \ac{MAC} Layer was reached (\textit{macMaxCSMABackoffs}). If this happens, the method extracts 
+    the first message from \textit{transfersQueue}, and increases the number of application retries due to Backoff for this message. If the maximum 
+    number of retries in the Application Layer is not reached yet, the message is transmitted again (and inserted into the queue), and if it is 
+    reached, the packet is erased. Dropped and erased packets are counted here, and recorded with the \textit{finish} method.
 
-    \item[-] \textit{PACKET\_DROPPED}. This control message is received when the transmitting packet in the \ac{MAC} Layer was dropped because
-    the maximum number of retransmissions without receiving an \ac{ACK} was fulfilled. If this happens, the method extracts the first message in
-    \textit{transfersQueue} and increases the number of application retries due to lack of \ac{ACK} for this message. If the maximum retries in
-    application is not yet reached, the message is transmitted again (and inserted into the queue), and if it is reached, the packet gets erased.
-    Dropped and erased packets are counted to be recorded with the \textit{finish} method.
+    \item[-] \textit{PACKET\_DROPPED}. This control message is received, when the transmitting packet in the \ac{MAC} Layer was dropped because
+    the maximum number of retransmissions without receiving an \ac{ACK} was reached. If this happens, the method extracts the first message from
+    \textit{transfersQueue}, and increases the number of application retries due to lack of \ac{ACK} for this message. If the maximum number of 
+    retries in application is not yet reached, the message is transmitted again (and inserted into the queue), and if it is reached, the packet 
+    is erased. Dropped and erased packets are counted here, and recorded with the \textit{finish} method.
 
-    \item[-] \textit{QUEUE\_FULL}. This control message is received when the last packet sent down, found the \ac{MAC} Layer queue full. As 
-    \ac{MAC} Layer queue is full, this layer cannot accept more packets and rejects it notifying to the Application Layer. If this happens, the message
-    is removed from the \textit{transfersQueue} and a counter, indicating the number of packets erased due to \ac{MAC} Layer queue full, is increased.
+    \item[-] \textit{QUEUE\_FULL}. This control message is received when the last packet which was sent down, found the \ac{MAC} Layer queue full. 
+    When \ac{MAC} Layer queue is full, it cannot accept more packets and rejects all the received packets, notifying to the Application Layer. If 
+    this happens, the message is removed from the \textit{transfersQueue} and a counter, indicating the number of packets erased due to \ac{MAC} 
+    Layer queue full, is increased.
 
     \item[-] \textit{SYNC\_SENT}. This control message is received when a broadcast was successfully transmitted into the channel. When this happens,
-    , and to remain \textit{transfersQueue} like a copy of the \ac{MAC} Layer queue, the first element in \textit{transfersQueue} is deleted. This 
-    value will be also recorded.
+    and to remain \textit{transfersQueue} like a copy of the \ac{MAC} Layer queue, the first element in \textit{transfersQueue} is deleted.
 
     \item[-] \textit{TX\_OVER}. This control message is received when a report was successfully sent and the \ac{ACK} was also received. When this 
-    happens, for the same reason as before, the first element in \textit{transfersQueue} is deleted. This value will be also recorded.
+    happens, for the same reason as before, the first element in \textit{transfersQueue} is deleted.
 
     \item[-] \textit{ACK\_SENT}. This control message is received whenever an \ac{ACK} is sent by the \ac{MAC} Layer. For Computer or \ac{AN} cases 
-    is not important, but it will be commented later in \ac{MN} explanation why is this control message needed.
+    is not important, but, as it will be commented later, this control message is needed for the \acp{MN}.
   \end{itemize}
 
+  \item \textbf{\textit{handleLowerMsg}}. Whenever the Computer receives a packet at its Application Layer, this method is executed. The purpose
+  of this method is handling the different kind of arrived packets according to the phase when they arrived. For Computer case, all received packets
+  out of the ComSink Phase 1 and coming from a node different to an \ac{AN} are rejected. When one non rejected report is received in the Computer, it 
+  will be resent again to the \ac{MN} where it came from (\textit{realSrcAddr}). For this purpose, addresses in the packet are interchanged, setting 
+  as \textit{realDestAddr} the address of the \ac{MN} and as \textit{destAddr} the address of the selected \ac{AN}. As Computer does not send packets
+  out of ComSink Phase 2, this packet has to stored first in \textit{packetsQueue}.
 
- \item \textbf{\textit{handleLowerMsg}}.
+  \item \textbf{\textit{handleSelfMsg}}. Whenever a self message is received in the Application Layer, it is handled by this method. The following 
+  kinds of self messages are processed by this method:
+  \begin{itemize}
+    \item \textit{CHECK\_QUEUE}. As it was already commented, the Computer can send only packets during ComSink Phase 2 and therefore it needs a 
+    queue to store the packets to be sent, until this phase comes. To check if this queue has still elements to be sent, this self message is programmed.
+    Whenever a self message of this type is received, this method checks if there are still elements in the \textit{packetsQueue}. In this case,
+    the first element in the queue is sent and a copy stored in the \textit{transfersQueue}. After that, if the \textit{packetsQueue} has still
+    packets to be sent, the self message is rescheduled in the next time. The random times when all packets will be sent, are calculated at the
+    beginning of the ComSink Phase 2.
 
- \item \textbf{\textit{handleSelfMsg}}.
+    \item \textit{BEGIN\_PHASE}. This self message is scheduled at the beginning of every single phase during the simulation. Its task is to 
+    configure the phase. The first thing all phases do, is deleting all messages in the \textit{transfersQueue}. These are the messages for which 
+    there was no time in the previous phase. These messages must be deleted not to interfere in the next phase (in a future work they could be 
+    recycled some way). As this queue is a copy of the \ac{MAC} Layer's queue, the same is done in that layer. All phases must also calculate the 
+    next phase start time, and reschedule the self message at that time.
 
-
+    Apart from these tasks, at the beginning of ComSink Phase 2, packets to be sent during this phase are going to be handled. At this point, and 
+    if the \textit{packetsQueue} has elements, all random transmission times for these packets are calculated. These times are calculated dividing 
+    first the ComSink Phase 2 in as much fragments as elements the queue has. Afterwards, a random time is calculated inside each fragment and
+    assigned to each element in the queue. Then, the first element in the queue is prepared to be sent, scheduling the self message 
+    \textit{CHECK\_QUEUE}.
+  \end{itemize}
 \end{itemize}
 
 
 \subsection{\acp{AN} Application Layer}
 
-\acp{AN} Application Layer functionality is contained in the class \textit{AnchorAppLayer}. The diagram in Figure \ref{fig:ANschema} 
-shows a general overview of this Layer functionality together with the Network Layer. This class inherits from \textit{AppLayer} class, like
+The functionality of the \acp{AN} Application Layer is contained in the class \textit{AnchorAppLayer}. The diagram in Figure \ref{fig:ANschema} 
+shows a general overview of this functionality together with the Network Layer's one. This class inherits from \textit{AppLayer} class, like
 \textit{ComputerAppLayer} did.
 
 \begin{figure}[ht]
@@ -564,45 +591,111 @@ shows a general overview of this Layer functionality together with the Network L
 All methods and elements in the figure will be described next:
 
 \begin{itemize}
- \item \textbf{Scheduled Messages \& Timers}. This module for the \acp{AN}, works exactly the same as for the Computer. For a deeper explanation, check
-the Computer Application Layer.
+  \item \textbf{Scheduled Messages \& Timers}. In \acp{AN}, this module works exactly the same as for the Computer. For a deeper explanation, check
+  the Computer Application Layer.
 
- \item \textbf{\textit{initialize}}. In this method, apart from initializing some variables, \acp{AN} schedule at \textit{stage} 4 the begin of 
-the first Sync Phase of the first period to make the protocol start working.
+  \item \textbf{\textit{initialize}}. This method just initializes some variables.
 
- \item \textbf{\textit{finish}}. Records the number of dropped and erased packets due to different reasons, as well as the number of packets
-correctly received and sent. It is executed at the end of the simulation.
+  \item \textbf{\textit{finish}}. Records the number of dropped and erased packets due to different reasons, as well as the number of packets
+  correctly received and sent. It is executed at the end of the simulation.
 
- \item \textbf{\textit{sendDown}}. This method sends application packets to the \ac{MAC} going through the Transport and Network layers.
+  \item \textbf{\textit{sendDown}}. This method sends application packets to the \ac{MAC} Layer. These packets will go first through the Transport 
+  and Network layers.
 
- \item \textbf{\textit{sendBroadcast}}. This method is called whenever a broadcast wants to be sent, for example during Sync Phase. Before sending
-the message down, an application message is created and initialized with the correct message type and data. One thing to take into account is that
-if the broadcast is a sync message, \ac{CSMA/CA} must be disabled and this is marked in the packet during this method. Remember that a copy must 
-be inserted into the \textit{transfersQueue}.
+  \item \textbf{\textit{sendBroadcast}}. This method is called whenever a broadcast wants to be sent, for example during Sync Phase. Before sending
+  the message down, an application message is created and initialized with the correct message type and data. One thing to take into account is that
+  if the broadcast is a sync message to be slotted, \ac{CSMA/CA} must be disabled. This fact is communicated to the \ac{MAC} Layer by means of a 
+  variable included in the packet. Remember that a copy must be inserted into the \textit{transfersQueue}.
 
- \item \textbf{\textit{transfersQueue}}. This module for the \acp{AN}, works exactly the same as for the Computer. For a deeper explanation, check
-the Computer Application Layer.
+  \item \textbf{\textit{transfersQueue}}. In \acp{AN}, this module works exactly the same as for the Computer. For a deeper explanation, check
+  the Computer Application Layer.
 
- \item \textbf{\textit{packetsQueue}}. When an \ac{AN} receives a packet from another \ac{AN}, it must be during the ComSink Phases and for 
-routing. This packet is immediately routed. When an \ac{AN} receives a packet (report or broadcast) from a \ac{MN}, it is during the
-Report or \ac{VIP} Phases. If this packet is intended to be routed till the Computer (centralized mode), it has to be stored in a queue until
-it can be sent during the next ComSink Phase 1. This queue is the \textit{packetsQueue}. All this process will be explained better in the 
-following method explanations.
+  \item \textbf{\textit{packetsQueue}}. When an \ac{AN} receives a packet from another \ac{AN}, it must be during the ComSink Phases. These packets
+  will be routed immediately towards the Computer or the selected \ac{AN}. When an \ac{AN} receives a packet (report or broadcast) from a \ac{MN}, 
+  it is during the Report or \ac{VIP} Phases. If this packet is intended to be routed till the Computer (centralized mode), it has to be stored in 
+  a queue until it can be sent during the next ComSink Phase 1. This queue is the \textit{packetsQueue}. All this process will be explained better 
+  in the following method explanations.
 
- \item \textbf{\textit{handleLowerControl}}. This method works exactly the same as for the Computer. For a deeper explanation, check the Computer 
-Application Layer.
+  \item \textbf{\textit{handleLowerControl}}. This method works exactly the same as for the Computer. For a deeper explanation, check the Computer 
+  Application Layer.
 
- \item \textbf{\textit{handleLowerMsg}}.
+  \item \textbf{\textit{handleLowerMsg}}. Whenever an \ac{AN} receives a packet at its Application Layer, this method is executed. The purpose
+  of this method is handling the different kind of arrived packets according to the phase when they arrived. The following situations are possible:
+  \begin{itemize}
+    \item Report received from a \ac{MN} during Report Phase. There are three types of reports which can be received during this phase:
+    \begin{itemize}
+      \item Request packet. In this case an answer is sent immediately to the \ac{MN}. A copy of this is inserted in the \textit{transfersQueue}.
 
- \item \textbf{\textit{handleSelfMsg}}.
+      \item Report in Distributed-A mode. This report is providing some information to the \ac{AN}. Right now the packet is just deleted, in future
+      works, it could be saved or processed some other way.
 
+      \item Report in Centralized mode. This report has to be routed until the Computer, but as this will be done in ComSink Phase 1, first it is
+      inserted in \textit{packetsQueue}.
+    \end{itemize}
+
+    \item Broadcast received from a \ac{MN} during Report or \ac{VIP} Phases. This broadcast is saved together will all the broadcasts received
+    from the same \ac{MN}. At the beginning of Sync Phase 2, it is generated a report for each \ac{MN} from which the \ac{AN} received at least a 
+    broadcast. This report contains the address of the \ac{MN} and an average of all the \ac{RSSI} values got from all the received broadcasts.
+
+    \item Report received from an \ac{AN} or Computer during a ComSink Phase. In this case there are also three types of reports which can be 
+    received during this phase:
+    \begin{itemize}
+      \item Report to be routed. This report is not for this \ac{AN} and is just sent down and inserted in \textit{transfersQueue}.
+      
+      \item Report for this \ac{AN}. This report is now deleted, but in future works it could be used by the Computer to communicate with 
+      the \acp{AN}.
+
+      \item Report for a \ac{MN}. This report is for a \ac{MN} from which this \ac{AN} is selected \ac{AN}. This packet was probably requested
+      from the \ac{MN}. In future works, this packet would be saved and sent to the \ac{MN} when requested. Right now is just deleted.
+    \end{itemize}
+  \end{itemize}
+
+  \item \textbf{\textit{handleSelfMsg}}. Whenever a self message is received in the Application Layer, it is handled by this method. The 
+  following kinds of self messages are processed by this method:
+  \begin{itemize}
+    \item \textit{SEND\_SYNC\_TIMER\_WITHOUT\_CSMA}. When this self message is received, \textit{sendBroadcast} method is called to send 
+    a broadcast. In this case the broadcasts are sync messages. The time to transmit the next sync message is also calculated according 
+    to the assigned slots for each \ac{AN} and to the number of sub phases in the Sync Phase.
+
+    \item \textit{CHECK\_QUEUE}. As it was already commented, any time an \ac{AN} receives or generates a message to be sent to the Computer 
+    out of the ComSink Phase 1, this message is saved in \textit{packetsQueue} waiting to be sent. To check if this queue has still elements 
+    to be sent, this self message is programmed. Whenever a self message of this type is received, this method checks if there are still 
+    elements in the \textit{packetsQueue}. In this case, the first element in the queue is sent and a copy stored in the \textit{transfersQueue}.
+    After that, if the \textit{packetsQueue} has still packets to be sent, the self message is rescheduled in the next time. The random times 
+    when all packets will be sent, are calculated at the beginning of the ComSink Phase 1.
+
+    \item \textit{BEGIN\_PHASE}. This self message is scheduled at the beginning of every single phase during the simulation. Its task is to 
+    configure the phase. The first thing all phases do, is deleting all messages in the \textit{transfersQueue}. These are the messages for which 
+    there was no time in the previous phase. These messages must be deleted not to interfere in the next phase (in a future work they could be 
+    recycled some way). As this queue is a copy of the \ac{MAC} Layer's queue, the same is done in that layer. All phases must also calculate the 
+    next phase start time, and reschedule the self message at that time. Apart from these tasks, some phases have their own jobs to be done:
+    \begin{itemize}
+      \item \textit{SYNC\_PHASE\_1}. At the beginning of this phase, the first sync message of this phase will be scheduled using the 
+      already seen self message.
+
+      \item \textit{SYNC\_PHASE\_2}. As it was already seen, at the beginning of this phase, it is generated a report for each \ac{MN} from which 
+      the \ac{AN} received at least a broadcast. This report contains the address of the \ac{MN} and an average of all the \ac{RSSI} values 
+      got from all the received broadcasts. This report is then inserted into the \textit{packetsQueue} to be transmitted during ComSink Phase 1.
+      
+      At the beginning of this phase, the first sync message of this phase will be scheduled like for \textit{SYNC\_PHASE\_1}.
+
+      \item \textit{COM\_SINK\_PHASE\_1}. At the beginning of this phase, packets to be sent during this phase are going to be handled. At 
+      this point, and if the \textit{packetsQueue} has elements, all random transmission times for these packets are calculated. These times 
+      are calculated dividing first the ComSink Phase 1 in as much fragments as elements the queue has. Afterwards, a random time is 
+      calculated inside each fragment and assigned to each element in the queue. Then, the first element in the queue is prepared to be 
+      sent, scheduling the self message \textit{CHECK\_QUEUE}.
+
+      \item \textit{SYNC\_PHASE\_3}. At the beginning of this phase, the first sync message of this phase will be scheduled like 
+      for \textit{SYNC\_PHASE\_1}.
+    \end{itemize}
+  \end{itemize}
 \end{itemize}
 
 
 \subsection{\acp{MN} Application Layer}
 
-\acp{MN} Application Layer functionality is contained in the class \textit{NodeAppLayer}. The diagram in Figure \ref{fig:MNschema} 
-shows a general overview of this Layer functionality together with the Network Layer. This class inherits from \textit{AppLayer} class, like
+The functionality of the \acp{MN} Application Layer is contained in the class \textit{NodeAppLayer}. The diagram in Figure \ref{fig:MNschema} 
+shows a general overview of this functionality together with the Network Layer's one. This class inherits from \textit{AppLayer} class, like
 \textit{ComputerAppLayer} did.
 
 \begin{figure}[ht]
@@ -616,211 +709,235 @@ shows a general overview of this Layer functionality together with the Network L
 All methods and elements in the figure will be described next:
 
 \begin{itemize}
- \item \textbf{Scheduled Messages \& Timers}. This module for the \acp{MN}, works exactly the same as for the Computer. For a deeper explanation, check
-the Computer Application Layer.
+  \item \textbf{Scheduled Messages \& Timers}. In \acp{MN}, this module works exactly the same as for the Computer. For a deeper explanation, check
+  the Computer Application Layer.
 
- \item \textbf{\textit{initialize}}. In this method, apart from initializing some variables, \acp{MN} schedule at \textit{stage} 4 the begin of 
-the first Sync Phase of the first period to make the protocol start working.
+  \item \textbf{\textit{initialize}}. This method just initializes some variables.
 
- \item \textbf{\textit{finish}}. Records the number of dropped and erased packets due to different reasons, as well as the number of packets
-correctly received and sent. It is executed at the end of the simulation.
+  \item \textbf{\textit{finish}}. Records the number of dropped and erased packets due to different reasons, as well as the number of packets
+  correctly received and sent. It is executed at the end of the simulation.
 
- \item \textbf{\textit{sendDown}}. This method sends application packets to the \ac{MAC} going through the Transport and Network layers.
+  \item \textbf{\textit{sendDown}}. This method sends application packets to the \ac{MAC} Layer. These packets will go first through the Transport 
+  and Network layers.
 
- \item \textbf{\textit{sendBroadcast}}. This method is called whenever a broadcast wants to be sent, during Report or \ac{VIP} Phases. Before 
-sending the message down, an application message is created and initialized with the correct message type and data. Unlike for the \acp{AN},
-here \ac{CSMA/CA} must remain active. Remember that a copy must be inserted into the \textit{transfersQueue}.
+  \item \textbf{\textit{sendBroadcast}}. This method is called whenever a broadcast wants to be sent, and always during Report or \ac{VIP} Phases. 
+  Before sending the message down, an application message is created and initialized with the correct message type and data. Unlike for the \acp{AN},
+  here \ac{CSMA/CA} must remain active. Remember that a copy must be inserted into the \textit{transfersQueue}.
 
- \item \textbf{\textit{sendReport}}. \ac{MN}'s reports are just sent to selected \acp{AN}, that is why before sending them, it is always needed
-to listen to any Sync Phase to find which \ac{AN} is our selected \ac{AN}. From the packets listened to, it is created a \ac{RSSI} list, which 
-is the first thing \textit{sendReport} method checks to assign the destination address. In the case the \ac{RSSI} list does not exists, an 
-error will notify about this fact. After assigning the destination address, real destination address is assigned. This address will be 
-the Computer's address if the \ac{MN} is working in centralized mode and the selected \ac{AN} address in the case the \ac{MN} is working in 
-Distributed-A mode.
+  \item \textbf{\textit{sendReport}}. \ac{MN}'s reports are just sent to selected \acp{AN}. That is why before sending them, it is always needed
+  to listen to Sync Phase 1 to find which \ac{AN} is our selected \ac{AN}. When sync packets are received, a \ac{RSSI} list is created. Before 
+  doing anything else, \textit{sendReport} method checks this list to assign the destination address. In the case the \ac{RSSI} list is empty, an 
+  error will notify about this fact. After assigning the destination address, real destination address is assigned. This address will be 
+  the Computer's address if the \ac{MN} is working in centralized mode and the selected \ac{AN} address in the case the \ac{MN} is working in 
+  Distributed-A mode.
 
-Next thing to do is assign the packet size to model the real packet behavior. Depending on the type of report to be sent, different sizes will 
-be chosen. A complete list of this types was already explained in sub-section \ref{sec:packetstructure} (page \pageref{sec:packetstructure}).
+  Next thing to do is assign the packet size in order to model the real packet behavior. Depending on the type of report to be sent, different 
+  sizes will be chosen. A complete list of this types was already explained in sub-section \ref{sec:packetstructure} (page 
+  \pageref{sec:packetstructure}).
 
-A last detail must be taken into account before sending the packet down. For the case where the packet asks for some information, the ASK flag
-will be activated and the address of the selected \ac{AN} saved. This address is saved because, in case the \ac{MN} moves and its selected \ac{AN}
-changes, the \ac{MN} will still need to ask for the information to the first \ac{AN}. This will be the \ac{AN} having the information ready to be 
-requested, and not the new selected \ac{AN}. For the case where the packet requests for the previously asked information, the Request flag will
-be activated. As it was said, the destination address to be used in this case, is the one saved by the \ac{MN} when asking for information.
+  A last detail must be taken into account before sending the packet down. For the case where the \ac{MN} wants to asks for some information, the 
+  ASK flag will be activated in the packet and the address of the selected \ac{AN} saved. This address is saved because, in case the \ac{MN} moves 
+  and its selected \ac{AN} changes, the \ac{MN} will still need to ask for the information to the first \ac{AN}. This \ac{AN} will be the one 
+  having the information ready to be requested, and not the new selected \ac{AN}. For the case where the \ac{MN} wants to request the previously 
+  asked information, the Request flag will be activated in the packet. As it was said, the destination address to be used in this case, is the 
+  one saved by the \ac{MN} when asking for information.
 
-Now the packet is ready to be sent down, but saving a copy before in the \textit{transfersQueue}.
+  Now the packet is ready to be sent down, but not before saving a copy in the \textit{transfersQueue}.
 
+  \item \textbf{\textit{transfersQueue}}. In \acp{MN}, this module works exactly the same as for the Computer. For a deeper explanation, check
+  the Computer Application Layer.
 
- \item \textbf{\textit{transfersQueue}}. This module for the \acp{MN}, works exactly the same as for the Computer. For a deeper explanation, check
-the Computer Application Layer.
+  \item \textbf{\textit{handleLowerControl}}. The basic functionality of this method is exactly the same as for the Computer. For a deeper explanation, 
+  check the Computer Application Layer. The main difference between this method and the one for the Computer is that this method handles in which 
+  situations, when receiving a control message, the \ac{MN} can go to sleep or must remain awake. All these cases will be explained at the end of this
+  section, together with the ones from all the other methods.
 
- \item \textbf{\textit{handleLowerControl}}. The main functionality of this method is exactly the same as for the Computer. For a deeper explanation, 
-check the Computer Application Layer. The difference between this method and the one for the Computer is that this method handles in which situations,
-when receiving a control message, the \ac{MN} can go to sleep or must remain awake. All this cases will be explained later together with the ones from
-the other methods.
+  \item \textbf{\textit{handleLowerMsg}}. Whenever a \ac{MN} receives a packet at its Application Layer, this method is executed. The purpose
+  of this method is handling the different kind of arrived packets according to the phase when they arrived. The following situations are possible:
+  \begin{itemize}
+    \item Broadcast received during a Sync Phase. The \acp{MN} listen to these broadcasts to get \ac{RSSI} samples and get synchronized. For this 
+    case, this method makes a list with all the \ac{RSSI} values received per \ac{AN}. This list will be used by the \textit{sendReport} method to 
+    decide which \ac{AN} is the selected \ac{AN}.
 
- \item \textbf{\textit{handleLowerMsg}}. Whenever a \ac{MN} receives a packet in its Application Layer, this method is executed. The purpose
-of this method is handling the different arrived packets according to the phase when they arrived. The following cases are possible:
-\begin{itemize}
-  \item Broadcasts arrived during any Sync Phase. This are the sync messages that \acp{MN} listen to get \ac{RSSI} samples and get 
-  synchronized. This method makes a list with all \ac{RSSI} values per \ac{AN}. This list will be used by the \textit{sendReport} method to 
-  decide which \ac{AN} is the selected \ac{AN}.
+    \item Reports from selected \ac{AN} received during a Report Phase, which are answering a request. In this case, the method will record if the packet was
+    received during the waiting time left for this purpose, or out of it. If it was received in the suitable moment, the timer will be canceled to
+    avoid idle listening in the \ac{MN}.
+  \end{itemize}
 
-  \item Report from selected \ac{AN} answering a request, received during Report Phase. If a report answering a previous request comes, and 
-  it comes during the waiting time left for this purpose, the answer will be considered as valid and the waiting time timer will get canceled to 
-  avoid idle listening.
-\end{itemize}
+  \item \textbf{\textit{handleSelfMsg}}. Whenever a self message is received in the Application Layer, it is handled by this method. The following 
+  kinds of self messages are processed by this method:
+  \begin{itemize}
+    \item \textit{SLEEP}. It will be explained at the end of this section.
 
- \item \textbf{\textit{handleSelfMsg}}. Whenever a self message is received, it is handled by this method. The following kinds of self messages
-are processed by this method:
- \begin{itemize}
-  \item \textit{SLEEP}. It will be explained at the end of this section.
+    \item \textit{WAKE\_UP}. It will be explained at the end of this section.
 
-  \item \textit{WAKE\_UP}. It will be explained at the end of this section.
+    \item \textit{SEND\_REPORT\_WITH\_CSMA}. In this case, the method will check if the \ac{MN} is already calculating its own position (only for 
+    \acp{MN} in Mode 2). When this is the case, the self message will be rescheduled a random time after the calculation process. If the \ac{MN} 
+    was not busy, \textit{sendReport} method will be called.
 
-  \item \textit{SEND\_REPORT\_WITH\_CSMA}. In this case, the method will check if the \ac{MN} is already calculating its own position (\acp{MN} in
-  Mode 2). When this is the case, the self message will be rescheduled a random time after the calculation process. If the \ac{MN} was not busy, 
-  \textit{sendReport} method will be called.
+    \item \textit{SEND\_SYNC\_TIMER\_WITH\_CSMA}. In this case, \textit{sendBroadcast} method is called to send a broadcast. If there are still 
+    more broadcasts to send, the self message is rescheduled some time later. The times where the broadcasts are going to be sent are calculated 
+    by the method \textit{createRandomBroadcastTimes}.
 
-  \item \textit{SEND\_SYNC\_TIMER\_WITH\_CSMA}. In this case, \textit{sendBroadcast} method is called to send a broadcast. If there are still 
-  more broadcasts to send, the self message is rescheduled a time after. The times where the broadcasts are going to be sent are calculated by the
-  method \textit{createRandomBroadcastTimes}.
+    \item \textit{CALCULATE\_POSITION}. When this self message is received, there are two options. If the \ac{MN} was calculating its position, then
+    the timer is ended and the energy status updated. If the \ac{MN} was not still calculating its position, a new timer is started scheduling its end
+    some processing time later (\textit{processingTime}). The \ac{MN}'s position is also stored in a list to be sent with an extra report.
 
-  \item \textit{CALCULATE\_POSITION}. When this self message is received, there are two options. If the \ac{MN} was calculating its position, then
-  the timer is ended and the energy status updated. If the \ac{MN} was not still calculating its position, a new timer is started scheduling its end
-  some time after. This time will be the processing time. The \ac{MN}'s position is also stored in a list.
+    \item \textit{WAITING\_REQUEST}. When a request is correctly transmitted, method \textit{handleLowerControl} starts a waiting time timer. When the
+    self message due to this timer is received, means that no \ac{AN}'s answer was received on time. This method restarts then all waiting time 
+    variables to its default values, and records this situation.
 
-  \item \textit{WAITING\_REQUEST}. When a request is correctly transmitted, method \textit{handleLowerControl} starts a waiting time timer. When the
-  self message due to this timer is received, means that no \ac{AN}'s answer was received on time. This method restarts then all waiting time 
-  variables to its default values, and records this situation.
+    This self message is also used to schedule a request packet. When a \ac{MN} wants to perform a request, Application Layer schedules a 
+    WAITING\_REQUEST self message at the middle of Sync Phase 1. The reason to schedule the self message at that time is because there, all 
+    reports or extra reports are already scheduled and can be found. When this self message is handled, the first thing to do is looking if a 
+    report or extra report is already scheduled. If this is the case, the request flag could be activated in it. If not, a new extra report is 
+    created and scheduled.
 
-  Another situation where this kind of self message can arrive is when requesting information. When a \ac{MN} wants to perform a request, it 
-  schedules a WAITING\_REQUEST self message at the middle of Sync Phase 1. It is made this way because in the middle of this phase all reports and 
-  extra reports are already scheduled. When this self message is handled, the first thing to do is looking for a report or extra report where the 
-  request flag could be activated. In case no report could be reused, a new one is scheduled.
+    The request process provides information to the \ac{MN}, probably for a configuration change or a position. This process is hence really 
+    important and must be given a higher priority. That is why, when a \ac{MN} in Mode 4 is requesting, its broadcasts are canceled 
+    to reduce the traffic during the Report Phase, and this way arise the probability of a successfully delivery of the request packet and its
+    answer.
 
-  The request packet is one of the most important packets to be sent, and not losing it is a priority. That is why when a request is made from a 
-  \ac{MN} in Mode 4, its broadcasts are canceled to reduce the traffic in the Report Phase, and hence arise the probability of a successfully 
-  delivery.
+    To distinguish between these two cases, the variable \textit{waitForAnchor} is used. If the value is 0, the method will schedule a request,
+    and if not, the waiting time timer will be handled (in this case \textit{waitForAnchor} will take as value the address of the \ac{AN} from
+    which the answer is expected).
 
-  \item \textit{BEGIN\_PHASE}. This self message is scheduled during all the simulation at the beginning of every phase to configure it. The 
-  first thing the method does when receiving a self message of this type, is deleting all messages in the \textit{transfersQueue} which did not 
-  have time to be transmitted during the previous phase (the same is done in \ac{MAC} queue). After that, next thing to do is calculate next phase 
-  start time, and reschedule the self message at that time. The following actions will be different depending on the phase:
-  \begin{enumerate}
-    \item \textit{SYNC\_PHASE\_1}. When this phase starts, and the period is active, the whole period will be configured. At this moment, the 
-    following things are going to be done:
+    \item \textit{BEGIN\_PHASE}. This self message is scheduled at the beginning of every single phase during the simulation. Its task is to 
+    configure the phase itself, and in some cases also the whole period (beginning of Sync Phase 1). Regardless of the phase, the first thing to
+    do is deleting all messages in the \textit{transfersQueue}. These are the messages for which there was no time in the previous phase. These 
+    messages must be deleted not to interfere in the next phase (in a future work they could be recycled some way). As this queue is a copy of the
+    \ac{MAC} Layer queue, the same is done in that layer. Another task that all phases have in common is calculating the next phase start time,
+    and rescheduling the self message at that time. This is done just after the \textit{transfersQueue} is emptied. From this point, the actions
+    to carry out, will depend on the phase the node is in:
     \begin{itemize}
-      \item Sync Phases to be listened are going to be enabled. It depends on the Sync Phase Offset, if the active period is the last one and
-      if the \acp{MN} are in Mode 3.
-      \item Clean \ac{RSSI} list before reading new Sync messages.
-      \item Report for \acp{MN} in Modes 1 and 4 are going to be scheduled if the active period is the last one of the collection.
-      \item If \ac{MN} is in Mode 2 and the active period is the last one of the collection, the timer for calculating the \ac{MN}'s position will 
-      be started.
-      \item Broadcasts random times are going to be calculated for \acp{MN} in Modes 3 and 4. The first broadcast is also going to be scheduled. 
-      If there is an extra report in the period and \ac{MN} is in Mode 3, broadcasts are going to be canceled to save battery. A minimum time among
-      broadcasts and with the reports should be left.
-      \item If an extra reports is going to be scheduled in this period (depends on the configuration parameters), Sync Phase 1 must be enabled if it
-      was not already. Before scheduling a new extra report, it has to be checked if another report is already scheduled. If this happens, the extra
-      report will not be scheduled and the normal report will be used. Every time an extra report is processed, a counter is increased. When this
-      counter reaches the value of the parameter \textit{askFrequency}, the extra report gets the ASK flag activated and the request packet is 
-      scheduled for the next period.
+      \item \textit{SYNC\_PHASE\_1}. At the beginning of this phase, not only this phase will be configured but also some aspects for the whole
+      period. The tasks to be done at this point are:
+      \begin{itemize}
+	\item If the period is active, the Sync Phase is not affected by the Sync Phase Offset and \ac{MN} is not in Mode 3, this Sync Phase will
+	be enabled to be listened to.
+
+	\item The \ac{RSSI} list is cleaned. This way the old values will not interfere with the new ones to be listened to.
+
+	\item Reports for \acp{MN} in Modes 1 and 4 are going to be scheduled if the active period is the last one of the collection.
+
+	\item If \ac{MN} is in Mode 2 and the active period is the last one of the collection, the timer for calculating the \ac{MN}'s position will 
+	be started.
+
+	\item If \ac{MN} is in Mode 3 or 4, the broadcasts random transmitting times are going to be calculated. This is done with the method 
+	\textit{createRandomBroadcastTimes}. This method assigns a random time to every broadcast to be transmitted, and leaves a minimum time
+	distance among all generated times. In case the \ac{MN} is in Mode 4 and during this period an extra report is also scheduled, the minimum 
+	time distance must be also left within the extra report. At this moment, the first broadcast is also scheduled. If the \ac{MN} is in Mode 3
+	and during this period an extra report is also scheduled, broadcasts are going to be canceled to save battery, as this report will already
+	carry \ac{RSSI} information from the \ac{MN}.
+
+	\item If according to the \ac{MN}'s configuration parameters, during this period there should be scheduled an extra report, it is done at 
+	this moment. First thing to do is enabling Sync Phase 1 to be listened to in case it was not. Before scheduling a new extra report, it has 
+	to be checked if another report is already scheduled. If this happens, the extra report will not be scheduled and the normal report will 
+	be used.
+
+	Every time an extra report is sent, a counter is increased. When this counter reaches the value of the parameter \textit{askFrequency}, 
+	the extra report gets the ASK flag activated and a request packet is scheduled for the next period as it was already told.
+      \end{itemize}
+
+      \item \textit{REPORT\_PHASE}. At this point just the sleep and wake up management will be done. As it was said, all cases will be explained 
+      together at the end of the section.
+
+      \item \textit{VIP\_PHASE}. At this point just the sleep and wake up management will be done. As it was said, all cases will be explained 
+      together at the end of the section.
+
+      \item \textit{SYNC\_PHASE\_2}. If \ac{MN} is not in Mode 3 and the period is active, this Sync Phase will be enabled to be listened to. However,
+      there are two exceptions where this phase will not be enabled. When the active period is the last one in the active periods collection. And when 
+      the active period is the first and this Sync Phase is affected by the Sync Phase Offset.
+
+      \item \textit{COM\_SINK\_PHASE\_1}. At this point just the sleep and wake up management will be done. As it was said, all cases will be 
+      explained together at the end of the section.
+
+      \item \textit{SYNC\_PHASE\_3}. If \ac{MN} is not in Mode 3 and the period is active, this Sync Phase will be enabled to be listened to. However,
+      when the active period is the last one in the active periods collection, this phase will not be enabled.
+
+      \item \textit{COM\_SINK\_PHASE\_2}. At this point just the sleep and wake up management will be done. As it was said, all cases will be 
+      explained together at the end of the section.
+
     \end{itemize}
-
-
-
-
-    \item \textit{REPORT\_PHASE}.
-    \item \textit{VIP\_PHASE}.
-    \item \textit{SYNC\_PHASE\_2}.
-    \item \textit{COM\_SINK\_PHASE\_1}.
-    \item \textit{SYNC\_PHASE\_3}.
-    \item \textit{COM\_SINK\_PHASE\_2}.
-
-  \end{enumerate}
-
-
- \end{itemize}
-
-
-
+  \end{itemize}
 \end{itemize}
 
-A last detail and probably the most important for the \ac{MN} is, when are the nodes going to sleep and when should they wake up? This transitions
-are done during the previously explained methods, but they will be explained all together here for a better understanding.
+A last detail to be studied and probably the most important for the \ac{MN} is, when are the nodes going to sleep and when should they wake up? 
+Even though Sleep and Wake-Up transitions are done during the previously explained methods, they are explained next, and all together for a 
+better understanding.
 
-Transition between SLEEP state and any other takes some time (times can be seen in source code in class \textit{EnergyConsumption}). This is why,
-before sleeping a node, it has to be checked if some other event. where the node must be awake. is coming sooner than the time needed to sleep and
-wake up the node again (this time will be named as T). From this, it results that \ac{MN} can go to sleep in the following situations:
+A transition between SLEEP state and any other takes some time (times can be seen in source code in class \textit{EnergyConsumption}). That is why,
+before sleeping a node, it has to be checked if some other event, where the node must be awake, is coming sooner than the time needed to sleep and
+wake up the node again (from now on, T). From this it is deduced, that the \ac{MN} can go to sleep in the following situations:
 
 \begin{itemize}
- \item At the beginning of ComSink 1 and 2 (Done in \textit{handleSelfMsg} method).
+ \item Always at the beginning of ComSink 1 and 2 (Done in \textit{handleSelfMsg} method).
  
- \item At the beginning of Sync Phases in any of the following cases (Done in \textit{handleSelfMsg} method):
+ \item At the beginning of Sync Phases in \underline{any} of the following cases (Done in \textit{handleSelfMsg} method):
     \begin{itemize}
       \item[-] Inactive periods.
       \item[-] First offset periods.
       \item[-] Second and third Sync Phases in last active period.
-      \item[-] Sync Phases belonging to the Sync Phases offset.
+      \item[-] Sync Phases affected by the Sync Phases offset.
       \item[-] If \ac{MN} is in Mode 3.
       \item[-] If there are no active periods.
     \end{itemize}
   The only exception to this, where \ac{MN} cannot go to sleep, is when an extra report is scheduled. In this case it does not matter if the 
-  previous conditions are fulfilled, at the beginning of the first Sync Phase in this period, the \ac{MN} cannot sleep.
+  previous conditions are fulfilled or not, at the beginning of the first Sync Phase in this period, the \ac{MN} must be awake.
 
  \item At the beginning of \ac{VIP} Phase if next broadcast is scheduled in a time bigger than T (Done in \textit{handleSelfMsg} method).
 
- \item At the beginning of a Report Phase if all these conditions get fulfilled (Done in \textit{handleSelfMsg} method):
+ \item At the beginning of a Report Phase if \underline{all} these conditions get fulfilled (Done in \textit{handleSelfMsg} method):
     \begin{itemize}
-      \item[-] If next extra report comes after T.
-      \item[-] If next report comes after T.
-      \item[-] If next broadcast comes after T (just for \ac{MN} in Mode 4).
+      \item[-] Next extra report comes after T.
+      \item[-] Next report comes after T.
+      \item[-] Next broadcast comes after T (just for \ac{MN} in Mode 4).
     \end{itemize}
 
-  \item When a report was successfully sent, if the \textit{transfersQueue} has no elements and all these conditions get fulfilled (Done in 
-  \textit{handleLowerControl} method):
+  \item When a report was successfully sent, if the \textit{transfersQueue} has no elements and \underline{all} these conditions get fulfilled 
+  (Done in \textit{handleLowerControl} method):
     \begin{itemize}
-      \item[-] If next broadcast comes after T (just for \ac{MN} in Mode 4).
-      \item[-] If the report was not a request. In this case instead of sleeping the \ac{MN}, a timer to wait for the \ac{AN}'s answer is started.
+      \item[-] Next broadcast comes after T (just for \ac{MN} in Mode 4).
+      \item[-] The report was not a request. In this case instead of sleeping the \ac{MN}, a timer to wait for the \ac{AN}'s answer is started.
     \end{itemize}
 
   \item When erasing a report due to maximum number of retries, if the \textit{transfersQueue} has no elements and if next broadcast (just for 
   \ac{MN} in Mode 4) comes after T (Done in \textit{handleLowerControl} method).
 
-  \item When a broadcast was successfully sent into the channel, if the \textit{transfersQueue} has no elements and all these conditions get 
-  fulfilled (Done in \textit{handleLowerControl} method):
+  \item When a broadcast was successfully sent into the channel, if the \textit{transfersQueue} has no elements and \underline{all} these 
+  conditions get fulfilled (Done in \textit{handleLowerControl} method):
     \begin{itemize}
-      \item[-] If next broadcast comes after T.
-      \item[-] If next report comes after T (just for \ac{MN} in Mode 4).
-      \item[-] If Sync Phase 2 begins after T (just for \ac{MN} in Mode 3).
+      \item[-] Next broadcast comes after T.
+      \item[-] Next report comes after T (just for \ac{MN} in Mode 4).
+      \item[-] Sync Phase 2 begins after T (just for \ac{MN} in Mode 3).
     \end{itemize}
 
-  \item When erasing a broadcast due to maximum number of retries, if the \textit{transfersQueue} has no elements and all these conditions get
-  fulfilled (Done in \textit{handleLowerControl} method):
+  \item When erasing a broadcast due to maximum number of retries, if the \textit{transfersQueue} has no elements and \underline{all} these 
+  conditions get fulfilled (Done in \textit{handleLowerControl} method):
     \begin{itemize}
-      \item[-] If next broadcast comes after T.
-      \item[-] If next report comes after T (just for \ac{MN} in Mode 4).
-      \item[-] If Sync Phase 2 begins after T (just for \ac{MN} in Mode 3).
+      \item[-] Next broadcast comes after T.
+      \item[-] Next report comes after T (just for \ac{MN} in Mode 4).
+      \item[-] Sync Phase 2 begins after T (just for \ac{MN} in Mode 3).
     \end{itemize}
 
-  \item When waiting time in request process ended, if the \textit{transfersQueue} has no elements and if next broadcast (just for \ac{MN} in 
+  \item When waiting time timer in request process ended, if the \textit{transfersQueue} has no elements and if next broadcast (just for \ac{MN} in 
   Modes 3 and 4) comes after T (Done in \textit{handleSelfMsg} method).
 
   \item When an answer from an \ac{AN} to a request is received and the \ac{ACK} is sent, if the \textit{transfersQueue} has no elements and 
   if next broadcast (just for \ac{MN} in Modes 3 and 4) comes after T (Done in \textit{handleLowerControl} method).
-
 \end{itemize}
 
-Like for the previous case, transition times between SLEEP state and any other state are important. That is why, if the \ac{MN} must be awake for 
-a certain event, it is important to wake it up some time before this event is coming. This time must be at least the time needed by \ac{MN} to go 
-from SLEEP state to \ac{Rx} state (this time is named ``$T_2$''). \ac{MN} must wake up in the following situations:
+To wake up the node and like for the previous case, transition times between SLEEP state and any other state have to be taken into account. That 
+is why, if the \ac{MN} must be awake for a certain event, it is important to wake it up some time before this event is coming. This time must be 
+at least the time needed by \ac{MN} to go from SLEEP state to \ac{Rx} state (from now on, $T_2$). \ac{MN} must wake up in the following situations:
 
 \begin{itemize}
-  \item A time $T_2$ before the start of each Sync Phase if all this conditions are fulfilled (Done in \textit{handleSelfMsg} method):
+  \item A time $T_2$ before the start of each Sync Phase if \underline{all} these conditions are fulfilled (Done in \textit{handleSelfMsg} method):
     \begin{itemize}
-      \item[-] If \ac{MN} is not in Mode 3.
-      \item[-] If the period is an active one.
-      \item[-] If the Sync Phase is not affected by Sync Phase Offset.
-      \item[-] If the Sync Phase is not the second or third Sync Phases in last active period.
+      \item[-] \ac{MN} is not in Mode 3.
+      \item[-] The period is active.
+      \item[-] The Sync Phase is not affected by Sync Phase Offset.
+      \item[-] The Sync Phase is not the second or third Sync Phases in the last active period.
     \end{itemize}
   
   \item A time $T_2$ before the start of Sync Phase 1 if there is an extra report scheduled in this period (Done in \textit{handleSelfMsg} method).
@@ -832,22 +949,21 @@ from SLEEP state to \ac{Rx} state (this time is named ``$T_2$''). \ac{MN} must w
   \item A time $T_2$ before a broadcast is going to be sent.
 \end{itemize}
 
-It is important to remember that any time a report, extra report or broadcast gets canceled, the wake up order must be also canceled or the \ac{MN}
-will wake up for nothing.
+It is important to remember that any time a report, extra report or broadcast gets canceled, the scheduled wake up order must be also canceled 
+or the \ac{MN} will wake up for nothing.
 
 Both sleeping the \ac{MN} and waking it up actions, are called with the methods \textit{goToSleep} and \textit{goToWakeUp} respectively. Whenever
-one of this two methods is called, it adds to an array a new time where the \ac{MN} should sleep or wake up. This arrays are then ordered to get
-first the times coming sooner. When the arrays are already ordered, a self message is scheduled for each array's first element, at the indicated 
-time. This self message will be handled by the \textit{handleSelfMsg} method. When this method receives a message to sleep or wake up the \ac{MN},
-it does the following:
+one of these two methods is called, it adds to an array a new time where the \ac{MN} should sleep or wake up. These arrays are then ordered to get
+first the times coming sooner, and then a self message is scheduled for each array's first element. This self message will be handled by the 
+\textit{handleSelfMsg} method. carrying out the following steps:
 \begin{itemize}
- \item[-] Sleeps or wakes up the Radio changing its state to SLEEP or \ac{Rx}.
+ \item[-] Sleep or wake up the Radio changing its state to SLEEP or \ac{Rx}.
  
- \item[-] Updates the Energy module status calling the \textit{updateStateStatus} method from \textit{EnergyConsumption} class.
+ \item[-] Update the Energy module status calling the \textit{updateStateStatus} method from \textit{EnergyConsumption} class.
 
- \item[-] Removes the already handled time from the array.
+ \item[-] Remove the already handled time from the array.
 
- \item[-] Schedules the next time if there are still times to schedule.
+ \item[-] Schedule the next time if there are still times to schedule.
 \end{itemize}
 
 
