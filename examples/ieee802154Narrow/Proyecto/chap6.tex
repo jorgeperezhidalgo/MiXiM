@@ -1,23 +1,98 @@
-\chapter{Conclusion and future work}
+\chapter{Conclusions and future work}
 \label{chap:conclusionsandfuture}
 
-Mirar conclusiones del paper.
+\section{Summary and Conclusions}
 
-Comentar que los slots han resultado se mejores y por ello se usan en el framework final
+In this work the design of a High Configurable Protocol based on 802.15.4 standard is proposed. This protocol appears as a combination of two
+previous proposals: \ac{LPL} and \ac{OLP}. Unlike this two proposals, this protocol allows \acp{MN} to operate in different modes according to 
+their necessities and the situation of the network. Four operation modes are proposed. Mode 1 allows \acp{AN} or the Computer to estimate the 
+\ac{MN}'s position using the reports sent by the \acp{MN}. This reports contain \ac{RSSI} measurements. This mode is equivalent to \ac{OLP}
+approach. \acp{MN} in Mode 2 estimate their position their selves using low-complexity algorithms, avoiding the overload of the network. This 
+position is estimated thanks to the captured \ac{RSSI} values. Mode 3 is used within \acp{MN} with a critical battery status. To make them 
+consume as low as possible, this \acp{MN} do not listen to the channel but send their own broadcast packets to be detected by the \acp{AN}. 
+This mode is equivalent to \ac{LPL}. And finally, an operational Mode 4 used by the \acp{MN} which need a high position accuracy. This is 
+done combining the functionality in Modes 1 and 3.
 
-Comentar que nodo 2 puede ser bueno para no cargar la red, que lo que mas consume es escuchar y por ello node 3 consume el que menos y por tanto
-hay que usarlos para bajo consumo. 
+The protocol's functionality is divided into periods which will be repeated periodically. Each period is divided into seven phases. During 
+the first, fourth and sixth phases (Sync Phases) all nodes in the network are synchronized thanks to broadcast packets sent by the \acp{AN}. 
+This broadcast packets are also used to provide to the \acp{MN} with \ac{RSSI} samples. The synchronization phase is divided into three parts 
+to avoid correlation in \ac{RSSI} values between consecutive broadcast packets. During the second phase (Report Phase), all \acp{MN} send their
+reports in case they have to. \acp{MN} configured in Mode 4 send also their broadcast packets. The third phase (\ac{VIP} Phase) is reserved for the \acp{MN} in Mode
+3. During this phase they do not need to compete, with \acp{MN} in other modes, for the channel, to be able to send all their broadcast packets. 
+The fifth and seventh phases are reserved for communication among \acp{AN} and the Computer.
+
+This new protocol allows, changing the \ac{MN}'s configuration, to distribute the working periods of each \ac{MN} in time. This way the network
+load will be distributed avoiding periods highly loaded compared with the others.
+
+In the results, it is proved that \acp{MN} in Mode 3 consume much less energy than the \acp{MN} operating in other modes and, how,
+this is independent of the simulated configuration. This shows how listening to broadcasted packets instead of transmitting them arises
+the energy consumption. When the number of \acp{MN} in Modes 3 and 4 grows, it is seen, how, the energy consumption 
+for this \acp{MN} also grows and, the performance of the ComSink Phases decreases. Hence, it is proved that \ac{LPL} configuration is not enough
+for all situations, specially when the number of \acp{MN} is big. On the other hand, if all \acp{MN} were configured in Modes 1 and 2, the accuracy
+and the energy consumption would be affected, revealing that \ac{OLP} configuration is not enough either. It is proved then, the necessity of
+a High Configurable Protocol.
+
+From the results can also be extracted that, independently of the configuration, the ComSink Phases are not enough to put up with all generated 
+traffic. It becomes essential then to make these phases' duration longer, to reduce the overall traffic in the network by configuring most of 
+the \acp{MN} in Modes 1 and 2 or to have a good distribution in time to avoid traffic concentration.
+
+In this work two different approaches for Sync Phase were also studied. In the first approach the \acp{AN} transmit their broadcast packets randomly
+in time. The best random transmission case, due to maximum random time between deliveries, is searched. In the second approach the \acp{AN} transmit
+their broadcast packets distributed into time slots previously calculated by the Computer. From the results can be extracted that slotted 
+transmission performance is better than even the best case of random transmission. Slotted transmission was, therefore, the one used during 
+the Sync Phase in the complete protocol analysis. An automatic algorithm to calculate the slot distribution is also presented in this work.
 
 
-Look for the best parameters in the simulation.
+\section{Future Work}
 
-Change node configuration.
+This work presents a stable and functional framework for a High Configurable Protocol based on 802.15.4 standard. However, all possible aspects
+for a full protocol are not still contemplated. The following aspects could be still improved or developed:
 
-Results Shows that distribution in time is really important.
+\begin{itemize}
+  \item \textbf{Change \ac{MN}'s configuration}. It was repeatedly said that \acp{MN} must adapt to network conditions and their own necessities. 
+  The need of a \ac{MN}'s configuration change during the simulation depending on this aspects is still not contemplated in this work. The
+  \acp{MN} are just configured at the beginning of the simulation.
 
-En las fases com sink se aprecia la sobre carga de la red, pero en los estudios de los nodos moviles, se aprecia un buen funcionamiento y la diferencia
-de configs sin distribuir y distribuidas es debida en su mayoria al numero total de paquetes mandados.
+  \item \textbf{Mobile \acp{MN}}. All this study was done for the case where all \acp{MN} stay in their original places. A study when the 
+  \acp{MN} move around the playground would be also interesting.
 
-Move the nodes.
+  \item \textbf{Optimal configuration}. In this work a couple of configurations were tested to extract the first conclusions about
+  this protocol. When using this protocol in a real situation, a deeper study of the configurations must be done. This way an optimal configuration
+  could be used in each network situation.
 
-Comment how long the nodes would last with this protocol.
+  \item \textbf{Real network comparison}. Whenever this protocol is build in real devices, a deep comparison between simulation and real case should
+  be done, to test the simulation validity.
+
+  \item \textbf{Network division}. When network is too big, a division of the network into different areas could be beneficial, to avoid the high
+  traffic during the ComSink Phases.
+
+  \item \textbf{Broadcast \acp{AN}}. Another interesting case to be studied is an \acp{AN} division into two groups. One group would be the 
+  \acp{AN} saw during this work, but, without the broadcasting function. A second group would be formed by \acp{AN} with a high power ability 
+  which will transmit only the broadcast packets at a high power. This \acp{AN} will be able to reach all the network, synchronizing it 
+  easily and in less time. This way idle time in \acp{MN} would be reduced and, for big networks, the synchronization problems due to long paths 
+  and, the high routing traffic, would be avoided.
+
+  \item \textbf{Reuse erased packets}. In this work packets are erased under many circumstances. In a future work these packets could be recovered
+  or reused somehow not to lose them.
+
+  \item \textbf{Full Network Layer}. To reduce the complexity of this project, the network layer routing was fixed, simulating always with the same
+  \ac{AN}'s distribution. In a future, the Network Layer should calculate the routing automatically depending on the \ac{AN}'s position.
+
+  \item \textbf{Aggregation and Segmentation}. In this work, \acp{AN} send a report for each \ac{MN}'s communication. To reduce traffic during
+  ComSink Phases, it could be positive aggregating communications from different \acp{MN} in just one report. For this, aggregation must be added 
+  to the protocol. When aggregated packets become too big, they must be segmented into smaller packets. This two capabilities should be implemented
+  in the Transport Layer which does nothing in this work.
+
+  \item \textbf{Real information in packets}. As this work's aim is to develop a working framework to test the protocol. All packet's 
+  information is not real, being the only important aspect of a packet, its size. For a more realistic behavior, packets should carry 
+  real information and, its handling should depend on this information.
+
+  \item \textbf{ComSink Phases study}. It was seen how this phases are the most critical in this protocol. A deeper study of this phases
+  should be done. An analysis of the advantages and disadvantages of, joining them in one bigger ComSink, taking out the up-links and down-links 
+  restriction or further studies, should be done.
+
+  \item \textbf{Queue priorities}. This work assumes all message's priority the same, putting them in a \ac{FIFO} queue. But as all messages have
+  not the same importance, a priority queue should be developed. The messages should also have a life time, as some messages would be occupying 
+  the queues even when they are not important anymore.
+
+\end{itemize}

@@ -1,18 +1,18 @@
 \chapter{Protocol Design}
 \label{chap:protocoldesign}
 
-In the state of the art, there are different protocols constructed over \ac{IEEE} 802.15.4, like ZigBee, WirelessHART, 6LoWPAN, etc. Some
-are prepared for low consumption, but almost none of them is focused on localization. To cover this necessity, as an alternative, 
-\ac{LPL} and \ac{OLP} \cite{LPLandOLP} protocols were proposed in the department. These protocols are based on 
-\ac{IEEE} 802.15.4 and are specifically designed for low consumption localization. In the next sections a brief overview will be given, 
-for a deeper view, please consult \cite{LPLandOLP}.
+In the state of the art, there are different protocols constructed over \ac{IEEE} 802.15.4, probably the most popular is ZigBee \cite{Zigbee}. 
+Some of these protocols are prepared for low consumption, but, looking for it, it was found that none of them is really focused on localization. 
+To cover this necessity, as an alternative, \ac{LPL} and \ac{OLP} \cite{LPLandOLP} protocols were proposed in the department. These protocols 
+are based on \ac{IEEE} 802.15.4 and are specifically designed for low consumption localization. In the next sections a brief overview will be 
+given, for a deeper view, please consult \cite{LPLandOLP}.
 
 \section{\ac{LPL} and \ac{OLP}}
 
 \ac{LPL} and \ac{OLP} \cite{LPLandOLP}, are two protocols designed for localization, in particular localization using \ac{RSSI} 
 values. These values give an idea of the received signal strength in the device, knowing that the higher this value,
 the nearer the device. \ac{RSSI} have the big advantage that its value is already included in all packets a device receives. There
-is hence no need for special hardware or data to be prepared or obtained like in other methods (Ultra Wide Band e.g.). But \ac{RSSI} 
+is therefore no need for special hardware or data to be prepared or obtained like in other methods (Ultra Wide Band e.g.). But \ac{RSSI} 
 values have a big problem for localization, its dispersion is very big, making the localization resolution (in some cases up to 
 many meters \cite{fingerprint}) inappropriate for some applications. 
 
@@ -80,7 +80,7 @@ In the following subsections, both protocols \ac{LPL} and \ac {OLP} are going to
 
 \subsection{\acl{LPL}}
 
-To reduce the idle listening, and thus the energy consumption, this protocol proposes that \acp{MN} do not listen to the \acp{AN}. Instead, the
+To reduce the idle listening, and therefore the energy consumption, this protocol proposes that \acp{MN} do not listen to the \acp{AN}. Instead, the
 \acp{MN} are the ones who transmit and the \acp{AN} the ones who listen and transmit this information to the central computer. This protocol is 
 divided into three phases which can be appreciated in Figure \ref{fig:LPL}.
 
@@ -110,7 +110,7 @@ This protocol, has some disadvantages that make it not suitable for all conditio
  \item Hidden Terminal Problem. This is a serious problem not only because it could cause big idle listening in phase 2, but also because the number
 of collisions could be high and the packets would have been sent for nothing, wasting a lot of energy. In phase 1, it could also 
 happen that, if two \acp{MN} transmit at the same time, the selected \ac{AN} might not be the closest one to the \ac{MN} but one with a bad connection.
- \item High \ac{MN} number. If the number of \acp{MN} is high, phase 2 is going to be full of collisions and thus, the idle listening will be
+ \item High \ac{MN} number. If the number of \acp{MN} is high, phase 2 is going to be full of collisions and therefore, the idle listening will be
 high. This problem would be worse due to the hidden terminal problem.
  \item Selected \ac{AN} selection. In phase 1, if many \acp{AN} are close to the \ac{MN}, all of them are going to try to answer causing collisions. Also, 
 when the \acp{AN} are not close to the \ac{MN}, a lot of energy is wasted in the \ac{MN} trying to detect gradually the selected \ac{AN}.
@@ -381,7 +381,7 @@ In order to reduce the idle listening period in the \acp{MN}, this work proposes
 Backoff delay. Thus, it is possible to have a constant offset time between the moment when the remaining time was calculated and the moment of the 
 transmission. According to the 802.15.4 Standard the Backoff delay can be disabled by setting the parameters \textit{macMaxCSMABackoffs}, 
 \textit{macMinBE} and \textit{macMaxBE} to zero. Under this \ac{MAC} configuration, in case the channel is busy during the first \ac{CCA} detection, a \ac{CAF} 
-is sent to the application level, which can try a retransmission. To avoid all \acp{AN} trying to transmit at the same time and hence making easier 
+is sent to the application level, which can try a retransmission. To avoid all \acp{AN} trying to transmit at the same time and therefore making easier 
 the access to the channel, a random delay has to be generated in the application level before sending the packet. This way, the time until the start of the
 next phase, will still be known in the application layer, but still random.
 
@@ -476,7 +476,7 @@ Then, A row is covered from left to right until a number 3 or bigger is found, t
 \begin{quote}
  Slot 1 - A, I
 \end{quote}
-Continuing the row, it is found that also J has a number 3, but as I and J have only a 1, they are not compatible and thus J is left out. 
+Continuing the row, it is found that also J has a number 3, but as I and J have only a 1, they are not compatible and therefore J is left out. 
 Then, next row is analyzed and B gets a slot.
 \begin{quote}
  Slot 1 - A, I \\ Slot 2 - B
@@ -490,7 +490,7 @@ slot and shares it with G but not with H for the same reason as A, I and J.
 Next row is D, this \ac{AN} gets its own slot, and covering the row, it is found that I can share the slot with it. But as I was already 
 assigned and to allow other \acp{AN} to get also a slot, I is skipped and left for the end. This way, J is the next with number 3 or more 
 which was not assigned yet, so it gets to share slot with J. There is still K with 3 or more, but K and J are not compatible, so K is left out.
-We had still I to recheck, in this case it is no more compatible with J and it is hence left out, but if it was compatible with all the 
+We had still I to recheck, in this case it is no more compatible with J and it is therefore left out, but if it was compatible with all the 
 \acp{AN} in the slot list, then I would get another slot. Based on this, \acp{AN} can get more than one slot if possible, and this way 
 idle listening in the \acp{MN} gets reduced.
  \begin{quote}

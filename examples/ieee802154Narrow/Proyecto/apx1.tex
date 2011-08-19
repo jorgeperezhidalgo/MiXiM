@@ -2,6 +2,102 @@
 \chapter{Source code first contact}
 \label{chap:installation}
 
+This appendix will give a basic explanation about the control version tool used during this work. It will also introduce how to deal with 
+the contents in the \ac{DVD} for the first time. All the steps will be explained for the Linux case, more precisely for Ubuntu 10.04.
+
 \section{Git Introduction}
 
-\section{OmNet++, \ac{MiXiM} and my code}
+All backups during this work were done with a version control program called GIT \cite{git}. It is recommended to read a good tutorial to get
+to work with it \cite{manualgit}.
+
+In GIT, there are two important files:
+
+\begin{itemize}
+  \item \textbf{.gitconfig} - This file is located on the home directory and its content defines the author, some shortcuts and other configurations.
+  The file used in this work is like follows.
+  \begin{verbatim}
+    [user]
+      name = Jorge Perez
+      email = jorgeperezhidalgo@gmail.com
+    [alias]
+      co = checkout
+      ci = commit
+      st = status
+      br = branch
+      hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
+      type = cat-file -t
+      dump = cat-file -p
+    [merge]
+      tool = vimdiff
+  \end{verbatim}
+
+  Before continuing reading, it is recommended to create also this file changing the name and email because from now on, all aliases are going to
+  be used. A copy of this file can be found in the root directory of the \ac{DVD}.
+
+  \item \textbf{.gitignore} - Not all files in the working directory are important to be saved in a backup, for example, compiled files, documents, 
+  etc. are not important. In this file it is defined which files are going to be saved and which not. This file should be placed in the root working
+  directory, in this case the $MiXiM$ directory. To get a detailed description of this file's format, please refer to \cite{manualgit}. A copy of 
+  this file can be found in $MiXiM$ directory in the \ac{DVD}.
+  
+\end{itemize}
+
+
+\section{First contact}
+
+First thing to do is installing \ac{OMNeT++} 4.0 \cite{OMNeT}. It can be easily done following \cite{installationomnet}. To follow this guide, 
+\ac{OMNeT++} 4.0 must be installed in the home directory.
+
+After that, copy the $MiXiM$ directory from the \ac{DVD} to the $~/omnetpp-4.1/samples/$ directory and, open the \ac{OMNeT++} 4.0.
+
+Once the program is opened, the MiXiM project must be imported. For that click on ``File'' and than ``Import''. In the new window select 
+``Existing Projects into Workspace'' from the ``General'' menu. Assure ``Select root directory'' is selected and browse the 
+$~/omnetpp-4.1/samples/MiXiM/$ directory. Than click on ``Finish''. Than the new project must be compiled, that is done by pressing ``Ctrl. + B''.
+To run the last version, first a configuration should be done, this can be done following \cite{manualomnet}.
+
+To see a history of all the versions in the project, from a terminal window and inside $~/omnetpp-4.1/samples/MiXiM/$ directory, $git hist$
+must be execute, obtaining the following output.
+
+\footnotesize{
+\begin{verbatim}
+~/omnetpp-4.1/samples/MiXiM$ git hist
+* e821eb8 2011-08-19 | Correcting document (HEAD, origin/master, origin/HEAD, master) [Jorg...
+* fe8ce36 2011-08-17 | Chapters 1 to 5 ready. Chapters 1 to 3 reviewed with Caro [Jorge Perez]
+* 0f6887c 2011-08-15 | Correcting chapters and finishing chapter 4 in document [Jorge Perez]
+* af6a4d3 2011-08-11 | Completing document chapter 4 [Jorge Perez]
+* 682758c 2011-08-10 | Revised all graphics and finished chapter 5 in document [Jorge Perez]
+* d12d184 2011-08-08 | Started document chapter 5, done some new graphics [Jorge Perez]
+* 907b88b 2011-08-08 | Added another slots number graphic [Jorge Perez]
+* 8baff00 2011-08-07 | Starting document chapter 4 [Jorge Perez]
+* f41f67d 2011-08-06 | Ended document chapter 3 [Jorge Perez]
+* 63d3c92 2011-08-05 | Continuing document chapter 3 [Jorge Perez]
+* e163b2f 2011-08-04 | First contact with final simulation [Jorge Perez]
+* c37d1b1 2011-08-02 | Document Chapter 3 start [Jorge Perez]
+* be45e73 2011-07-27 | Added different packet sizes and different network configurations [J...
+* a56a4b5 2011-07-26 | Document Chapter 1 and 2 ready [Jorge Perez]
+* db46eca 2011-07-23 | LaTeX document structure done [Jorge Perez]
+* c201800 2011-07-21 | Corrected error: going to Rx when a transmission ready, in App layer...
+* 790553c 2011-07-13 | First steps writing the project with LaTeX [Jorge Perez]
+* 8046976 2011-06-06 | Sleeping the Nodes and waking them up [Jorge Perez]
+* aa8459d 2011-06-01 | Restructuring the configuration phases to reduce the number of event...
+* 1cb3f90 2011-05-19 | Solving some problems when having a Broadcast MN type [Jorge Perez]
+* 796160b 2011-05-04 | Mobile Nodes Types and Behaviour (frequencies, active and inactive f...
+* 3bf9dfb 2011-05-02 | Slotted & Random Modes comparison graphics saved and commented [Jorg...
+* 7cf1f71 2011-04-26 | RSSI info forwarded to App layer to start with phase organization [J...
+* e912ccb 2011-04-18 | Corrected some general misstakes and ROUTING WORKING [Jorge Perez]
+* 467d069 2011-04-13 | Added automatic grid location for Anchors [Jorge Perez]
+* cfd79e0 2011-04-12 | Comparison between sloted phase 1 and random phase 1 [Jorge Perez]
+* 88d0229 2011-04-11 | Check the total number of slots in sync phase when changing the dens...
+* 2cf324f 2011-04-11 | Added Net and Trans Layer for Nodes and Computer [Jorge Perez]
+* 6fa2e53 2011-04-07 | Added Net and Trans Layer to Anchor and deleted not useful files fro...
+* f2d8e00 2011-04-04 | Added computer entity and anchor density distribution in map [Jorge ...
+* f678d11 2011-02-22 | Added random transmision in phase 1 with results in Matlab [Jorge Pe...
+* 04db6aa 2011-02-03 | Anchors transmit in every slot and model adapted to all phases [Jorg...
+* 54dd74f 2011-01-25 | Added the slot division and assigned one or more slots to every Anch...
+* 871f78d 2011-01-20 | Place anchor and mobile nodes randomly in the map with minimum separ...
+* d713063 2011-01-20 | First Commit [Jorge Perez]
+\end{verbatim}
+}
+
+It can be observed in order how each version has a reference number, the modification date, a description and the name of the person who modified
+it. The ``HEAD'' word indicates in which 
+

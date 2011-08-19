@@ -20,15 +20,16 @@ As a cabled technology would be unpractical for a topology where freedom of move
 but why did we choose 802.15.4 \ac{WSN} and not other alternatives?
 
 One possible alternative would have been Wi-Fi. This technology is based in \ac{IEEE} 802.11 standard, and with bit rates up to
-54 Mbps and much bigger ranges, it would be a good alternative, but its energy consumption is much bigger than for 802.15.4 \ac{WSN}.
+54 Mbps and much bigger ranges, it would be a good alternative, but its energy consumption is much bigger than for 802.15.4 \ac{WSN} 
+\cite{WirelessProtocolsComparison}.
 
 In the same group as \ac{WSN}, Bluetooth can be found (\ac{IEEE} 802.15.1). This standard has bigger bit rates than 
-802.15.4, but its energy consumption is still too big, as it is not thought for this kind of applications. Also Bluetooth scalability
-is not as good as for 802.15.4.
+802.15.4, but its energy consumption is still bigger. As it is not thought for this kind of applications, Bluetooth scalability
+is not as good as for 802.15.4 \cite{WirelessProtocolsComparison}.
 
-These reasons combined with the low prices of 802.15.4 nodes compared with the other alternatives, made this work use the \ac{IEEE} 802.15.4 
-as the selected standard for building a High Configurable Protocol for localization. The idea is that by using this protocol we should
-get a little node working with a couple of AA batteries for many months or even some years.
+These reasons combined with the low prices of 802.15.4 nodes compared with the other alternatives \cite{802154Scalability}, made this 
+work use the \ac{IEEE} 802.15.4 as the selected standard for building a High Configurable Protocol for localization. The idea is that by 
+using this protocol we should get a little node working with a couple of AA batteries for many months or even some years \cite{BatteryDuration}.
 
 \section{Applications}
 
@@ -92,7 +93,8 @@ The same happens with accuracy and with emergency, where the rest does not matte
 \end{center}
 \end{table}
 
-Later on, this kind of applications will conclude in 4 different types of nodes in our network.
+As it will be seen in Chapter \ref{chap:protocoldesign}: \nameref{chap:protocoldesign}, this kind of applications will conclude in 4 different 
+types of nodes in our network.
 
 \section{Challenges and Objectives}
 
@@ -118,7 +120,7 @@ Hence, devices must be adaptable to the circumstances.
 or big memory capacities. This is a strong constraint in the design, and that is why the protocol must remain simple.
 \end{itemize}
 
-The objective of this Final Project is hence, the design of a Protocol based on \ac{IEEE} 802.15.4 standard, able to deal with all the 
+The objective of this Final Project is therefore, the design of a Protocol based on \ac{IEEE} 802.15.4 standard, able to deal with all the 
 challenges stated before. But the objective is also the design of a robust and complete framework where future works could add more 
 functionalities or improve the existing ones without worrying about the communication or basic functionality.
 As this is a design stage, simulation was chosen instead of testing directly on real devices. The simulation will be done with the Discrete 
