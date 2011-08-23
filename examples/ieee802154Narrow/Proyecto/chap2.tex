@@ -2,7 +2,7 @@
 \label{chap:802154standard}
 
 Work-group \ac{IEEE} 802.15 was formed to elaborate a standard for the \ac{WPAN}. Inside this work-group, the Task Group 4 
-deals with the low binary rate ones, \ac{LR-WPAN}. Last standard revision was approved in 2006 with the name of: ``Wireless 
+deals with the low binary rate networks, \ac{LR-WPAN}. Last standard revision was approved in 2006 with the name of: ``Wireless 
 Medium Access Control (\ac{MAC}) and Physical Layer (\ac{PHY}) Specifications for Low-Rate Wireless Personal Area Networks (\acp{WPAN})'' 
 \cite{IEEE802.15.4-2006}.
 
@@ -23,7 +23,7 @@ for this Final Project. To have a deeper view of the standard, refer to \cite{IE
 
 \begin{itemize}
  \item \ac{PHY}: works in 868 MHz (1 ch), 915 MHz (10 ch) and 2450 MHz (16 ch) bands.
- \item Binary rates of 20 kb/s and 40 kb/s at low frequencies and 250 Kb/s at 2450 MHz.
+ \item Binary rates of 20 Kb/s and 40 Kb/s at low frequencies and 250 Kb/s at 2450 MHz.
  \item Uses 16 bits logic addresses and 64 bits physic addresses.
  \item Possible to use \ac{GTS}.
  \item Channel access through \ac{CSMA/CA}.
@@ -37,7 +37,7 @@ Depending to the device functionality, they can be classified in 2 kinds:
 
 \begin{itemize}
  \item \acl{FFD}. These devices have full capacity and functionality and are the framework of the network. They can connect 
-among themselves but also with other \ac{RFD}. \ac{FFD} are usually plugged in, so energy here will not be a problem. They can provide 
+among themselves but also with other \ac{RFD}. \ac{FFD} are usually plugged in, as energy here will not be a problem. They can provide 
 information or act as routers to redirect this information. In every network, there should be one \ac{FFD} who works as \ac{WPAN}
 Coordinator. Depending on the topology (see Figure \ref{fig:WPAN_Network_Topologies}) all communications must go through this 
 Coordinator or not. The Coordinator is usually connected to a central computer that deals with the complexer tasks in the system 
@@ -45,7 +45,7 @@ and distributes all the information to the rest of the devices. These devices wi
 are the ones which would be fixed.
  \item \acl{RFD}. These devices have a reduce capacity and functionality as they are thought for easy tasks. These devices are
 usually powered with battery and that is why the energy consumption reduction must be focused on them. They can connect only
-\ac{FFD} and cannot handle high traffic loads. These devices will be referred as \ac{MN} during this work, as they are the ones with 
+to \acp{FFD} and cannot handle high traffic loads. These devices will be referred as \ac{MN} during this work, as they are the ones with 
 movement possibility.
 
 \vspace*{1cm}
@@ -58,11 +58,11 @@ movement possibility.
  \label{fig:WPAN_Network_Topologies}
 \end{figure}
 \end{itemize}
-This work will use the peer-to-peer topology as it is more flexible and scalable than the star topology. This topology is also
-complexer, that is why a simpler case of peer-to-peer topology is selected, the tree topology. In this case all devices are
+This work will use the peer-to-peer topology as it is more flexible and scalable than the star topology. Peer-to-peer topology is also
+complexer, that is why a simpler case of this topology is selected, the tree topology. In this case all devices are
 structured hierarchically and all of them have a father with whom they communicate, excepting the \ac{WPAN} Coordinator who is on the top of the network.
 
-For making this topology work, a Network Layer (not provided in 802.15.4) is needed for routing purposes. To make packets as short as possible,
+To make this topology working, a Network Layer (not provided in 802.15.4) is needed for routing purposes. To make packets as short as possible,
 and only in communicaton among \acp{FFD}, short addresses (16 bits) will be used.
 
 \section{Physic Layer}
@@ -73,7 +73,7 @@ that are good to know. This section will focus just on these aspects.
 Some of the tasks developed by the \ac{PHY} Layer are:
 
 \begin{itemize}
- \item \textbf{Switches on and off the radio transceiver.} The transceiver has three operation modes: \ac{Tx}, \ac{Rx} and sleeping. \ac{PHY}
+ \item \textbf{Switches on and off the radio transceiver.} The transceiver has three operation modes: \ac{Tx}, \ac{Rx} and SLEEP. \ac{PHY}
 layer must commute among these modes by \ac{MAC} layer petitions. The standard defines that the change time between \ac{Rx} and 
 \ac{Tx} and vice versa must not be bigger as 12 symbols (\textit{aTurnaroundTime} = 12 symbols = 192 $\mu$s at 2.4 GHz).
  \item \textbf{Performs the \ac{ED} of the channel.} \ac{PHY} layer measures the power level of the channels in order to choose the best one
@@ -83,8 +83,8 @@ to transmit. This measurement lasts exactly 8 symbols.
 period lasts exactly like the \ac{ED}, 8 symbols (128 $\mu$s at 2.4 GHz).
  \item \textbf{Channel frequency selection.} As it was already commented, the 802.15.4 standard contemplates 3 different frequency 
 ranges, although only the 2450 MHz will be used in this work. At this frequency, the standard stipulates 
-the use of a \ac{O-QPSK} modulation with a symbol rate of 62,5 symbols/s. As this modulation makes 4 bit per symbol, we get 
-a 250 Kbit/s bit rate. This frequency range has 16 different channels with a 5 MHz separation between them. The number of 
+the use of a \ac{O-QPSK} modulation with a symbol rate of 62,5 Ksymbols/s. As this modulation uses 4 bit per symbol, 
+a 250 Kbit/s bit rate is obtained. This frequency range has 16 different channels with a 5 MHz separation between them. The number of 
 these channels goes from 11 to 26.
  \item \textbf{Data transmission and reception.} According to the standard, the \ac{PHY} Layer must be able to transmit with a minimum
 power of 1 mW and it must have a sensibility of at least -85 dBm \cite{IEEE802.15.4-2006}. Figure \ref{fig:PPDU} shows the physical level frame structure.
@@ -93,7 +93,7 @@ power of 1 mW and it must have a sensibility of at least -85 dBm \cite{IEEE802.1
 
 \begin{figure}[ht]
  \begin{center}
-  \includegraphics[width=0.9\textwidth]{PPDU.eps}
+  \includegraphics[width=1\textwidth]{PPDU.eps}
  \end{center}
  \caption{\ac{PHY} Layer frame \cite{IEEE802.15.4-2006}}
  \label{fig:PPDU}
@@ -103,7 +103,7 @@ power of 1 mW and it must have a sensibility of at least -85 dBm \cite{IEEE802.1
 \section{\ac{MAC} Layer}
 
 \ac{MAC} layer is responsible for connecting the node with all the other nodes in a reachable distance. Although this layer has a reduced
-primitive set (26 primitives), it is really versatile and assures the minimum necessary instructions to work. Some of the responsibilities of \ac{MAC}
+primitive set, it is really versatile and assures the minimum necessary instructions to work. Some of the responsibilities of \ac{MAC}
 layer are:
 
 \begin{itemize}
@@ -120,7 +120,7 @@ layer are:
 \end{itemize}
 
 As happened for the \ac{PHY} layer, the \ac{MAC} layer has some constants and attributes to be configured, which will be used later in this work.
-These parameters can be found from page 133 in \cite{IEEE802.15.4-2006}.
+These parameters can be found from page 159 in \cite{IEEE802.15.4-2006}.
 
 \subsection{Working Modes}
 
@@ -151,7 +151,7 @@ processes to be commented are signaled with a number in brackets.
  \item \textbf{(1)} - Restarts the parameters to their initial values. \ac{NB} is a counter of the number of times the process was done. \ac{BE}
 is the exponent for the Backoff Random time calculation. At the beginning it takes the minimum defined by the user (\textit{macMinBE}), usually 3.
  \item \textbf{(2)} - In this step a random number between 0 and $2^{\ac{BE}}$ - 1 is generated and multiplied by the unit Backoff period, defined
-by \textit{aUnitBackoffPeriod} in the standard whose default value is 20 symbols = 320 $\mu$s.
+by \textit{aUnitBackoffPeriod} in the standard, whose default value is 20 symbols = 320 $\mu$s.
  \item \textbf{(3)} - After this waiting period while the node is in IDLE mode, \ac{MAC} orders \ac{PHY} to sense the channel performing the \ac{CCA} 
 (8 symbols = 128 $\mu$s). If the channel is free, the \ac{MAC} proceeds to transmit the packet and if not, the algorithm proceeds with the 
 step (4).
@@ -170,14 +170,14 @@ but if it is reached, the entire process gets canceled and \ac{MAC} layer inform
 \end{figure}
 
 This algorithm helps to reduce the so called collisions. These collisions could occur when a node starts transmitting without checking the 
-channel, and if another node next to it has already sent some packet.
+channel and, another node next to it was already sending a packet.
 
 But using \ac{CSMA/CA} algorithm does not solve this problem. It could also happen that two packets have a collision in the air. One 
 reason could be that while one node is performing the \ac{CCA}, another node does the same. In this case, both of them will start transmitting 
 producing a collision. The other reason is the well known Hidden Terminal Problem. To explain this phenomena, Figure \ref{fig:HiddenTerminalProblem}
-will be used. Node A wants to communicate with node B, but node C is already transmitting something to node B. As we can see with the dotted line,
+will be used. Node A wants to communicate with node B, but node C is already transmitting something to node B. As it can be seen with the dotted line,
 the range of A does not cover node C. Because of this, when A performs the \ac{CCA}, it does not get any signal from C. Then node A starts transmitting, and 
-node B takes at the same time a message from A and C, having a collision.
+node B receives at the same time a message from A and C, causing a collision.
 
 \begin{figure}[!ht]
  \begin{center}
@@ -237,12 +237,11 @@ only the frames related to this mode will be explained. Figure \ref{fig:MACFrame
 \subsection{Hardware}
 
 Although this work is based on a simulation, all the needed physical parameters to simulate are obtained from the commercial hardware 
-RCB230 V3.2 as it is the one available in the department. This node has a AT86RF230 transceiver and a ATmega1281V \ac{uC}. According 
-to \cite{LPLandOLP}, the consumption values of this node are the ones shown in Table \ref{tab:NodeEnergyConsumption}. Transition times that are not defined
-in 802.15.4 standard are in Table \ref{tab:NodeTiming}.
+RCB230 V3.2 as it is the one available in the department. This node has a AT86RF230 transceiver and a ATmega1281V \ac{uC}.
+According to \cite{LPLandOLP}, the consumption values of this node are the ones shown in Table \ref{tab:NodeEnergyConsumption}. Transition 
+times that are not defined in 802.15.4 standard are in Table \ref{tab:NodeTiming}.
 
-
-\begin{table}
+\begin{table}[H]
  \begin{center}
   \begin{tabular}{|l|c|}
    %\noalign{\vspace*{0.5cm}}
@@ -264,7 +263,7 @@ in 802.15.4 standard are in Table \ref{tab:NodeTiming}.
   \label{tab:NodeEnergyConsumption}
  \end{center}
 \end{table}
-\begin{table}
+\begin{table}[H]
  \begin{center}
   \begin{tabular}{|l|c|}
    %\noalign{\vspace*{0.5cm}}
@@ -282,4 +281,3 @@ in 802.15.4 standard are in Table \ref{tab:NodeTiming}.
   \label{tab:NodeTiming}
  \end{center}
 \end{table}
-

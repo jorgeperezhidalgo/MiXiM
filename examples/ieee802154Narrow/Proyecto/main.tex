@@ -1,7 +1,7 @@
 \input{header.tex}
 
 \author{Jorge P\'erez Hidalgo}
-\title{Cosas con Noditos}
+\title{Simulative study of a high configurable protocol for localization in sensor networks}
 \date{\today}
 
 \marginsize{3cm}{2cm}{2cm}{2cm}
@@ -12,6 +12,7 @@
 %\renewcommand{\baselinestretch}{1.5}
 
 \begin{document}
+\selectlanguage{english}
 
 \pagestyle{empty}
 
@@ -23,10 +24,58 @@
 
 \pagestyle{plain}
 
-\chapter*{\begin{it}Acknowledgements\end{it}}
+\chapter*{\begin{it}Selbstst\"andigkeitserkl\"arung\end{it}}
+\selectlanguage{german}
 \begin{quotation}
-To my bichito :)
+Hiermit erkl\"are ich, dass ich die am heutigen Tag beim Pr\"ufungsausschuss der Fakult\"at Elektrotechnik und Informationstechnik eingereichte
+Studienarbeit zum Thema
+
+\begin{quote}\textbf{
+  ``Simulative study of a high configurable protocol for localization in sensor networks''
+}
+\end{quote}
+
+vollkommen selbstst\"andig von mir verfasst, und keine anderen als die angegebenen Quellen und Hilfsmittel verwendet sowie Zitate kenntlich
+gemacht wurden.
+\vspace{6cm}
+\begin{flushright}
+Jorge P\'erez Hidalgo
+
+Dresden, den 25. August 2011
+\end{flushright}
+
+
 \end{quotation}
+\pagestyle{empty}
+\cleardoublepage
+
+\selectlanguage{spanish}
+\chapter*{\begin{it}Agradecimientos\end{it}}
+\begin{quotation}
+Cuando pienso en que al fin ha llegado el d\'ia en el que ser\'e Ingeniero de Telecomunicaci\'on, no puedo evitar pensar en todo lo que ha pasado
+durante todos estos a\~nos. Una parte de mi no puede cre\'erselo y otra siempre ha pensado que este d\'ia sin duda llegar\'ia. Es por ello que 
+me gustar\'ia dedicar este proyecto a toda la gente, que pese a todo, nunca ha perdido la fe y siempre me ha apoyado.
+
+Durante estos dos a\~nos que he pasado en Dresde, mucha ha sido la gente que he conocido y muchos los buenos momentos pasados con ellos. A toda
+esta gente, tambi\'en, gracias, porque sin vosotros y todos esos buenos ratos no se si hubiera llegado a este punto. En especial me
+gustar\'ia mencionar a mis compa\~neros de laboratorio, con los que he compartido d\'ias de angustia y de felicidad, d\'ias llenos de decepciones y de 
+satisfacciones y en general, muchos, muchos d\'ias. Muchas gracias por todo vuestro apoyo y ayuda. Gracias por estar ah\'i siempre que lo he 
+necesitado.
+
+I would like to thank also to the Chair for Telecommunication in the TU-Dresden. Thanks for the oportunity you gave me. En especial a mi tutor, Jorge, por
+todos los buenos ratos compartidos, por toda su confianza y ayuda. Gracias especialmente por tu paciencia y comprensi\'on a la hora de llevar a cabo 
+este proyecto.
+
+Cuando escribo esto, no puedo evitar acordarme de mi familia, en especial de mis padres y mi hermano. Ellos son sin duda una parte importante de mi 
+vida y es por ellos que soy como soy. Gracias por todo vuestro cari\~no y apoyo. Gracias por estar siempre ah\'i. Este proyecto tambi\'en es
+vuestro.
+
+Por \'ultimo, y no por ello menos importante, qu\'e decir del amor de mi vida, de la persona que me ha alegrado cada instante desde que la conozco, 
+de la persona que me ha dado fuerzas para empezar cada d\'ia. Sin ti, Caro, sin tu ayuda, sin tu ejemplo y sin tu amor diario, esta no hubiera sido 
+seguramente una de las mejores etapas de mi vida, y este sue\~no nunca se habr\'ia hecho realidad. Muchas gracias por estar siempre ah\'i. Gracias 
+por existir.
+\end{quotation}
+\selectlanguage{english}
 \pagestyle{empty}
 \cleardoublepage
 
@@ -70,18 +119,35 @@ analyzed in order to show the improvement of this protocol compared to existing 
 
 
 \input{chap1.tex}
+\clearpage{\pagestyle{empty}\cleardoublepage}
 \input{chap2.tex}
+\clearpage{\pagestyle{empty}\cleardoublepage}
 \input{chap3.tex}
+\clearpage{\pagestyle{empty}\cleardoublepage}
 \input{chap4.tex}
+\clearpage{\pagestyle{empty}\cleardoublepage}
 \input{chap5.tex}
+\clearpage{\pagestyle{empty}\cleardoublepage}
 \input{chap6.tex}
+\clearpage{\pagestyle{empty}\cleardoublepage}
 
-\bibliographystyle{unsrt}
-\bibliography{bib}
+\appendix
 
+\cleardoublepage
+\pagestyle{fancy}
 \input{apx1.tex}
 
+\clearpage{\pagestyle{empty}\cleardoublepage}
+\pagestyle{plain}
+\input{acron.tex}
+
+\clearpage{\pagestyle{empty}\cleardoublepage}
+\bibliographystyle{unsrt}
+\bibliography{bib}
+\pagestyle{plain}
+
+
 % Pages with extra content of the document
-\appendix
+%\appendix
 
 \end{document}

@@ -4,7 +4,7 @@ img_extIsRegExp=false
 img_extensions=.eps .jpg .jpeg .png .pdf .ps .fig .gif
 kileprversion=2
 kileversion=2.0.85
-lastDocument=chap4.tex
+lastDocument=apx1.tex
 masterDocument=
 name=final_project
 pkg_extIsRegExp=false
@@ -15,6 +15,14 @@ src_extensions=.tex .ltx .latex .dtx .ins
 [Tools]
 MakeIndex=
 QuickBuild=
+
+[document-settings,item:acron.tex]
+Bookmarks=
+Encoding=UTF-8
+Highlighting=LaTeX
+Indentation Mode=
+Mode=LaTeX
+ReadWrite=true
 
 [document-settings,item:apx1.tex]
 Bookmarks=
@@ -104,92 +112,102 @@ Indentation Mode=
 Mode=LaTeX
 ReadWrite=true
 
-[item:apx1.tex]
+[item:acron.tex]
 archive=true
-column=6
+column=20
 encoding=UTF-8
 highlight=LaTeX
-line=2
+line=1
 mode=LaTeX
-open=false
-order=4
+open=true
+order=9
+
+[item:apx1.tex]
+archive=true
+column=1
+encoding=UTF-8
+highlight=LaTeX
+line=116
+mode=LaTeX
+open=true
+order=10
 
 [item:bib.bib]
 archive=true
-column=26
+column=77
 encoding=UTF-8
 highlight=BibTeX
-line=12
+line=5
 mode=BibTeX
 open=true
 order=1
 
 [item:chap1.tex]
 archive=true
-column=0
+column=43
 encoding=UTF-8
 highlight=LaTeX
-line=117
+line=21
 mode=LaTeX
 open=true
 order=6
 
 [item:chap2.tex]
 archive=true
-column=0
+column=64
 encoding=UTF-8
 highlight=LaTeX
-line=0
+line=179
 mode=LaTeX
 open=true
 order=8
 
 [item:chap3.tex]
 archive=true
-column=15
+column=39
 encoding=UTF-8
 highlight=LaTeX
-line=380
+line=282
 mode=LaTeX
 open=true
 order=5
 
 [item:chap4.tex]
 archive=true
-column=30
+column=0
 encoding=UTF-8
 highlight=LaTeX
-line=972
+line=0
 mode=LaTeX
 open=true
 order=4
 
 [item:chap5.tex]
 archive=true
-column=31
+column=28
 encoding=UTF-8
 highlight=LaTeX
-line=644
+line=97
 mode=LaTeX
 open=true
 order=7
 
 [item:chap6.tex]
 archive=true
-column=0
+column=10
 encoding=UTF-8
 highlight=LaTeX
-line=0
+line=94
 mode=LaTeX
-open=false
-order=7
+open=true
+order=11
 
 [item:cover.tex]
 archive=true
-column=0
+column=56
 encoding=UTF-8
 highlight=LaTeX
-line=2
+line=25
 mode=LaTeX
 open=true
 order=3
@@ -206,64 +224,68 @@ order=-1
 
 [item:header.tex]
 archive=true
-column=34
+column=39
 encoding=UTF-8
 highlight=LaTeX
-line=84
+line=0
 mode=LaTeX
 open=true
 order=2
 
 [item:main.tex]
 archive=true
-column=13
+column=0
 encoding=UTF-8
 highlight=LaTeX
-line=54
+line=72
 mode=LaTeX
 open=true
 order=0
 
+[view-settings,view=0,item:acron.tex]
+CursorColumn=20
+CursorLine=1
+
 [view-settings,view=0,item:apx1.tex]
-CursorColumn=6
-CursorLine=2
+CursorColumn=1
+CursorLine=116
 
 [view-settings,view=0,item:bib.bib]
-CursorColumn=26
-CursorLine=12
+CursorColumn=77
+CursorLine=5
 
 [view-settings,view=0,item:chap1.tex]
-CursorColumn=0
-CursorLine=117
+CursorColumn=43
+CursorLine=21
 
 [view-settings,view=0,item:chap2.tex]
+CursorColumn=64
+CursorLine=179
+
+[view-settings,view=0,item:chap3.tex]
+CursorColumn=39
+CursorLine=282
+
+[view-settings,view=0,item:chap4.tex]
 CursorColumn=0
 CursorLine=0
 
-[view-settings,view=0,item:chap3.tex]
-CursorColumn=15
-CursorLine=380
-
-[view-settings,view=0,item:chap4.tex]
-CursorColumn=30
-CursorLine=972
-
 [view-settings,view=0,item:chap5.tex]
-CursorColumn=31
-CursorLine=644
+CursorColumn=28
+CursorLine=97
 
 [view-settings,view=0,item:chap6.tex]
-CursorColumn=43
-CursorLine=95
+CursorColumn=10
+CursorLine=94
 
 [view-settings,view=0,item:cover.tex]
-CursorColumn=0
-CursorLine=2
+CursorColumn=56
+CursorLine=25
 
 [view-settings,view=0,item:header.tex]
-CursorColumn=34
-CursorLine=84
+CursorColumn=39
+CursorLine=0
 
 [view-settings,view=0,item:main.tex]
-CursorColumn=13
-CursorLine=54
+CursorColumn=0
+CursorLine=72

@@ -134,8 +134,8 @@ them can be appreciated in Figure \ref{fig:OLP}.
 \end{figure}
 
 \begin{itemize}
- \item \textbf{Phase A:} In this phase, and thanks to the synchronization among \acp{AN}, the inter-arrival time is reduced, decreasing so the
-idle listening. These packets also contains synchronization information for the \ac{MN}. In this phase \ac{RSSI} values are received and stored
+ \item \textbf{Phase A:} In this phase, the \acp{AN} transmit their broadcast packets. Thanks to the synchronization among \acp{AN}, the inter-arrival 
+time is reduced, decreasing so the idle listening. These packets also contains synchronization information for the \ac{MN}. In this phase \ac{RSSI} values are received and stored
 by the \ac{MN}. Then it goes to sleep.
  \item \textbf{Phase B:} In this phase and in Distributed-M mode, the \ac{MN} will use easy localization algorithms together with all the obtained
 \ac{RSSI} values to calculate its position. In case of Distributed-A or Centralized mode, the \ac{MN} will send a report to the selected \ac{AN}, taken 
@@ -169,7 +169,7 @@ From the previous section and according to the results in \cite{LPLandOLP}:
 OLP becomes more energy efficient than LPL when there are several MNs and few RSSI samples are needed.''\cite{LPLandOLP}
 \end{quote}
 
-From this could be extracted that depending on the application, and the network load, it could be better that some nodes could have a 
+From this could be extracted that depending on the application and the network load, it could be better that some nodes could have a 
 configuration where their main action is listening and others could have a configuration where their main action is broadcasting. This 
 configuration should be variable depending on the current network situation and the necessities of the node. From this arises the necessity
 of a High Configurable Protocol with different node configurations.
@@ -198,8 +198,8 @@ will be able to estimate \ac{MN} position. When it is needed, a way for the \ac{
 later. The number of sent broadcasts is defined with the parameter \textit{NumberOfBroadcasts}.
 
  \item \textbf{Mode 4.} Unlike the previous configuration, this configuration is for nodes without battery problems, and with a high accuracy
-need. This configuration is a mix of mode 1 and 3, the \ac{MN} listens to the \acp{AN} broadcasts but also they broadcast their
-own packets to be measured by the \acp{AN}. All this information together is sent to a coordinator that will estimate \ac{MN} position.
+need. This configuration is a mix of Modes 1 and 3, the \ac{MN} listens to the \ac{AN}'s broadcasts but also they broadcast their
+own packets to be measured by the \acp{AN}. All this information is sent together to a coordinator that will estimate the \ac{MN} position.
 This Mode as well as Mode 3 loads the network so much and will be used just when strictly needed. The number of sent broadcasts is also defined with 
 the parameter \textit{NumberOfBroadcasts}.
 \end{itemize}
@@ -214,7 +214,7 @@ Phase, where the \acp{AN} will transmit broadcasts and the \acp{MN} will listen 
 phase is a phase where \acp{AN} and \acp{MN} could communicate among them. And the last required phase, is the one where the \acp{AN} could 
 communicate with each other to and from the coordinator.
 
-\acp{MN} configured with mode 3, are nodes with critical battery. These nodes must not waste energy, and this means their idle listening must be
+\acp{MN} configured in Mode 3 are nodes with critical battery. These nodes must not waste energy, and this means their idle listening must be
 as low as possible. As these nodes will not waste time listening and will just transmit broadcasts, it could be interesting reserving a phase
 just for them, where their transmissions will not interfere with the ones from the rest of the \acp{MN}. This phase will be called \ac{VIP} 
 Phase. It is clear, that the number of \ac{VIP} \acp{MN} cannot be too big, if so, their exclusivity will not be anymore exclusive.
@@ -225,7 +225,7 @@ their broadcasts and where communication among \acp{MN} and \acp{AN} can take pl
 The main purpose of the phase where \acp{AN} communicate with each other, is to transmit information between the coordinator, also called sink, and 
 the \acp{MN}. That is the reason why this phase will be called ComSink Phase. This phase should be the biggest one, as all traffic from 
 the \acp{MN} should reach the sink and come back, and all \acp{AN} must transmit their own \acp{MN} information and route the one coming from
-their sons or parents. As the traffic in this phase will be high, it could be useful to separate up-links traffic and down-links traffic. 
+their sons or father. As the traffic in this phase will be high, it could be useful to separate up-links traffic and down-links traffic. 
 ComSink Phase will be divided in ComSink Phase 1 (up-links) and ComSink Phase 2 (down-links).
 
 As it was said, \ac{RSSI} values are very correlated in time instants that are next to each other \cite{RSSIcorrelated}. That is why it could 
@@ -259,8 +259,8 @@ where the \ac{RSSI} values are sent.
  
  \item \textbf{Mode 2.} Like in Mode 1, \acp{MN} listen during the Sync Phases to the \acp{AN} broadcasts, and read the \ac{RSSI} values. Instead
 of sending them and due to the fact that packets also contain information of \acp{AN} localization, it is the \ac{MN} who calculates its own position 
-and saves it. From time to time, these positions information will be sent to the coordinator via the selected \ac{AN} during the Report Phase. The 
-selected \ac{AN} will answer with an \ac{ACK} to the \ac{MN} which go to sleep. \ac{MN} sleeps, like Mode 1, during \ac{VIP}, ComSink 1 and ComSink 2 
+and saves it. From time to time, this positions information will be sent to the coordinator via the selected \ac{AN} during the Report Phase. The 
+selected \ac{AN} will answer with an \ac{ACK} to the \ac{MN} which will go to sleep. \ac{MN} sleeps, like Mode 1, during \ac{VIP}, ComSink 1 and ComSink 2 
 Phases as well as during Report Phase when no transmitting.
 
  \item \textbf{Mode 3.} Unlike Mode 1 and 2, Mode 3 does not listen during the Sync Phases but sleeps. Once in a while, Mode 3 will not sleep during a 
@@ -280,7 +280,7 @@ during \ac{VIP}, ComSink 1 and ComSink 2 phases as well as during Report Phase w
  \item \textbf{General Information Request.} What happens if a \ac{MN} wants to know its position? or if it wants to change its configuration, how does it
 warn the coordinator? Thanks to the General Information Request, this can be solved. During Report Phase and using a report or extra report, the \ac{MN}
 will activate in this packet an ASK flag to notify the selected \ac{AN} that some data (the requested info is given in this packet) will be requested 
-during next period in Report Phase, than the \ac{AN} acknowledges the packet like always. During the next Report Phase, the \ac{MN} will generate an extra
+during next period in Report Phase, then the \ac{AN} acknowledges the packet like always. During the next Report Phase, the \ac{MN} will generate an extra
 report in case there is no scheduled one and will activate the Request flag to notify the \ac{AN} that it wants the data asked the previous period about. As soon
 as the \ac{MN} receives the \ac{ACK} from the selected \ac{AN}, a timer starts. If during this timer no packet from the selected \ac{AN} is received, the whole
 process is canceled and it could be tried again later. If during this timer the \ac{MN} receives a packet from the selected \ac{AN}, the \ac{MN} sends an
@@ -291,13 +291,13 @@ This process must be done from time to time even if the node does not have any c
 \ac{MN}, which would be sleeping all the time, this is the only way to reach it.
 \end{itemize}
 
-Like for \ac{LPL}, all packets sent (report and broadcasts), are sent in a random time using \ac{CSMA/CA} to minimize collisions.
+Like in \ac{LPL}, all packets sent (report and broadcasts), are sent in a random time using \ac{CSMA/CA} to minimize collisions.
 
 Previously, it was just defined the standard behavior of the different configurations, but to really extract a high configuration of the protocol, some 
 parameters must be taken into account.
 
 \begin{itemize}
- \item \textbf{activePhases -} These are the periods where the \acp{MN} are active with their standard behavior (already commented).
+ \item \textbf{activePhases -} These are the periods where the \acp{MN} are active with their standard behavior (the already commented in the previous page).
  \item \textbf{inactivePhases -} These are the periods where the \acp{MN} are sleeping during all the phases.
  \item \textbf{offsetPhases -} These are the periods to leave inactive before the first active period comes.
  \item \textbf{offsetSyncPhases -} This is the number of Sync Phases during the first active period where the \acp{MN} do not listen, it will be explained 
@@ -315,14 +315,6 @@ As an example to explain these parameters check Figure \ref{fig:parametersphases
 | \textit{askFrequency} = 2 | \textit{offsetReportPhases} = 0
 \end{quote}
 
-\begin{figure}[ht]
- \begin{center}
-  \includegraphics[width=1\textwidth]{parametersphases.eps}
- \end{center}
- \caption{Parameters Example}
- \label{fig:parametersphases}
-\end{figure}
-
 In Figure \ref{fig:parametersphases} can be seen how the first period is left inactive due to the \textit{offsetPhases} = 1. Although the period
 is inactive, it has an extra report (\textit{offsetReportPhases} is 0). As \textit{reportPhases} is 3, the first period of 3 will have an extra report (R1). 
 Then, for two periods it will not be an extra report and then another extra report will be scheduled (R3). After the first inactive period, 2 active 
@@ -331,6 +323,14 @@ corresponding to the standard behavior of \acp{MN} Mode 1 and 4, which is transm
 the one scheduled with \textit{reportPhases} frequency. Take into account that, while reports are sent just for Modes 1 and 4 and only in the last active period,
 broadcasts in Modes 3 and 4 are send every active period. Note also that, if an extra report is scheduled in an inactive period, the \ac{MN} must
 listen to the first Sync Phase of the period to get to know which is its selected \ac{AN}.
+
+\begin{figure}[H]
+ \begin{center}
+  \includegraphics[width=1\textwidth]{parametersphases.eps}
+ \end{center}
+ \caption{Parameters Example}
+ \label{fig:parametersphases}
+\end{figure}
 
 The last period in a group of active periods, is the one where the position is calculated (for mode 2) or the \ac{RSSI} values are sent (R2) to the selected 
 \ac{AN} (for modes 1 and 4). After this moment, it makes no sense for the \acp{MN} to listen to more Sync Phases, that is why they are crossed out. 

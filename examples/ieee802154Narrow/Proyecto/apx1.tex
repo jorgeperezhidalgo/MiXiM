@@ -1,4 +1,3 @@
-\appendix
 \chapter{Source code first contact}
 \label{chap:installation}
 
@@ -16,19 +15,19 @@ In GIT, there are two important files:
   \item \textbf{.gitconfig} - This file is located on the home directory and its content defines the author, some shortcuts and other configurations.
   The file used in this work is like follows.
   \begin{verbatim}
-    [user]
-      name = Jorge Perez
-      email = jorgeperezhidalgo@gmail.com
-    [alias]
-      co = checkout
-      ci = commit
-      st = status
-      br = branch
-      hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
-      type = cat-file -t
-      dump = cat-file -p
-    [merge]
-      tool = vimdiff
+[user]
+  name = Jorge Perez
+  email = jorgeperezhidalgo@gmail.com
+[alias]
+  co = checkout
+  ci = commit
+  st = status
+  br = branch
+  hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
+  type = cat-file -t
+  dump = cat-file -p
+[merge]
+  tool = vimdiff
   \end{verbatim}
 
   Before continuing reading, it is recommended to create also this file changing the name and email because from now on, all aliases are going to
@@ -36,8 +35,8 @@ In GIT, there are two important files:
 
   \item \textbf{.gitignore} - Not all files in the working directory are important to be saved in a backup, for example, compiled files, documents, 
   etc. are not important. In this file it is defined which files are going to be saved and which not. This file should be placed in the root working
-  directory, in this case the $MiXiM$ directory. To get a detailed description of this file's format, please refer to \cite{manualgit}. A copy of 
-  this file can be found in $MiXiM$ directory in the \ac{DVD}.
+  directory, in this case the \verb|MiXiM| directory. To get a detailed description of this file's format, please refer to \cite{manualgit}. A copy of 
+  this file can be found in \verb|MiXiM| directory in the \ac{DVD}.
   
 \end{itemize}
 
@@ -47,19 +46,21 @@ In GIT, there are two important files:
 First thing to do is installing \ac{OMNeT++} 4.0 \cite{OMNeT}. It can be easily done following \cite{installationomnet}. To follow this guide, 
 \ac{OMNeT++} 4.0 must be installed in the home directory.
 
-After that, copy the $MiXiM$ directory from the \ac{DVD} to the $~/omnetpp-4.1/samples/$ directory and, open the \ac{OMNeT++} 4.0.
+After that, copy the \verb|MiXiM| directory from the \ac{DVD} to the \verb|~/omnetpp-4.1/samples/| directory and, open the \ac{OMNeT++} 4.0.
 
 Once the program is opened, the MiXiM project must be imported. For that click on ``File'' and than ``Import''. In the new window select 
-``Existing Projects into Workspace'' from the ``General'' menu. Assure ``Select root directory'' is selected and browse the 
-$~/omnetpp-4.1/samples/MiXiM/$ directory. Than click on ``Finish''. Than the new project must be compiled, that is done by pressing ``Ctrl. + B''.
+``Existing Projects into Workspace'' from the ``General'' menu.
+
+Assure ``Select root directory'' is selected and browse the 
+\verb|~/omnetpp-4.1/samples/MiXiM/| directory. Than click on ``Finish''. Than the new project must be compiled, that is done by pressing ``Ctrl. + B''.
 To run the last version, first a configuration should be done, this can be done following \cite{manualomnet}.
 
-To see a history of all the versions in the project, from a terminal window and inside $~/omnetpp-4.1/samples/MiXiM/$ directory, $git hist$
+To see a history of all the versions in the project, from a terminal window and inside \verb|~/omnetpp-4.1/samples/MiXiM/| directory, \verb|git hist --all|
 must be execute, obtaining the following output.
 
-\footnotesize{
+\footnotesize
 \begin{verbatim}
-~/omnetpp-4.1/samples/MiXiM$ git hist
+~/omnetpp-4.1/samples/MiXiM$ git hist --all
 * e821eb8 2011-08-19 | Correcting document (HEAD, origin/master, origin/HEAD, master) [Jorg...
 * fe8ce36 2011-08-17 | Chapters 1 to 5 ready. Chapters 1 to 3 reviewed with Caro [Jorge Perez]
 * 0f6887c 2011-08-15 | Correcting chapters and finishing chapter 4 in document [Jorge Perez]
@@ -96,8 +97,21 @@ must be execute, obtaining the following output.
 * 871f78d 2011-01-20 | Place anchor and mobile nodes randomly in the map with minimum separ...
 * d713063 2011-01-20 | First Commit [Jorge Perez]
 \end{verbatim}
-}
+\normalsize
 
-It can be observed in order how each version has a reference number, the modification date, a description and the name of the person who modified
-it. The ``HEAD'' word indicates in which 
+It can be observed how each version has a reference number, the modification date, a description and the name of the person who modified
+it. The ``HEAD'' word indicates which version is the current one and ``origin'' is the last saved version.
 
+To change to an specific version execute, for example, \verb|git reset --hard 8046976|. And to go back to last version \verb|git reset --hard origin|.
+This way all tracked files are changed to the desired version. To start another version from a specific point read about ``branches'' in
+\cite{manualgit}. Remember to recompile the code in \ac{OMNeT++} by pressing ``Ctrl. + B'' each time the version is changed, as compiled
+files are not saved in the backup.
+
+MiXiM has many examples apart from the one studied by this work. This example is contained in directory \verb|~/omnetpp-4.1/samples/MiXiM/examples/ieee802154Narrow/|.
+
+In the folder \verb|Resultados| in \verb|~/omnetpp-4.1/samples/MiXiM/examples/ieee802154Narrow/| directory are all the Matlab files necessary to plot
+all the results contained in the work.
+
+In the folder \verb|Proyecto| in \verb|~/omnetpp-4.1/samples/MiXiM/examples/ieee802154Narrow/| directory can be found this work document made in \LaTeX{}.
+
+The \ac{DVD} folders \verb|Documents| and \verb|Programs| contain the documents and programs used during the development of this work.

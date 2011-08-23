@@ -4,10 +4,10 @@
 \section{Summary and Conclusions}
 
 In this work the design of a High Configurable Protocol based on 802.15.4 standard is proposed. This protocol appears as a combination of two
-previous proposals: \ac{LPL} and \ac{OLP}. Unlike this two proposals, this protocol allows \acp{MN} to operate in different modes according to 
+previous proposals: \ac{LPL} and \ac{OLP}. Unlike these two proposals, this protocol allows \acp{MN} to operate in different modes according to 
 their necessities and the situation of the network. Four operation modes are proposed. Mode 1 allows \acp{AN} or the Computer to estimate the 
-\ac{MN}'s position using the reports sent by the \acp{MN}. This reports contain \ac{RSSI} measurements. This mode is equivalent to \ac{OLP}
-approach. \acp{MN} in Mode 2 estimate their position their selves using low-complexity algorithms, avoiding the overload of the network. This 
+\ac{MN}'s position using the reports sent by the \acp{MN}. These reports contain \ac{RSSI} measurements. This mode is equivalent to \ac{OLP}
+approach. \acp{MN} in Mode 2 estimate their position on their own using low-complexity algorithms, avoiding the overload of the network. This 
 position is estimated thanks to the captured \ac{RSSI} values. Mode 3 is used within \acp{MN} with a critical battery status. To make them 
 consume as low as possible, this \acp{MN} do not listen to the channel but send their own broadcast packets to be detected by the \acp{AN}. 
 This mode is equivalent to \ac{LPL}. And finally, an operational Mode 4 used by the \acp{MN} which need a high position accuracy. This is 
@@ -18,7 +18,7 @@ the first, fourth and sixth phases (Sync Phases) all nodes in the network are sy
 This broadcast packets are also used to provide to the \acp{MN} with \ac{RSSI} samples. The synchronization phase is divided into three parts 
 to avoid correlation in \ac{RSSI} values between consecutive broadcast packets. During the second phase (Report Phase), all \acp{MN} send their
 reports in case they have to. \acp{MN} configured in Mode 4 send also their broadcast packets. The third phase (\ac{VIP} Phase) is reserved for the \acp{MN} in Mode
-3. During this phase they do not need to compete, with \acp{MN} in other modes, for the channel, to be able to send all their broadcast packets. 
+3. During this phase they do not need to compete for the channel with \acp{MN} in other modes, to be able to send all their broadcast packets. 
 The fifth and seventh phases are reserved for communication among \acp{AN} and the Computer.
 
 This new protocol allows, changing the \ac{MN}'s configuration, to distribute the working periods of each \ac{MN} in time. This way the network
@@ -40,7 +40,7 @@ In this work two different approaches for Sync Phase were also studied. In the f
 in time. The best random transmission case, due to maximum random time between deliveries, is searched. In the second approach the \acp{AN} transmit
 their broadcast packets distributed into time slots previously calculated by the Computer. From the results can be extracted that slotted 
 transmission performance is better than even the best case of random transmission. Slotted transmission was, therefore, the one used during 
-the Sync Phase in the complete protocol analysis. An automatic algorithm to calculate the slot distribution is also presented in this work.
+the Sync Phase in the complete protocol analysis. An automatic algorithm to calculate the slot distribution was also presented in this work.
 
 
 \section{Future Work}
@@ -66,8 +66,8 @@ for a full protocol are not still contemplated. The following aspects could be s
   \item \textbf{Network division}. When network is too big, a division of the network into different areas could be beneficial, to avoid the high
   traffic during the ComSink Phases.
 
-  \item \textbf{Broadcast \acp{AN}}. Another interesting case to be studied is an \acp{AN} division into two groups. One group would be the 
-  \acp{AN} saw during this work, but, without the broadcasting function. A second group would be formed by \acp{AN} with a high power ability 
+  \item \textbf{Broadcast \acp{AN}}. Another interesting case to be studied is an \acp{AN} division into two groups. One group would be formed by the 
+  \acp{AN} seen during this work, but, without the broadcasting function. A second group would be formed by \acp{AN} with a high power ability 
   which will transmit only the broadcast packets at a high power. This \acp{AN} will be able to reach all the network, synchronizing it 
   easily and in less time. This way idle time in \acp{MN} would be reduced and, for big networks, the synchronization problems due to long paths 
   and, the high routing traffic, would be avoided.
@@ -80,19 +80,19 @@ for a full protocol are not still contemplated. The following aspects could be s
 
   \item \textbf{Aggregation and Segmentation}. In this work, \acp{AN} send a report for each \ac{MN}'s communication. To reduce traffic during
   ComSink Phases, it could be positive aggregating communications from different \acp{MN} in just one report. For this, aggregation must be added 
-  to the protocol. When aggregated packets become too big, they must be segmented into smaller packets. This two capabilities should be implemented
+  to the protocol. When aggregated packets become too big, they must be segmented into smaller packets. These two capabilities should be implemented
   in the Transport Layer which does nothing in this work.
 
-  \item \textbf{Real information in packets}. As this work's aim is to develop a working framework to test the protocol. All packet's 
+  \item \textbf{Real information in packets}. One of this work's aims is to develop a working framework to test the protocol. All packet's 
   information is not real, being the only important aspect of a packet, its size. For a more realistic behavior, packets should carry 
   real information and, its handling should depend on this information.
 
-  \item \textbf{ComSink Phases study}. It was seen how this phases are the most critical in this protocol. A deeper study of this phases
+  \item \textbf{ComSink Phases study}. It was seen how these phases are the most critical in this protocol. A deeper study of these phases
   should be done. An analysis of the advantages and disadvantages of, joining them in one bigger ComSink, taking out the up-links and down-links 
   restriction or further studies, should be done.
 
-  \item \textbf{Queue priorities}. This work assumes all message's priority the same, putting them in a \ac{FIFO} queue. But as all messages have
-  not the same importance, a priority queue should be developed. The messages should also have a life time, as some messages would be occupying 
+  \item \textbf{Queue priorities}. This work assumes all message's priority the same, putting them in a \ac{FIFO} queue. But as all messages do 
+  not have the same importance, a priority queue should be developed. The messages should also have a life time, as some messages would be occupying 
   the queues even when they are not important anymore.
 
 \end{itemize}
